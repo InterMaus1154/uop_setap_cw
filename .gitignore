@@ -4,3 +4,5 @@ README~
 *~
 *.swp
 *.swo
+# macOS specific
+.DS_Store
