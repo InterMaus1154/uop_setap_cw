@@ -6,3 +6,31 @@ README~
 *.swo
 # macOS specific
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+backend/venv/
+backend/.venv/
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+backend/.env
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+!.env.example

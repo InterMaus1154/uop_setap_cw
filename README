@@ -1,1 +1,138 @@
 SETaP coursework
+# Campus Connect
+
+A mobile and web application for students to share pinpoints of information and warnings on a campus map.
+
+## Project Structure
+```
+uop_setap_cw/
+├── frontend/          # Flutter app (mobile + web)
+├── backend/           # FastAPI backend
+├── docs/              # Project documentation
+├── .gitignore
+└── README.md
+```
+
+## Prerequisites
+
+Before you start, make sure you have the following installed:
+
+- **Flutter SDK** (3.0 or higher) - [Install Flutter](https://docs.flutter.dev/get-started/install)
+- **Python** (3.9 or higher) - [Install Python](https://www.python.org/downloads/)
+- **Git** - [Install Git](https://git-scm.com/downloads)
+
+### Verify Installation
+```bash
+flutter --version
+python3 --version
+git --version
+```
+
+## Getting Started
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd uop_setap_cw
+```
+
+### 2. Frontend Setup (Flutter)
+```bash
+cd frontend
+flutter pub get
+flutter run  # For mobile
+# OR
+flutter run -d chrome  # For web
+```
+
+### 3. Backend Setup (FastAPI)
+```bash
+cd backend
+
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy environment template
+cp .env.example .env
+
+# Run the server
+uvicorn app.main:app --reload
+```
+
+The API will be available at `http://localhost:8000`
+
+## Development Workflow
+
+### Creating a New Branch
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/your-feature-name
+```
+
+### Making Changes
+
+1. Make your changes in your branch
+2. Test your code
+3. Commit your changes:
+```bash
+   git add .
+   git commit -m "Description of your changes"
+```
+
+### Submitting a Pull Request
+
+1. Push your branch to GitHub:
+```bash
+   git push origin feature/your-feature-name
+```
+2. Go to the GitHub repository
+3. Click "Pull requests" → "New pull request"
+4. Select your branch and create the PR
+5. Request review from team members
+6. Wait for approval before merging
+
+## Team Members
+
+- [Add team member names here]
+
+## Tech Stack
+
+- **Frontend**: Flutter (Dart)
+- **Backend**: FastAPI (Python)
+- **Database**: TBD (likely Supabase)
+
+## Useful Commands
+
+### Flutter
+```bash
+flutter pub get          # Install dependencies
+flutter run              # Run on mobile
+flutter run -d chrome    # Run on web
+flutter clean            # Clean build files
+flutter doctor           # Check Flutter installation
+```
+
+### FastAPI
+```bash
+uvicorn app.main:app --reload    # Run with auto-reload
+uvicorn app.main:app --port 8001 # Run on different port
+```
+
+## Contributing
+
+Please ensure:
+- Code is properly tested
+- Commit messages are clear and descriptive
+- Pull requests have a clear description of changes
+- All PRs require at least one approval before merging
+
