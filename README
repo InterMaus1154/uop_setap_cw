@@ -1,1 +1,37 @@
 SETaP coursework
+
+## Setup to help you all get started, lets get full marks!
+
+### Backend (Python FastAPI)
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Run the server:
+```bash
+uvicorn main:app --reload
+```
+API runs at http://localhost:8000
+
+### Frontend (Flutter)
+
+```bash
+cd frontend
+flutter pub get
+```
+
+Run the app:
+```bash
+flutter run
+```
+
+## Project Structure
+
+```
+backend/   - Python FastAPI server
+frontend/  - Flutter application
+```
