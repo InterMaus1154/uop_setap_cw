@@ -6,3 +6,21 @@ README~
 *.swo
 # macOS specific
 .DS_Store
+
+# Python
+backend/venv/
+__pycache__/
+*.pyc
+
+# Flutter
+frontend/.dart_tool/
+frontend/.idea/
+frontend/build/
+frontend/ios/
+frontend/android/
+frontend/web/
+frontend/macos/
+frontend/linux/
+frontend/windows/
+frontend/.metadata
+frontend/*.iml
