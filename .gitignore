@@ -11,6 +11,7 @@ README~
 backend/venv/
 __pycache__/
 *.pyc
+.env
 
 # Flutter
 frontend/.dart_tool/
