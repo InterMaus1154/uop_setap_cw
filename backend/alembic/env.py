@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from models import Base, User
+from models import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
