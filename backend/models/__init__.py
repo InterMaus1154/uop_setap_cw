@@ -11,5 +11,6 @@ from models.admin import Admin
 from models.user_ban import UserBan
 from models.message import Message
 from models.location_sharing import LocationSharing
+from models.user_relationship import UserRelationship
 
-__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message"]
+__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message", "UserRelationship"]

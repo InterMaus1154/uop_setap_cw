@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from database.db import Base
+from models.user_relationship import UserRelationshipType
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -26,3 +28,18 @@ class User(Base):
     received_messages = relationship("Message", foreign_keys="[Message.receiver_id]", back_populates="receiver")
     shared_locations = relationship("LocationSharing", foreign_keys="[LocationSharing.user_id]", back_populates="user")
     received_locations = relationship("LocationSharing", foreign_keys="[LocationSharing.target_user_id]", back_populates="target_user")
+    sent_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.user_id]", back_populates="requester")
+    received_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.target_user_id]", back_populates="addressee")
+
+    @property
+    def friends(self) -> list["User"]:
+        friends: list[User] = []
+
+        for rel in self.sent_relationships:
+            if rel.user_rel_status == UserRelationshipType.ACCEPTED:
+                friends.append(rel.addressee)
+
+        for rel in self.received_relationships:
+            if rel.user_rel_status == UserRelationshipType.ACCEPTED:
+                friends.append(rel.requester)
+        return friends
