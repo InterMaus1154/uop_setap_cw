@@ -26,4 +26,4 @@ class PinReport(Base):
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 
     pin = relationship("Pin", back_populates="reports")
-    user = relationship("User", back_populates="reports")
+    user = relationship("User", back_populates="pin_reports")
