@@ -9,5 +9,6 @@ from models.pin_report import PinReport
 from models.user_report import UserReport
 from models.admin import Admin
 from models.user_ban import UserBan
+from models.message import Message
 
-__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin"]
+__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message"]

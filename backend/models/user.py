@@ -22,3 +22,5 @@ class User(Base):
     pin_reports = relationship("PinReport", back_populates="user")
     reports = relationship("UserReport", back_populates="user")
     bans = relationship("UserBan", back_populates="user")
+    sent_messages = relationship("Message", foreign_keys="[Message.sender_id]", back_populates="sender")
+    received_messages = relationship("Message", foreign_keys="[Message.receiver_id]", back_populates="receiver")
