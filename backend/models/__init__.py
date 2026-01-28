@@ -10,5 +10,6 @@ from models.user_report import UserReport
 from models.admin import Admin
 from models.user_ban import UserBan
 from models.message import Message
+from models.location_sharing import LocationSharing
 
 __all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message"]
