@@ -18,3 +18,4 @@ class User(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now(), default=func.now())
 
     pins = relationship("Pin", back_populates="user")
+    reactions = relationship("PinReaction", back_populates="user")
