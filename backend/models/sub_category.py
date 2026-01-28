@@ -12,3 +12,4 @@ class SubCategory(Base):
     sub_cat_name = Column(String(60), nullable=False)
 
     category = relationship("Category", back_populates="sub_categories")
+    pins = relationship("Pin", back_populates="sub_category")

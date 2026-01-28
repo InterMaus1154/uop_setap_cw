@@ -13,3 +13,4 @@ class Category(Base):
 
     category_level = relationship("CategoryLevel", back_populates="categories")
     sub_categories = relationship("SubCategory", back_populates="category")
+    pins = relationship("Pin", back_populates="category")

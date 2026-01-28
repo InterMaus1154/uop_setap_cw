@@ -1,5 +1,6 @@
 # User database model
 from sqlalchemy import Column, BigInteger, String, Boolean, text, DateTime
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from database.db import Base
@@ -15,3 +16,5 @@ class User(Base):
     user_isactive = Column(Boolean, nullable=False, server_default=text("true"), default=True)
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now(), default=func.now())
+
+    pins = relationship("Pin", back_populates="user")
