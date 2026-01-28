@@ -12,3 +12,4 @@ class Category(Base):
     cat_name = Column(String(60), nullable=False)
 
     category_level = relationship("CategoryLevel", back_populates="categories")
+    sub_categories = relationship("SubCategory", back_populates="category")
