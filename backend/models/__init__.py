@@ -8,4 +8,6 @@ from models.pin_reaction import PinReaction
 from models.pin_report import PinReport
 from models.user_report import UserReport
 from models.admin import Admin
+from models.user_ban import UserBan
+
 __all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin"]

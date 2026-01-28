@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy.orm import relationship
 
 from database.db import Base
 
@@ -12,3 +13,5 @@ class Admin(Base):
     admin_password = Column(String(300), nullable=False)
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
+
+    bans = relationship("UserBan", back_populates="admin")
