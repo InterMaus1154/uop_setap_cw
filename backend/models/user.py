@@ -19,3 +19,4 @@ class User(Base):
 
     pins = relationship("Pin", back_populates="user")
     reactions = relationship("PinReaction", back_populates="user")
+    reports = relationship("PinReport", back_populates="user")

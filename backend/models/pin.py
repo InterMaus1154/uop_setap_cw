@@ -24,3 +24,4 @@ class Pin(Base):
     sub_category = relationship("SubCategory", back_populates="pins")
     user = relationship("User", back_populates="pins")
     reactions = relationship("PinReaction", back_populates="pin")
+    reports = relationship("PinReport", back_populates="pin")
