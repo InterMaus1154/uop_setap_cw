@@ -1,5 +1,6 @@
 # category level model
 from sqlalchemy import Column, SmallInteger, String
+from sqlalchemy.orm import relationship
 
 from database.db import Base
 
@@ -9,3 +10,5 @@ class CategoryLevel(Base):
     cat_level_id = Column(SmallInteger, primary_key=True, index=True, autoincrement=True)
     cat_level_name = Column(String(60), nullable=False, unique=True)
     cat_level_ttl_mins = Column(SmallInteger, nullable=False)
+
+    categories = relationship("Category", back_populates="category_level")
