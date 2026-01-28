@@ -7,5 +7,5 @@ from models.pin import Pin
 from models.pin_reaction import PinReaction
 from models.pin_report import PinReport
 from models.user_report import UserReport
-
-__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport"]
+from models.admin import Admin
+__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin"]
