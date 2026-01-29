@@ -1,20 +1,21 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 from fastapi.middleware.cors import CORSMiddleware
 
 from typing import Optional
+from routes import users
 
 load_dotenv()
 
 app = FastAPI()
 
+@app.get('api/health')
+def health():
+    return {"message": "Api is running!:)"}
 
-@app.get("/")
+@app.get('/test')
 def test():
-    return {"message": "test"}
+    return "test"
 
-@app.get("/users/{user_id}")
-def get_user(user_id: int):
-    return {"user": user_id}
-
+app.include_router(users.router)
