@@ -3,19 +3,24 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Path
 from fastapi.middleware.cors import CORSMiddleware
 
-from typing import Optional
-from routes import users
+from routes.users import router as users_router
 
 load_dotenv()
 
 app = FastAPI()
 
-@app.get('api/health')
-def health():
-    return {"message": "Api is running!:)"}
+# Allow any localhost port for development 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"http://localhost(:\d+)?",
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
-@app.get('/test')
+app.include_router(users_router)
+
+
+@app.get("/")
 def test():
-    return "test"
-
-app.include_router(users.router)
+    return {"message": "test"}
