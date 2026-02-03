@@ -21,6 +21,19 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 03/02/2026
+**Summary:** Built out frontend models and map screen in preparation for backend endpoints
+
+**Files Modified/Created:**
+- frontend/lib/models/category.dart (CategoryLevel, Category, SubCategory models)
+- frontend/lib/models/pin.dart (Pin, PinReaction models with safe num to double casting for coordinates)
+- frontend/lib/screens/home_screen.dart (wrapper for MapScreen)
+- frontend/lib/screens/map_screen.dart (OpenStreetMap integration, campus centered on Portsmouth, recenter button, logout flow, placeholder for pin creation)
+
+**Notes:** Read the erd, frontend models are aligned with backend DB schema and ready for API integration. Added defensive casting for latitude/longitude to handle int/double JSON inconsistencies.(this issue was alerted from a code review by the flutter discord community) Map screen has UI scaffolding, just needs pin fetching and creation endpoints wired up.
+
+---
+
 ### Josh up2255832 - 31/01/2026 
 **Summary:** Created test user flow branch with fake login system for UI testing
 
