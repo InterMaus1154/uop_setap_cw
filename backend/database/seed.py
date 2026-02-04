@@ -3,6 +3,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
+from backend.models.category_level import CategoryLevel
 from models.user import User
 
 from models.pin import Pin
@@ -28,6 +29,22 @@ def seed_users():
     print("Users seeded")
 
 
+def seed_category_levels():
+    print("Seeding category levels")
+    db = SessionLocal()
+
+    category_levels = [
+        CategoryLevel(cat_level_name="Level 1", cat_level_ttl_mins=60),
+        CategoryLevel(cat_level_name="Level 2", cat_level_ttl_mins=120),
+        CategoryLevel(cat_level_name="Level 3", cat_level_ttl_mins=180),
+    ]
+
+    db.add_all(category_levels)
+    db.commit()
+    db.close()
+    print("Category levels seeded")
+
+
 def seed_pins():
     print("Seeding pins")
     db = SessionLocal()
@@ -46,6 +63,7 @@ def seed_pins():
 def seed_all():
     print("Start seeding")
     seed_users()
+    seed_category_levels()
     seed_pins()
 
 
