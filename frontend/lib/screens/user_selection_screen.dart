@@ -50,7 +50,9 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
   }
 
   String _getInitials(User user) {
-    return '${user.firstName[0]}${user.lastName[0]}'.toUpperCase();
+    final first = user.firstName.isNotEmpty ? user.firstName[0] : '?';
+    final last = user.lastName.isNotEmpty ? user.lastName[0] : '?';
+    return '$first$last'.toUpperCase();
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -15,12 +16,13 @@ class ApiException implements Exception {
 
 class ApiService {
   static const String baseUrl = 'http://localhost:8000';
+  static const Duration _timeout = Duration(seconds: 10);
 
   Future<List<User>> getUsers() async {
     try {
       final response = await http
           .get(Uri.parse('$baseUrl/users/'))
-          .timeout(const Duration(seconds: 10));
+          .timeout(_timeout);
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -33,6 +35,8 @@ class ApiService {
       }
     } on SocketException {
       throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
     } on http.ClientException {
       throw ApiException(
         'Could not connect to server. Is the backend running?',
