@@ -3,6 +3,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
+from models.location_sharing import LocationSharing
+from models.user_relationship import UserRelationship, UserRelationshipType
 from models.pin_report import PinReport, PinReportType
 from models.admin import Admin
 from models.user_ban import UserBan, UserBanType
@@ -44,7 +46,7 @@ def seed_user_reports():
         UserReport(reported_user_id=1, report_type=UserReportType.SPAM),
         UserReport(reported_user_id=2, report_type=UserReportType.HARASSMENT),
         UserReport(reported_user_id=3, report_type=UserReportType.IMPERSONATION),
-        
+
     ]
 
     seed_template(user_reports)
@@ -178,6 +180,37 @@ def seed_pin_reports():
     seed_template(reports)
     print("Pin reports seeded")
 
+def seed_user_relationships():
+    print("Seeding user relationships")
+
+    user_relationships = [
+            UserRelationship(user_id=1, target_user_id=2, user_rel_status=UserRelationshipType.BLOCKED),
+            UserRelationship(user_id=1, target_user_id=3, user_rel_status=UserRelationshipType.REJECTED),
+            UserRelationship(user_id=2, target_user_id=3, user_rel_status=UserRelationshipType.ACCEPTED),
+            UserRelationship(user_id=2, target_user_id=4, user_rel_status=UserRelationshipType.BLOCKED),
+            UserRelationship(user_id=3, target_user_id=4, user_rel_status=UserRelationshipType.PENDING),  
+    ]
+    seed_template(user_relationships)
+
+    print("User relationships seeded")
+
+def seed_location_sharing():
+    print("Seeding location sharing")
+
+    # Example data for location sharing
+    location_sharing_data = [
+        LocationSharing(user_id=1, target_user_id=2, is_enabled=True),
+        LocationSharing(user_id=1, target_user_id=3, is_enabled=False),
+        LocationSharing(user_id=2, target_user_id=3, is_enabled=True),
+        LocationSharing(user_id=2, target_user_id=4, is_enabled=False),
+        LocationSharing(user_id=3, target_user_id=4, is_enabled=True),
+    ]
+
+    seed_template(location_sharing_data)
+
+    print("Location sharing seeded")
+
+
 def seed_template(data_to_seed):
     db = SessionLocal()
     db.add_all(data_to_seed)
@@ -197,6 +230,8 @@ def seed_all():
     seed_pins()
     seed_pin_reactions()
     seed_pin_reports()
+    seed_user_relationships()
+    seed_location_sharing()
     print("Finished seeding")
 
 if __name__ == '__main__':
