@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from models.pin_report import PinReport, PinReportType
+from models.admin import Admin
 from models.pin_reaction import PinReaction
 from models.sub_category import SubCategory
 from models.category import Category
@@ -33,12 +34,17 @@ def seed_admins():
     print("Seeding admins")
 
     admins = [
-        User(user_fname="Admin", user_lname="User", user_email="admin@port.ac.uk", password="adminpassword"),
-        User(user_fname="Super", user_lname="Admin", user_email="superadmin@port.ac.uk", password="superadminpassword"),
+        Admin(admin_fname="Admin", admin_lname="User", admin_email="admin@port.ac.uk", admin_password="adminpassword"),
+        Admin(admin_fname="Super", admin_lname="Admin", admin_email="superadmin@port.ac.uk", admin_password="superadminpassword"),
     ]
     seed_template(admins)
     
     print("Admins seeded")
+
+
+
+
+
 
 def seed_category_levels():
     print("Seeding category levels")
@@ -155,6 +161,7 @@ def seed_template(data_to_seed):
 def seed_all():
     print("Start seeding")
     seed_users()
+    seed_admins()
     seed_category_levels()
     seed_categories()
     seed_sub_categories()
