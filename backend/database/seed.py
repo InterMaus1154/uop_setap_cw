@@ -3,6 +3,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
+from models.pin_report import PinReport, PinReportType
+from models.pin_reaction import PinReaction
 from models.sub_category import SubCategory
 from models.category import Category
 from models.category_level import CategoryLevel
@@ -111,6 +113,49 @@ def seed_pins():
     db.close()
     print("Pins seeded")
 
+def seed_pin_reactions():
+    print("Seeding pin reactions")
+    db = SessionLocal()
+
+    # Example reactions (this assumes you have a PinReaction model and corresponding table)
+    reactions = [
+        PinReaction(pin_id=1, user_id=2, reaction_value=1),
+        PinReaction(pin_id=1, user_id=3, reaction_value=1),
+        PinReaction(pin_id=2, user_id=1, reaction_value=-1),
+        PinReaction(pin_id=3, user_id=4, reaction_value=1),
+        PinReaction(pin_id=4, user_id=1, reaction_value=-1),
+    ]
+
+    db.add_all(reactions)
+    db.commit()
+    db.close()
+    print("Pin reactions seeded")
+
+
+
+
+def seed_pin_reports():
+    print("Seeding pin reports")
+    db = SessionLocal()
+
+    # Example reports (this assumes you have a PinReport model and corresponding table)
+    reports = [
+        PinReport(pin_id=1, user_id=2, report_type=PinReportType.INACCURATE),
+        PinReport(pin_id=2, user_id=3, report_type=PinReportType.RESOLVED),
+        PinReport(pin_id=3, user_id=1, report_type=PinReportType.DUPLICATE),
+        PinReport(pin_id=4, user_id=4, report_type=PinReportType.EXPIRED),
+        PinReport(pin_id=5, user_id=1, report_type=PinReportType.MISLEADING),
+        PinReport(pin_id=6, user_id=2, report_type=PinReportType.SPAM),
+        PinReport(pin_id=7, user_id=3, report_type=PinReportType.INAPPROPRIATE),
+        PinReport(pin_id=8, user_id=4, report_type=PinReportType.SPAM),
+        PinReport(pin_id=9, user_id=1, report_type=PinReportType.RESOLVED),
+        PinReport(pin_id=10, user_id=2, report_type=PinReportType.DUPLICATE),
+    ]
+
+    db.add_all(reports)
+    db.commit()
+    db.close()
+    print("Pin reports seeded")
 
 def seed_all():
     print("Start seeding")
@@ -119,7 +164,9 @@ def seed_all():
     seed_categories()
     seed_sub_categories()
     seed_pins()
-
+    seed_pin_reactions()
+    seed_pin_reports()
+    print("Finished seeding")
 
 if __name__ == '__main__':
     seed_all()
