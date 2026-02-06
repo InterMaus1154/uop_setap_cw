@@ -5,6 +5,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from models.pin_report import PinReport, PinReportType
 from models.admin import Admin
+from models.user_ban import UserBan, UserBanType
 from models.pin_reaction import PinReaction
 from models.sub_category import SubCategory
 from models.category import Category
@@ -41,7 +42,16 @@ def seed_admins():
     
     print("Admins seeded")
 
+def seed_user_bans():
+    print("Seeding user bans")
 
+    bans = [
+        UserBan(user_id=3, admin_id=1, ban_reason="Spamming", ban_expiry="2024-12-31 23:59:59", ban_type=UserBanType.TEMPORARY),
+        UserBan(user_id=2, admin_id=2, ban_reason="Inappropriate content", ban_type=UserBanType.PERMANENT),
+    ]
+
+    seed_template(bans)
+    print("User bans seeded")
 
 
 
@@ -108,7 +118,6 @@ def seed_pins():
         Pin(cat_id=2, user_id=1, pin_title="ASB - Southsea Common", pin_latitude=50.7915, pin_longitude=-1.0889, pin_expire_at="2025-03-15 18:30:00"),
 
     ]
-    # 50.796417, -1.063785
     
 
     seed_template(pins)
@@ -116,7 +125,6 @@ def seed_pins():
 
 def seed_pin_reactions():
     print("Seeding pin reactions")
-    # Example reactions (this assumes you have a PinReaction model and corresponding table)
     reactions = [
         PinReaction(pin_id=1, user_id=2, reaction_value=1),
         PinReaction(pin_id=1, user_id=3, reaction_value=1),
@@ -134,7 +142,6 @@ def seed_pin_reports():
     print("Seeding pin reports")
     
 
-    # Example reports (this assumes you have a PinReport model and corresponding table)
     reports = [
         PinReport(pin_id=1, user_id=2, report_type=PinReportType.INACCURATE),
         PinReport(pin_id=2, user_id=3, report_type=PinReportType.RESOLVED),
@@ -162,6 +169,7 @@ def seed_all():
     print("Start seeding")
     seed_users()
     seed_admins()
+    seed_user_bans()
     seed_category_levels()
     seed_categories()
     seed_sub_categories()
