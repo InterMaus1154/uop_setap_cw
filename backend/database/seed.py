@@ -29,6 +29,13 @@ def seed_users():
         User(user_fname="Jane", user_lname="Doe", user_email="janedoe@port.ac.uk"),
         User(user_fname="Carl", user_lname="Johnson", user_email="carljohnson@port.ac.uk"),
         User(user_fname="Alice", user_lname="Smith", user_email="alicesmith@port.ac.uk"),
+        User(user_fname="Michael", user_lname="Brown", user_email="michaelbrown@port.ac.uk"),
+        User(user_fname="Sarah", user_lname="Wilson", user_email="sarahwilson@port.ac.uk"),
+        User(user_fname="James", user_lname="Davis", user_email="jamesdavis@port.ac.uk"),
+        User(user_fname="Emma", user_lname="Miller", user_email="emmamiller@port.ac.uk"),
+        User(user_fname="David", user_lname="Taylor", user_email="davidtaylor@port.ac.uk"),
+        User(user_fname="Lisa", user_lname="Anderson", user_email="lisaanderson@port.ac.uk"),
+        
     ]
     seed_template(users)
     
