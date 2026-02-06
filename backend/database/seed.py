@@ -11,6 +11,7 @@ from models.sub_category import SubCategory
 from models.category import Category
 from models.category_level import CategoryLevel
 from models.user import User
+from models.user_report import UserReport, UserReportType
 
 from models.pin import Pin
 
@@ -30,6 +31,25 @@ def seed_users():
     seed_template(users)
     
     print("Users seeded")
+
+
+
+
+def seed_user_reports():
+    print("Seeding user reports")
+
+    
+    user_reports = [
+        UserReport(reported_user_id=1, report_type=UserReportType.SPAM),
+        UserReport(reported_user_id=1, report_type=UserReportType.SPAM),
+        UserReport(reported_user_id=2, report_type=UserReportType.HARASSMENT),
+        UserReport(reported_user_id=3, report_type=UserReportType.IMPERSONATION),
+        
+    ]
+
+    seed_template(user_reports)
+    print("User reports seeded")
+
 
 def seed_admins():
     print("Seeding admins")
@@ -168,6 +188,7 @@ def seed_template(data_to_seed):
 def seed_all():
     print("Start seeding")
     seed_users()
+    seed_user_reports()
     seed_admins()
     seed_user_bans()
     seed_category_levels()
