@@ -29,6 +29,16 @@ def seed_users():
     
     print("Users seeded")
 
+def seed_admins():
+    print("Seeding admins")
+
+    admins = [
+        User(user_fname="Admin", user_lname="User", user_email="admin@port.ac.uk", password="adminpassword"),
+        User(user_fname="Super", user_lname="Admin", user_email="superadmin@port.ac.uk", password="superadminpassword"),
+    ]
+    seed_template(admins)
+    
+    print("Admins seeded")
 
 def seed_category_levels():
     print("Seeding category levels")
