@@ -21,6 +21,26 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 12/02/2026 (nearly midnight)
+**Summary:** Created backend category endpoints and wired up full frontend API integration for pin creation
+
+**Files Created:**
+- backend/schemas/Category.py (Pydantic response schemas for CategoryLevel, Category, SubCategory)
+- backend/routes/categories.py (GET /categories/, GET /categories/levels, GET /categories/sub-categories, GET /categories/{cat_id}/sub-categories)
+
+**Files Modified:**
+- backend/main.py (registered categories router)
+- frontend/lib/services/api_service.dart (added getCategories, getCategoryLevels, getSubCategories, createPin methods, extracted generic _getList helper)
+- frontend/lib/widgets/pin_creation_sheet.dart (removed hardcoded mock data, now accepts categories/levels/subcategories via constructor, added null check on TTL)
+- frontend/lib/screens/map_screen.dart (fetches category data from API, lazy-loaded and cached, pin creation now calls POST /pins/ with logged-in user ID)
+
+**Issues encountered and resolved:**
+1. Force unwrap on _ttlMinutes could crash if category level data was inconsistent  added null check with user-facing snackbar fallback
+
+**Notes:** Pin creation is now fully end to end: user taps map  selects location fills form (categories fetched from DB)  pin saved to database via POST /pins/. Tested and confirmed working. Julian created most endpoints,  I created the backend category endpoints myself as they were simple read only GETs and I needed them to unblock frontend work.
+
+---
+
 ### Josh up2255832 - 06/02/2026
 **Summary:** Built pin creation form UI with bottom sheet, tap-to-place flow, category-based auto-expiry, and performed strict code review with fixes
 
