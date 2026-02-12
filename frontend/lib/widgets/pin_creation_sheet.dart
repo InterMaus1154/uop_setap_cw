@@ -5,11 +5,17 @@ import '../models/pin_form_data.dart';
 
 class PinCreationSheet extends StatefulWidget {
   final LatLng location;
+  final List<Category> categories;
+  final List<CategoryLevel> categoryLevels;
+  final List<SubCategory> subCategories;
   final Function(PinFormData) onSubmit;
 
   const PinCreationSheet({
     super.key,
     required this.location,
+    required this.categories,
+    required this.categoryLevels,
+    required this.subCategories,
     required this.onSubmit,
   });
 
@@ -22,38 +28,12 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  // Hardcoded for now — will fetch from API later
-  final List<CategoryLevel> _categoryLevels = [
-    CategoryLevel(catLevelId: 1, catLevelName: 'Danger', catLevelTtlMins: 60),
-    CategoryLevel(
-      catLevelId: 2,
-      catLevelName: 'Information',
-      catLevelTtlMins: 120,
-    ),
-    CategoryLevel(catLevelId: 3, catLevelName: 'Level 3', catLevelTtlMins: 180),
-  ];
-
-  final List<Category> _categories = [
-    Category(catId: 1, catLevelId: 1, catName: 'Theft'),
-    Category(catId: 2, catLevelId: 2, catName: 'Anti-Social Behaviour'),
-    Category(catId: 3, catLevelId: 3, catName: 'Assault'),
-  ];
-
-  final List<SubCategory> _subCategories = [
-    SubCategory(subCatId: 1, catId: 1, subCatName: 'Burglary'),
-    SubCategory(subCatId: 2, catId: 1, subCatName: 'Mugging'),
-    SubCategory(subCatId: 3, catId: 2, subCatName: 'Street'),
-    SubCategory(subCatId: 4, catId: 2, subCatName: 'Park'),
-    SubCategory(subCatId: 5, catId: 3, subCatName: 'Physical'),
-    SubCategory(subCatId: 6, catId: 3, subCatName: 'Verbal'),
-  ];
-
   Category? _selectedCategory;
   SubCategory? _selectedSubCategory;
 
   List<SubCategory> get _filteredSubCategories {
     if (_selectedCategory == null) return [];
-    return _subCategories
+    return widget.subCategories
         .where((sub) => sub.catId == _selectedCategory!.catId)
         .toList();
   }
@@ -61,12 +41,11 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
   int? get _ttlMinutes {
     if (_selectedCategory == null) return null;
     try {
-      final level = _categoryLevels.firstWhere(
+      final level = widget.categoryLevels.firstWhere(
         (l) => l.catLevelId == _selectedCategory!.catLevelId,
       );
       return level.catLevelTtlMins;
     } catch (e) {
-      // No matching level found — data inconsistency
       return null;
     }
   }
@@ -92,6 +71,13 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
 
   void _submit() {
     if (_formKey.currentState!.validate() && _selectedCategory != null) {
+      final ttl = _ttlMinutes;
+      if (ttl == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not determine pin expiry time')),
+        );
+        return;
+      }
       final formData = PinFormData(
         catId: _selectedCategory!.catId,
         subCatId: _selectedSubCategory?.subCatId,
@@ -101,7 +87,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
             : _descriptionController.text.trim(),
         latitude: widget.location.latitude,
         longitude: widget.location.longitude,
-        ttlMinutes: _ttlMinutes!,
+        ttlMinutes: ttl,
       );
       widget.onSubmit(formData);
     }
@@ -154,7 +140,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                   labelText: 'Category *',
                   border: OutlineInputBorder(),
                 ),
-                items: _categories.map((cat) {
+                items: widget.categories.map((cat) {
                   return DropdownMenuItem(value: cat, child: Text(cat.catName));
                 }).toList(),
                 onChanged: (cat) {
@@ -168,7 +154,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Subcategory dropdown (only if category selected)
+              // Subcategory dropdown
               if (_filteredSubCategories.isNotEmpty) ...[
                 DropdownButtonFormField<SubCategory>(
                   key: ValueKey(_selectedCategory?.catId),

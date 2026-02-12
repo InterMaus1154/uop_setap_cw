@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import '../models/category.dart';
 import '../models/pin_form_data.dart';
 import '../providers/user_provider.dart';
+import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
 import 'user_selection_screen.dart';
 
@@ -16,6 +18,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
+  final ApiService _apiService = ApiService();
 
   // University of Portsmouth campus coordinates
   static const LatLng _campusCenter = LatLng(50.797864, -1.098353);
@@ -24,10 +27,40 @@ class _MapScreenState extends State<MapScreen> {
   bool _isPlacingPin = false;
   LatLng? _selectedLocation;
 
+  // Category data from API
+  List<Category> _categories = [];
+  List<CategoryLevel> _categoryLevels = [];
+  List<SubCategory> _subCategories = [];
+  bool _categoriesLoaded = false;
+
   @override
   void dispose() {
     _mapController.dispose();
     super.dispose();
+  }
+
+  /// Fetch categories, levels, and subcategories from API
+  Future<void> _loadCategories() async {
+    if (_categoriesLoaded) return;
+    try {
+      final results = await Future.wait([
+        _apiService.getCategories(),
+        _apiService.getCategoryLevels(),
+        _apiService.getSubCategories(),
+      ]);
+      setState(() {
+        _categories = results[0] as List<Category>;
+        _categoryLevels = results[1] as List<CategoryLevel>;
+        _subCategories = results[2] as List<SubCategory>;
+        _categoriesLoaded = true;
+      });
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load categories: $e')),
+        );
+      }
+    }
   }
 
   void _enterPinPlacementMode() {
@@ -50,8 +83,12 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _confirmLocationAndShowForm() {
+  Future<void> _confirmLocationAndShowForm() async {
     if (_selectedLocation == null) return;
+
+    // Load categories if not already loaded
+    await _loadCategories();
+    if (!_categoriesLoaded || !mounted) return;
 
     showModalBottomSheet(
       context: context,
@@ -59,32 +96,43 @@ class _MapScreenState extends State<MapScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => PinCreationSheet(
         location: _selectedLocation!,
+        categories: _categories,
+        categoryLevels: _categoryLevels,
+        subCategories: _subCategories,
         onSubmit: _handlePinSubmit,
       ),
     );
   }
 
-  void _handlePinSubmit(PinFormData formData) {
+  Future<void> _handlePinSubmit(PinFormData formData) async {
     // Close the bottom sheet
     Navigator.pop(context);
 
-    // Exit placement mode
-    _exitPinPlacementMode();
+    final userId = context.read<UserProvider>().currentUser?.userId;
+    if (userId == null) return;
 
-    // TODO: Send to API when backend endpoint is ready
-    // For now, show confirmation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Pin "${formData.title}" created! (API pending)'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    try {
+      await _apiService.createPin(formData, userId);
 
-    // Debug output
-    debugPrint('Pin created: ${formData.title}');
-    debugPrint('Category: ${formData.catId}, SubCat: ${formData.subCatId}');
-    debugPrint('Location: ${formData.latitude}, ${formData.longitude}');
-    debugPrint('Expires: ${formData.expiresAt}');
+      if (mounted) {
+        _exitPinPlacementMode();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Pin "${formData.title}" created!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create pin: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
