@@ -16,6 +16,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     pass
 
+
 class UserUpdateDisplayName(BaseModel):
     user_display_name : str = Field(..., max_length=30)
 
@@ -25,6 +26,19 @@ class UserResponse(UserBase):
     user_fname: str
     user_lname: str
     user_email: str
+    user_displayname: Optional[str] = None
+    user_isactive: bool
+    last_login: Optional[datetime] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class UserLoginResponse(BaseModel):
+    token: str
+    user_id: int
+    user_fname: str
+    user_lname: str
+    user_email: EmailStr
     user_displayname: Optional[str] = None
     user_isactive: bool
     last_login: Optional[datetime] = None

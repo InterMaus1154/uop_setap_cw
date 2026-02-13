@@ -9,10 +9,12 @@ from models.user import User
 
 import hashlib
 
+from schemas.User import UserLoginResponse
+
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login")
+@router.post("/login", status_code=200, response_model=UserLoginResponse)
 def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_email == credentials.email).first()
 
@@ -21,9 +23,15 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid email address")
 
     # create auth token
-
     encoded_email = credentials.email.__str__().encode()
     token = hashlib.md5(encoded_email).hexdigest()
-    return {
-        "token": token
-    }
+
+    # save token to database
+    user.user_token = token
+    db.commit()
+    db.refresh(user)
+
+    return UserLoginResponse(
+        token=token,
+        **user.__dict__
+    )
