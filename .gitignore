@@ -10,6 +10,11 @@ README~
 backend/venv/
 __pycache__/
 *.pyc
+*.bak
+.idea
+.vsc
+backend/.idea
+backend/.vsc
 
 
 # Flutter
