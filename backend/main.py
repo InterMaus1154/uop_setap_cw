@@ -4,6 +4,8 @@ from fastapi import FastAPI, Path
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.users import router as users_router
+from routes.pins import router as pins_router
+from routes.categories import router as categories_router
 
 load_dotenv()
 
@@ -19,6 +21,8 @@ app.add_middleware(
 )
 
 app.include_router(users_router)
+app.include_router(pins_router)
+app.include_router(categories_router)
 
 
 @app.get("/")

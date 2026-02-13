@@ -29,3 +29,6 @@ frontend/linux/
 frontend/windows/
 frontend/.metadata
 frontend/*.iml
+
+frontend/devtools_options.yaml
+
