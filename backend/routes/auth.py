@@ -22,6 +22,10 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     if credentials.email is None or user is None:
         raise HTTPException(status_code=401, detail="Invalid email address")
 
+    # if user is inactive, reject login
+    if not user.user_isactive:
+        raise HTTPException(status_code=403, detail="Your account has been disabled!")
+
     # create auth token
     encoded_email = credentials.email.__str__().encode()
     token = hashlib.md5(encoded_email).hexdigest()
