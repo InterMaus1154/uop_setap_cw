@@ -20,7 +20,7 @@ class UserReport(Base):
 
     user_report_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     reported_user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
-    report_type = Column(Enum(UserReportType), nullable=False)
+    report_type = Column(Enum(UserReportType, name='userreporttype', create_type=True), nullable=False)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 
     user = relationship('User', back_populates='reports')

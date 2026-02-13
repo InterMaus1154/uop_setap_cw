@@ -24,7 +24,6 @@ app.include_router(users_router)
 app.include_router(pins_router)
 app.include_router(categories_router)
 
-
 @app.get("/")
 def test():
     return {"message": "test"}

@@ -22,7 +22,7 @@ class PinReport(Base):
     pin_report_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     pin_id = Column(BigInteger, ForeignKey("pins.pin_id"), nullable=False)
     user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
-    report_type = Column(Enum(PinReportType), nullable=False)
+    report_type = Column(Enum(PinReportType, name='pinreporttype', create_type=True), nullable=False)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 
     pin = relationship("Pin", back_populates="reports")

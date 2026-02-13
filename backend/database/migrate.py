@@ -1,9 +1,14 @@
+import os
+import sys
 
 from alembic.config import Config
 from alembic import command
 from sqlalchemy import text, inspect
-from db import engine, Base
-import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models.user import User
+from database.db import engine, Base
 
 def drop_tables():
     print("Dropping tables...")
@@ -21,14 +26,11 @@ def drop_tables():
 
     print("All tables dropped")
 
-def run_migrations():
-    print("Running migrations")
-
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
-    print("Migration completed")
-
+def create_tables():
+    print("Creating tables")
+    Base.metadata.create_all(engine)
+    print("Tables created")
 
 if __name__ == '__main__':
     drop_tables()
-    run_migrations()
+    create_tables()

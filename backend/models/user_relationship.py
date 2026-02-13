@@ -17,7 +17,7 @@ class UserRelationship(Base):
     user_rel_id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
     target_user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
-    user_rel_status = Column(Enum(UserRelationshipType), nullable=False, default=UserRelationshipType.PENDING, server_default="pending")
+    user_rel_status = Column(Enum(UserRelationshipType, name='userrelationshiptype', create_type=True), nullable=False, default=UserRelationshipType.PENDING)
     updated_at = Column(DateTime, nullable=False, onupdate=func.now(), default=func.now(), server_default=func.now())
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 

@@ -16,7 +16,7 @@ class UserBan(Base):
     ban_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
     admin_id = Column(Integer, ForeignKey("admins.admin_id"), nullable=False)
-    ban_type = Column(Enum(UserBanType), nullable=False)
+    ban_type = Column(Enum(UserBanType, name='userbantype', create_type=True), nullable=False)
     ban_expiry = Column(DateTime, nullable=True)
     ban_reason = Column(Text, nullable=False)
     ban_isactive = Column(Boolean, nullable=False, default=True, server_default="true")
