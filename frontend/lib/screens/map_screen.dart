@@ -207,14 +207,16 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.logout, color: Colors.white),
-                    onPressed: () {
-                      context.read<UserProvider>().logout();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const UserSelectionScreen(),
-                        ),
-                      );
+                    onPressed: () async {
+                      await context.read<UserProvider>().logout();
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UserSelectionScreen(),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],

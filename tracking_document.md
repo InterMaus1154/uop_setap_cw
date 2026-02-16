@@ -21,6 +21,19 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 16/02/2026
+**Summary:** Integrated frontend authentication with backend token-based auth system
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added login/logout methods, Bearer token auth headers, LoginResponse class, 401/403 error handling)
+- frontend/lib/providers/user_provider.dart (replaced manual setUser with async login/logout via API, added isLoading state)
+- frontend/lib/screens/user_selection_screen.dart (user selection now calls POST /auth/login, async with error handling)
+- frontend/lib/screens/map_screen.dart (logout now calls POST /auth/logout before clearing local state)
+
+**Notes:** Frontend auth is now fully wired to Mark's backend auth system. User selection calls login endpoint, receives token, stores it via SecureStorageService (which Mark created). All authenticated requests (pin creation, logout) send Bearer token in headers. Token is cleared both server-side and locally on logout. Tested full flow: login → create pin (authenticated) → logout → back to user selection.
+
+---
+
 ### Mark up2306492 - 16/02/2026
 
 **Summary**: Created backend authentication, simple login and logout and middleware for validating authenticated user
