@@ -3,6 +3,7 @@ from fastapi.params import Depends
 from sqlalchemy.orm import Session
 
 from database.db import get_db
+from middleware.auth import require_auth
 from schemas.Auth import LoginRequest
 
 from models.user import User
@@ -39,3 +40,14 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
         token=token,
         **user.__dict__
     )
+
+
+@router.post("/logout", status_code=200)
+def logout(db: Session = Depends(get_db), user: User = Depends(require_auth)):
+    # delete user token from db
+    user.user_token = None
+    db.commit()
+    db.refresh(user)
+    return {
+        "message": "Successfully logged out"
+    }

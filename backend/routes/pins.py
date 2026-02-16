@@ -11,9 +11,8 @@ from models.user import User
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
-
 @router.get("/", response_model=list[PinResponse])
-def get_pins(db: Session = Depends(get_db), user: User = Depends(require_auth)):
+def get_pins(db: Session = Depends(get_db)):
     """Get all active pins"""
     pins = db.query(Pin).filter(Pin.pin_isactive == True).all()
     return pins
