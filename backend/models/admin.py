@@ -11,6 +11,7 @@ class Admin(Base):
     admin_lname = Column(String(60), nullable=False)
     admin_email = Column(String(250), nullable=False, unique=True)
     admin_password = Column(String(300), nullable=False)
+    admin_token = Column(String(500), nullable=True)
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 

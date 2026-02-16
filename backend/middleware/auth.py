@@ -6,23 +6,27 @@ from sqlalchemy.orm import Session
 
 from database.db import get_db
 from models.user import User
-
+from models.admin import Admin
 
 security = HTTPBearer()
 
-def require_auth(credentials: HTTPAuthorizationCredentials = Depends(security),db: Session = Depends(get_db)) -> User:
+def require_auth(credentials: HTTPAuthorizationCredentials = Depends(security),db: Session = Depends(get_db)) -> User | Admin:
     """Validate token and return authenticated user"""
 
     token = credentials.credentials
 
-    # find user with token
-    user = db.query(User).filter(User.user_token == token).first()
+    # find user or admin with token
+    user: User = db.query(User).filter(User.user_token == token).first()
+    admin: Admin = db.query(Admin).filter(Admin.admin_token == token).first()
 
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthenticated")
+    if admin: return admin
 
     # reject inactive users
-    if not user.user_isactive:
+    if user and not user.user_isactive:
         raise HTTPException(status_code=403, detail="Your account has been disabled")
+
+    # if neither admin or user token is passed
+    if not user and not admin:
+        raise HTTPException(status_code=401, detail="Unauthenticated")
 
     return user
