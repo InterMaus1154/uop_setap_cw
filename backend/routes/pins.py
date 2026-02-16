@@ -3,6 +3,7 @@ from fastapi.params import Depends
 from sqlalchemy.orm import Session
 
 from database.db import get_db
+from models.admin import Admin
 from models.pin import Pin
 from models.category import Category
 from schemas.Pin import PinResponse, PinCreate, PinUpdate
@@ -56,15 +57,15 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
 
 
 @router.put("/{pin_id}", response_model=PinResponse)
-def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
+def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db), authenticated: User | Admin = Depends(require_auth)):
     """Update pin details"""
     pin: Pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
 
-    # check if user is updating who created
-    if pin.user_id != user.user_id:
-        raise HTTPException(status_code=403, detail="This pin wasn't created by you")
+    # check if user is updating who created or it is an admin
+    if isinstance(authenticated, User) and pin.user_id != authenticated.user_id or not isinstance(authenticated, Admin):
+        raise HTTPException(status_code=403, detail="Forbidden")
 
     # update only provided fields
     if pin_data.pin_title is not None:
