@@ -6,11 +6,14 @@ from database.db import get_db
 from models.pin import Pin
 from models.category import Category
 from schemas.Pin import PinResponse, PinCreate, PinUpdate
+from middleware.auth import require_auth
+from models.user import User
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
+
 @router.get("/", response_model=list[PinResponse])
-def get_pins(db: Session = Depends(get_db)):
+def get_pins(db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Get all active pins"""
     pins = db.query(Pin).filter(Pin.pin_isactive == True).all()
     return pins
