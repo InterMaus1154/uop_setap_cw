@@ -111,3 +111,7 @@ Once endpoints exist, I can wire up the API calls and remove hardcoded data.
 **Notes:** Users can select from DB users to "login" without OAuth. Placeholder for map screen. minor work i did on the backend -  CORS properly configured, Router included correctly
 questions i asked: could the user_selection_screen be split to remove a single long file, i asked the flutter discord and they informed me that there is no need. 
 ---
+
+### Mark up2306492 - 28-29/01/2026
+**Summary**: Set up backend with models and basic routes
+**Details**: I have set up the Python backend - continued from Josh's template -, and connected our database, created models that can be used to interact with database entities more easily. Created a migration/seed template, that will enable us for easier testing and ensuring the database can be easily reset to a working state.
