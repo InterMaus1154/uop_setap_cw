@@ -21,6 +21,13 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 16/02/2026
+
+**Summary**: Created backend authentication, simple login and logout and middleware for validating authenticated user
+**Files created**
+- backend/middleware/auth.py
+- backend/routes/auth.py
+
 ### Josh up2255832 - 12/02/2026 (nearly midnight)
 **Summary:** Created backend category endpoints and wired up full frontend API integration for pin creation
 
