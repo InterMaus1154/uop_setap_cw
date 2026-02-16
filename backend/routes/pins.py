@@ -11,11 +11,13 @@ from models.user import User
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
+
 @router.get("/", response_model=list[PinResponse])
 def get_pins(db: Session = Depends(get_db)):
     """Get all active pins"""
     pins = db.query(Pin).filter(Pin.pin_isactive == True).all()
     return pins
+
 
 @router.get("/{pin_id}", response_model=PinResponse)
 def get_pin(pin_id: int, db: Session = Depends(get_db)):
@@ -25,24 +27,25 @@ def get_pin(pin_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Pin not found")
     return pin
 
+
 @router.post("/", response_model=PinResponse, status_code=201)
-def create_pin(pin_data: PinCreate, db: Session = Depends(get_db)):
+def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Create a new pin"""
-    #Ensures category exists
+    # Ensures category exists
     category = db.query(Category).filter(Category.cat_id == pin_data.cat_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
-    
-    #Create new pin
+
+    # Create new pin
     new_pin = Pin(
-        pin_title = pin_data.pin_title,
-        pin_latitude = pin_data.pin_latitude,
-        pin_longitude = pin_data.pin_longitude,
-        user_id = pin_data.user_id,
-        cat_id = pin_data.cat_id,
-        sub_cat_id = pin_data.sub_cat_id,
-        pin_expire_at = pin_data.pin_expire_at,
-        pin_description = pin_data.pin_description
+        pin_title=pin_data.pin_title,
+        pin_latitude=pin_data.pin_latitude,
+        pin_longitude=pin_data.pin_longitude,
+        user_id=user.user_id,
+        cat_id=pin_data.cat_id,
+        sub_cat_id=pin_data.sub_cat_id,
+        pin_expire_at=pin_data.pin_expire_at,
+        pin_description=pin_data.pin_description
     )
 
     db.add(new_pin)
@@ -51,14 +54,19 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db)):
 
     return new_pin
 
+
 @router.put("/{pin_id}", response_model=PinResponse)
-def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db)):
+def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Update pin details"""
-    pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
+    pin: Pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
 
-    #update only provided fields
+    # check if user is updating who created
+    if pin.user_id != user.user_id:
+        raise HTTPException(status_code=403, detail="This pin wasn't created by you")
+
+    # update only provided fields
     if pin_data.pin_title is not None:
         pin.pin_title = pin_data.pin_title
     if pin_data.pin_description is not None:
@@ -68,9 +76,9 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db)):
     if pin_data.pin_longitude is not None:
         pin.pin_longitude = pin_data.pin_longitude
     if pin_data.pin_expire_at is not None:
-        pin.pin_expire_at = pin_data.pin_expire_at      
+        pin.pin_expire_at = pin_data.pin_expire_at
 
     db.commit()
-    db.refresh(pin)               
+    db.refresh(pin)
 
     return pin

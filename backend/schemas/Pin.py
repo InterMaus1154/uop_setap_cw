@@ -8,7 +8,6 @@ class PinCreate(BaseModel):
     pin_title: str = Field(..., max_length=30)
     pin_latitude: float
     pin_longitude: float
-    user_id: int
     cat_id: int
     sub_cat_id: Optional[int] = None  
     pin_expire_at: datetime
