@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 from typing import Optional
 
+
 class UserBase(BaseModel):
     """Base schema"""
     user_email: EmailStr
@@ -13,12 +14,16 @@ class UserBase(BaseModel):
     user_lname: str = Field(..., min_length=1, max_length=60)
     user_displayname: Optional[str] = Field(None, max_length=30)
 
+
 class UserCreate(UserBase):
     pass
 
 
-class UserUpdateDisplayName(BaseModel):
-    user_display_name : str = Field(..., max_length=30)
+class UserUpdate(BaseModel):
+    user_display_name: Optional[str] = Field(None, max_length=30)
+    user_fname: Optional[str] = Field(None, max_length=60)
+    user_lname: Optional[str] = Field(None, max_length=60)
+
 
 class UserResponse(UserBase):
     """Schema for user response"""
@@ -32,6 +37,7 @@ class UserResponse(UserBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class UserLoginResponse(BaseModel):
     token: str
