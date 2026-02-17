@@ -33,12 +33,20 @@ Use this document to log your contributions. Add new entries at the top.
 ---
 
 ### Mark up2306492 - 17/02/2026
-**Summary:** Added filtering options on backend for pins
+**Summary:** Pin filtering and additional user endpoints
 
-**Details:** Pins can be filtered now using cat_id or cat_level_id, or both, and multiple, so for example GET /pins?cat_id=1&cat_level_id=2&cat_id=3
+**Details:** 
+- Pins can be filtered now using cat_id or cat_level_id, or both, and multiple, so for example `GET /pins?cat_id=1&cat_level_id=2&cat_id=3`
+- Added `GET /users/me` endpoint for getting the profile information of a user
+- Added `PUT /users` endpoint for updating the `user_fname` `user_lname` and `user_displayname` fields. (GitHub issue #9)
+- Fixed that `last_login` timestamp wasn't being updated in the database upon login, now it is
+- Added `PATCH /users/deactivate` endpoint, allowing a user to deactivate their account
+- (Deleted some of my older branches on GH for cleanup)
 
 **Files modified:**
 - backend/routes/pins.py (added filtering for get_pins function)
+- backend/routes/users.py (added new endpoints)
+- backend/routes/auth.py (added that last_login timestamp is automatically updated in the database after login)
 
 ### Josh up2255832 - 16/02/2026
 **Summary:** Integrated frontend authentication with backend token-based auth system

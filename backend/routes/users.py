@@ -65,14 +65,12 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     return user
 
 
-@router.get('/search/{email}', response_model=UserResponse)
+@router.get('/search/{email}', response_model=list[UserResponse])
 def get_user_by_email(email: str, db: Session = Depends(get_db)):
     """Get user by email address"""
-    user = db.query(User).filter(User.user_email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    users: list[User] = db.query(User).filter(User.user_email.like(f"%{email}%")).all()
 
-    return user
+    return users
 
 
 @router.post('/', response_model=UserResponse, status_code=201)
