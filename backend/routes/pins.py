@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
+
+from typing import Optional
 
 from database.db import get_db
 from models.admin import Admin
@@ -14,9 +16,16 @@ router = APIRouter(prefix="/pins", tags=["pins"])
 
 
 @router.get("/", response_model=list[PinResponse])
-def get_pins(db: Session = Depends(get_db)):
+def get_pins(cat_id : Optional[list[int]] = Query(default=None), db: Session = Depends(get_db)):
     """Get all active pins"""
-    pins = db.query(Pin).filter(Pin.pin_isactive == True).all()
+
+    # build query
+    query = db.query(Pin).filter(Pin.pin_isactive == True)
+
+    if cat_id:
+        query = query.filter(Pin.cat_id.in_(cat_id))
+
+    pins = query.all()
     return pins
 
 
