@@ -80,6 +80,13 @@ Use this document to log your contributions. Add new entries at the top.
 **Notes:** Pin creation is now fully end to end: user taps map  selects location fills form (categories fetched from DB)  pin saved to database via POST /pins/. Tested and confirmed working. Julian created most endpoints,  I created the backend category endpoints myself as they were simple read only GETs and I needed them to unblock frontend work.
 
 ---
+### Julian up2301253 - 11/02/2026
+**Description:** Added Pin.py schema and some pins.py endpoints to enable frontend pin creation, editing and, displaying pins.
+
+**Files Created:**
+- backend/schemas/Pin.py
+- backend/routes/pins.py
+
 
 ### Josh up2255832 - 06/02/2026
 **Summary:** Built pin creation form UI with bottom sheet, tap-to-place flow, category-based auto-expiry, and performed strict code review with fixes
