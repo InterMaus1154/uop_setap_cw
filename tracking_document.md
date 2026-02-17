@@ -41,6 +41,7 @@ Use this document to log your contributions. Add new entries at the top.
 - Added `PUT /users` endpoint for updating the `user_fname` `user_lname` and `user_displayname` fields. (GitHub issue #9)
 - Fixed that `last_login` timestamp wasn't being updated in the database upon login, now it is
 - Added `PATCH /users/deactivate` endpoint, allowing a user to deactivate their account
+- Fixed `GET /users/search/{email}` endpoint, now it allows to search by partial match and returns a list of users
 - (Deleted some of my older branches on GH for cleanup)
 
 **Files modified:**
