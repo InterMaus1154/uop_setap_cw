@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, Query as Q
 from database.db import get_db
 from middleware.auth import require_auth
 from models.user import User
-from schemas.User import UserResponse, UserCreate
+from schemas.User import UserResponse, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -17,6 +17,26 @@ def get_users(db: Session = Depends(get_db)):
     """List all users. Used for prototype only."""
     users = db.query(User).all()
     return users
+
+
+@router.put("/", response_model=UserResponse, status_code=200)
+def update_user(user_data: UserUpdate, user: User = Depends(require_auth), db: Session = Depends(get_db)):
+    """Update the logged-in user's details"""
+
+    # only update fields that are present
+    if user_data.user_fname:
+        user.user_fname = user_data.user_fname
+
+    if user_data.user_lname:
+        user.user_lname = user_data.user_lname
+
+    if user_data.user_display_name:
+        user.user_displayname = user_data.user_display_name
+
+    db.commit()
+    db.refresh(user)
+
+    return user
 
 
 @router.get('/me', response_model=UserResponse)
@@ -38,8 +58,8 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 
 @router.get('/search/{email}', response_model=UserResponse)
 def get_user_by_email(email: str, db: Session = Depends(get_db)):
+    """Get user by email address"""
     user = db.query(User).filter(User.user_email == email).first()
-
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
