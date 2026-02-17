@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query as Q
 
 from database.db import get_db
 from models.user import User
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", response_model=list[UserResponse])
 def get_users(db: Session = Depends(get_db)):
-    """List all users"""
+    """List all users. Used for prototype only."""
     users = db.query(User).all()
     return users
 
@@ -26,7 +26,7 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 
     return user
 
-@router.get('/email/{email}', response_model=UserResponse)
+@router.get('/search/{email}', response_model=UserResponse)
 def get_user_by_email(email: str, db : Session = Depends(get_db)):
     user = db.query(User).filter(User.user_email == email).first()
 
