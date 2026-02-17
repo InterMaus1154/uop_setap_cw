@@ -108,11 +108,8 @@ class _MapScreenState extends State<MapScreen> {
     // Close the bottom sheet
     Navigator.pop(context);
 
-    final userId = context.read<UserProvider>().currentUser?.userId;
-    if (userId == null) return;
-
     try {
-      await _apiService.createPin(formData, userId);
+      await _apiService.createPin(formData);
 
       if (mounted) {
         _exitPinPlacementMode();

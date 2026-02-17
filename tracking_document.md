@@ -21,6 +21,17 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 17/02/2026
+**Summary:** Cleaned up redundant user_id from pin creation after reviewing backend changes
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (removed userId parameter from createPin, backend now derives it from auth token)
+- frontend/lib/screens/map_screen.dart (removed userId lookup before createPin call)
+
+**Notes:** POST /pins/ endpoint correctly pulls user_id from the authenticated token server-side, so passing it from the frontend was redundant. Also reviewed new pin filtering (GET /pins?cat_id=1&cat_level_id=2) — will be useful for map category filtering later.
+
+---
+
 ### Mark up2306492 - 17/02/2026
 **Summary:** Added filtering options on backend for pins
 

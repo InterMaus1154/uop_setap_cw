@@ -142,10 +142,9 @@ class ApiService {
       _getList('/categories/sub-categories', SubCategory.fromJson);
 
   // Pins
-  Future<Pin> createPin(PinFormData formData, int userId) async {
+  Future<Pin> createPin(PinFormData formData) async {
     try {
       final body = formData.toJson();
-      body['user_id'] = userId;
 
       final headers = await _authHeaders();
       final response = await http
