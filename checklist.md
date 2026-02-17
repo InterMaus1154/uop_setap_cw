@@ -5,7 +5,7 @@
 - [ ] Frontend auto fills locaiton when starting pin creation (user doesn't have to manually )
 - [ ] Add modal when clicking on a pin, showing pin details, including stats (dislikes likes)
 - [ ] Add interaction to the pin modal, like marking it as resolved, like or dislike
-- [ ] Add filter on the backend for pins per category and cat level
+- [X] Add filter on the backend for pins per category and cat level
 - [ ] Add pin filter on the frontend
 - [ ] Add category colours from the backend to categories
 - [ ] Add on frontend a friend list
