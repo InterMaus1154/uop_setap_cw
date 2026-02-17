@@ -45,6 +45,15 @@ def get_me(user: User = Depends(require_auth)):
     return user
 
 
+@router.patch("/deactivate", status_code=200)
+def deactivate_me(user: User = Depends(require_auth), db: Session = Depends(get_db)):
+    """Deactivate the account of the logged-in user"""
+    user.user_isactive = False
+    user.user_token = None
+    db.commit()
+    return {"message": "Account deactivated"}
+
+
 @router.get('/{user_id}', response_model=UserResponse)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     """Get user by id"""
