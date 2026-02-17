@@ -21,6 +21,14 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 17/02/2026
+**Summary:** Added filtering options on backend for pins
+
+**Details:** Pins can be filtered now using cat_id or cat_level_id, or both, and multiple, so for example GET /pins?cat_id=1&cat_level_id=2&cat_id=3
+
+**Files modified:**
+- backend/routes/pins.py (added filtering for get_pins function)
+
 ### Josh up2255832 - 16/02/2026
 **Summary:** Integrated frontend authentication with backend token-based auth system
 
@@ -37,6 +45,7 @@ Use this document to log your contributions. Add new entries at the top.
 ### Mark up2306492 - 16/02/2026
 
 **Summary**: Created backend authentication, simple login and logout and middleware for validating authenticated user
+
 **Files created**
 - backend/middleware/auth.py
 - backend/routes/auth.py
