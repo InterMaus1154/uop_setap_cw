@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from database.db import get_db
 from middleware.auth import require_auth
@@ -33,6 +34,10 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
 
     # save token to database
     user.user_token = token
+
+    # update login timestamp
+    user.last_login = func.now()
+
     db.commit()
     db.refresh(user)
 
