@@ -143,6 +143,33 @@ class ApiService {
 
   // Pins
   Future<List<Pin>> getPins() => _getList('/pins/', Pin.fromJson);
+  // this displays pins on users profile of how many they made
+  // undecided if they should decrease as pins expire or just continue like a tally
+  Future<int> getMyPinCount() async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http
+          .get(Uri.parse('$baseUrl/users/me/pin-count'), headers: headers)
+          .timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['pin_count'] as int;
+      } else {
+        throw ApiException(
+          'Failed to load pin count: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
 
   Future<Pin> createPin(PinFormData formData) async {
     try {

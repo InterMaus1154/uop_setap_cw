@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
 import '../models/category.dart';
 import '../models/pin_form_data.dart';
 import '../models/pin.dart';
-import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
-import 'user_selection_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -282,8 +279,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>().currentUser;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -334,55 +329,6 @@ class _MapScreenState extends State<MapScreen> {
                 ],
               ),
             ],
-          ),
-
-          // Top bar with user info
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 8,
-                left: 16,
-                right: 16,
-                bottom: 8,
-              ),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black.withAlpha(150), Colors.transparent],
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Welcome, ${user?.firstName ?? "User"}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.white),
-                    onPressed: () async {
-                      await context.read<UserProvider>().logout();
-                      if (context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const UserSelectionScreen(),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
           ),
 
           // Loading indicator for pins
