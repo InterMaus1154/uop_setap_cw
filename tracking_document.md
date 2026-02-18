@@ -21,6 +21,23 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 18/02/2026
+**Summary:** Code reviewed and fixed pin display on map, improved pin detail sheet
+
+**Files Modified:**
+- frontend/lib/screens/map_screen.dart (removed dead _pinsLoaded variable, added loading indicator, styled pin detail bottom sheet to match creation sheet, added category/subcategory chips, formatted expiry as relative time, added placement mode guard on pin taps, clientbside expired pin filter, fixed RenderFlex overflow on narrow screens)
+
+**Issues encountered and resolved:**
+1. Dead code, _pinsLoaded was set but never read, replaced with _isLoadingPins driving a spinner
+2. Pin detail sheet was unstyled and inconsistent with creation sheet, added drag handle, rounded corners, matching layout
+3. Raw DateTime shown for expiry, formatted as readable time
+5. RenderFlex overflow on small screens, wrapped text in Expanded with ellipsis overflow
+6. Category/subcategory not shown on pin details, added chip display with lookup from cached data
+
+**Notes:** Categories now load on map, so they're available when tapping pins. will discuss colour coding with team
+
+---
+
 ### Josh up2255832 - 17/02/2026
 **Summary:** Cleaned up redundant user_id from pin creation after reviewing backend changes
 
