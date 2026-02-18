@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 18/02/2026
+**Summary:** Added profile page with bottom nav, pin count endpoint
+
+**Files Created:**
+- frontend/lib/screens/profile_screen.dart (profile page with avatar, name, email, pin count, logout)
+
+**Files Modified:**
+- frontend/lib/screens/home_screen.dart (converted to bottom nav bar with Map and Profile tabs)
+- frontend/lib/screens/map_screen.dart (removed top bar, cleaned up unused imports)
+- frontend/lib/services/api_service.dart (added getMyPinCount method)
+- backend/routes/users.py (added GET /users/me/pin-count endpoint)
+
+**Notes:** Forgot to git pull before merging to master, caused divergent branches with Julian's friend  commits. Resolved with a merge commit, no work lost. Lesson learned  always pull before merging lol.
+
+---
+
 ### Julian up2301253 - 18/02/2026
 **Description:** Added Friend.py schema and friend.py endpoints to allow ability to send, accept, and reject friend requests and delete friends from list.
 
