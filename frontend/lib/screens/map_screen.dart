@@ -23,12 +23,13 @@ class _MapScreenState extends State<MapScreen> {
 
   // Pins from API
   List<Pin> _pins = [];
-  bool _pinsLoaded = false;
+  bool _isLoadingPins = true;
 
   @override
   void initState() {
     super.initState();
     _loadPins();
+    _loadCategories();
   }
 
   Future<void> _loadPins() async {
@@ -37,10 +38,11 @@ class _MapScreenState extends State<MapScreen> {
       if (!mounted) return;
       setState(() {
         _pins = results;
-        _pinsLoaded = true;
+        _isLoadingPins = false;
       });
     } on ApiException catch (e) {
       if (mounted) {
+        setState(() => _isLoadingPins = false);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Failed to load pins: $e')));
@@ -49,28 +51,120 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showPinDetails(Pin pin) {
+    // Don't open details while placing a new pin
+    if (_isPlacingPin) return;
+
+    // Look up category and subcategory names
+    final catName = _categories
+        .where((c) => c.catId == pin.catId)
+        .map((c) => c.catName)
+        .firstOrNull;
+    final subCatName = pin.subCatId != null
+        ? _subCategories
+              .where((s) => s.subCatId == pin.subCatId)
+              .map((s) => s.subCatName)
+              .firstOrNull
+        : null;
+
     showModalBottomSheet(
       context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Text(
               pin.pinTitle,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            if (pin.pinDescription != null) Text(pin.pinDescription!),
+            // Category chip
+            if (catName != null)
+              Wrap(
+                spacing: 8,
+                children: [
+                  Chip(
+                    label: Text(catName, style: const TextStyle(fontSize: 12)),
+                    backgroundColor: Colors.blue[50],
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  if (subCatName != null)
+                    Chip(
+                      label: Text(
+                        subCatName,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      backgroundColor: Colors.grey[100],
+                      visualDensity: VisualDensity.compact,
+                    ),
+                ],
+              ),
+            if (catName != null) const SizedBox(height: 8),
+            if (pin.pinDescription != null && pin.pinDescription!.isNotEmpty)
+              Text(pin.pinDescription!, style: const TextStyle(fontSize: 14)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.person_outline, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Posted by user #${pin.userId}',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
-            Text('Posted by user ${pin.userId}'),
-            const SizedBox(height: 8),
-            Text('Expires: ${pin.pinExpireAt.toLocal()}'),
+            Row(
+              children: [
+                Icon(Icons.timer_outlined, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    _formatExpiry(pin.pinExpireAt),
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatExpiry(DateTime expireAt) {
+    final now = DateTime.now();
+    final diff = expireAt.difference(now);
+    if (diff.isNegative) return 'Expired';
+    if (diff.inMinutes < 60) return 'Expires in ${diff.inMinutes} min';
+    if (diff.inHours < 24) {
+      final mins = diff.inMinutes % 60;
+      if (mins == 0) return 'Expires in ${diff.inHours} hr';
+      return 'Expires in ${diff.inHours} hr $mins min';
+    }
+    return 'Expires in ${diff.inDays} day${diff.inDays > 1 ? 's' : ''}';
   }
 
   // University of Portsmouth campus coordinates
@@ -210,7 +304,9 @@ class _MapScreenState extends State<MapScreen> {
               // Show API pins and selected location during placement
               MarkerLayer(
                 markers: [
-                  for (final pin in _pins)
+                  for (final pin in _pins.where(
+                    (p) => p.pinExpireAt.isAfter(DateTime.now()),
+                  ))
                     Marker(
                       point: LatLng(pin.pinLatitude, pin.pinLongitude),
                       width: 40,
@@ -288,6 +384,17 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
           ),
+
+          // Loading indicator for pins
+          if (_isLoadingPins)
+            const Positioned(
+              bottom: 160,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: CircularProgressIndicator(color: Colors.blue),
+              ),
+            ),
 
           // Pin placement mode UI
           if (_isPlacingPin) ...[
