@@ -1,8 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query as Q
+
+from typing import Optional
 
 from database.db import get_db
+from models import CategoryLevel
 from models.admin import Admin
 from models.pin import Pin
 from models.category import Category
@@ -14,9 +17,24 @@ router = APIRouter(prefix="/pins", tags=["pins"])
 
 
 @router.get("/", response_model=list[PinResponse])
-def get_pins(db: Session = Depends(get_db)):
+def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
+             db: Session = Depends(get_db)):
     """Get all active pins"""
-    pins = db.query(Pin).filter(Pin.pin_isactive == True).all()
+
+    # build query
+    query: Q[Pin] = db.query(Pin).filter(Pin.pin_isactive == True)
+
+    # join category on pins if any id is present
+    if cat_id or cat_level_id:
+        query = query.join(Pin.category)
+
+    if cat_id:
+        query = query.filter(Category.cat_id.in_(cat_id))
+
+    if cat_level_id:
+        query = query.filter(Category.cat_level_id.in_(cat_level_id))
+
+    pins = query.all()
     return pins
 
 
@@ -57,7 +75,8 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
 
 
 @router.put("/{pin_id}", response_model=PinResponse)
-def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db), authenticated: User | Admin = Depends(require_auth)):
+def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
+               authenticated: User | Admin = Depends(require_auth)):
     """Update pin details"""
     pin: Pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
 

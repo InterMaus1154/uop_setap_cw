@@ -161,11 +161,8 @@ class _MapScreenState extends State<MapScreen> {
     // Close the bottom sheet
     Navigator.pop(context);
 
-    final userId = context.read<UserProvider>().currentUser?.userId;
-    if (userId == null) return;
-
     try {
-      await _apiService.createPin(formData, userId);
+      await _apiService.createPin(formData);
       await _loadPins();
 
       if (mounted) {
@@ -275,14 +272,16 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.logout, color: Colors.white),
-                    onPressed: () {
-                      context.read<UserProvider>().logout();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const UserSelectionScreen(),
-                        ),
-                      );
+                    onPressed: () async {
+                      await context.read<UserProvider>().logout();
+                      if (context.mounted) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const UserSelectionScreen(),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ],

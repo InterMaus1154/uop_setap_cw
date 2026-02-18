@@ -4,11 +4,11 @@ We are using FastAPI with Python for our backend rest api. We are creating an AP
 1. Go into the backend folder and open cmd
 2. It is easier if we use a virtual environment.
 3. Type in order:
-4. `python -m venv .venv`
+4. `python -m venv venv`
 5. If you open the backend folder directly in vscode, it should automatically detect the virtual environment (you see a .venv in front of the folder in terminal)
-6. If not, then to activate it: .venv\Scripts\activate in cmd, or in powershell .venc\Scripts\Activate.ps1
+6. If not, then to activate it: venv\Scripts\activate in cmd, or in powershell venv\Scripts\Activate.ps1
 7. Install dependencies: `pip install -r requirements.txt`
-8. After it finished, you can run the app `uvicorn main:app --reload --port=8001`.
+8. After it finished, you can run the app `uvicorn main:app --reload --port=8000`.
 
 ## How to run migrations and seed
 The goal of migrations and seeding is to have a basic state of the database we can always go back to with some dummy data for testing.

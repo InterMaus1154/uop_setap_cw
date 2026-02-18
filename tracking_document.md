@@ -21,9 +21,51 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 17/02/2026
+**Summary:** Cleaned up redundant user_id from pin creation after reviewing backend changes
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (removed userId parameter from createPin, backend now derives it from auth token)
+- frontend/lib/screens/map_screen.dart (removed userId lookup before createPin call)
+
+**Notes:** POST /pins/ endpoint correctly pulls user_id from the authenticated token server-side, so passing it from the frontend was redundant. Also reviewed new pin filtering (GET /pins?cat_id=1&cat_level_id=2) — will be useful for map category filtering later.
+
+---
+
+### Mark up2306492 - 17/02/2026
+**Summary:** Pin filtering and additional user endpoints
+
+**Details:** 
+- Pins can be filtered now using cat_id or cat_level_id, or both, and multiple, so for example `GET /pins?cat_id=1&cat_level_id=2&cat_id=3`
+- Added `GET /users/me` endpoint for getting the profile information of a user
+- Added `PUT /users` endpoint for updating the `user_fname` `user_lname` and `user_displayname` fields. (GitHub issue #9)
+- Fixed that `last_login` timestamp wasn't being updated in the database upon login, now it is
+- Added `PATCH /users/deactivate` endpoint, allowing a user to deactivate their account
+- Fixed `GET /users/search/{email}` endpoint, now it allows to search by partial match and returns a list of users
+- (Deleted some of my older branches on GH for cleanup)
+
+**Files modified:**
+- backend/routes/pins.py (added filtering for get_pins function)
+- backend/routes/users.py (added new endpoints)
+- backend/routes/auth.py (added that last_login timestamp is automatically updated in the database after login)
+
+### Josh up2255832 - 16/02/2026
+**Summary:** Integrated frontend authentication with backend token-based auth system
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added login/logout methods, Bearer token auth headers, LoginResponse class, 401/403 error handling)
+- frontend/lib/providers/user_provider.dart (replaced manual setUser with async login/logout via API, added isLoading state)
+- frontend/lib/screens/user_selection_screen.dart (user selection now calls POST /auth/login, async with error handling)
+- frontend/lib/screens/map_screen.dart (logout now calls POST /auth/logout before clearing local state)
+
+**Notes:** Frontend auth is now fully wired to Mark's backend auth system. User selection calls login endpoint, receives token, stores it via SecureStorageService (which Mark created). All authenticated requests (pin creation, logout) send Bearer token in headers. Token is cleared both server-side and locally on logout. Tested full flow: login → create pin (authenticated) → logout → back to user selection.
+
+---
+
 ### Mark up2306492 - 16/02/2026
 
 **Summary**: Created backend authentication, simple login and logout and middleware for validating authenticated user
+
 **Files created**
 - backend/middleware/auth.py
 - backend/routes/auth.py
@@ -47,6 +89,13 @@ Use this document to log your contributions. Add new entries at the top.
 **Notes:** Pin creation is now fully end to end: user taps map  selects location fills form (categories fetched from DB)  pin saved to database via POST /pins/. Tested and confirmed working. Julian created most endpoints,  I created the backend category endpoints myself as they were simple read only GETs and I needed them to unblock frontend work.
 
 ---
+### Julian up2301253 - 11/02/2026
+**Description:** Added Pin.py schema and some pins.py endpoints to enable frontend pin creation, editing and, displaying pins.
+
+**Files Created:**
+- backend/schemas/Pin.py
+- backend/routes/pins.py
+
 
 ### Josh up2255832 - 06/02/2026
 **Summary:** Built pin creation form UI with bottom sheet, tap-to-place flow, category-based auto-expiry, and performed strict code review with fixes

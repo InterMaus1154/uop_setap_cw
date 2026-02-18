@@ -6,6 +6,7 @@ import '../models/category.dart';
 import '../models/pin.dart';
 import '../models/pin_form_data.dart';
 import '../models/user.dart';
+import 'secure_storage_service.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -17,9 +18,27 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+/// Response from login endpoint containing user data and auth token
+class LoginResponse {
+  final User user;
+  final String token;
+
+  LoginResponse({required this.user, required this.token});
+}
+
 class ApiService {
   static const String baseUrl = 'http://localhost:8000';
   static const Duration _timeout = Duration(seconds: 10);
+  final SecureStorageService _storage = SecureStorageService();
+
+  /// Get auth headers with Bearer token if available
+  Future<Map<String, String>> _authHeaders() async {
+    final token = await _storage.getToken();
+    return {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
 
   /// Generic GET list handler to reduce duplication
   Future<List<T>> _getList<T>(
@@ -59,6 +78,59 @@ class ApiService {
   // Users
   Future<List<User>> getUsers() => _getList('/users/', User.fromJson);
 
+  // Auth
+  Future<LoginResponse> login(String email) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'email': email}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final token = data['token'] as String;
+        await _storage.saveToken(token);
+        return LoginResponse(user: User.fromJson(data), token: token);
+      } else if (response.statusCode == 401) {
+        throw ApiException('Invalid email address.', statusCode: 401);
+      } else if (response.statusCode == 403) {
+        throw ApiException('Your account has been disabled.', statusCode: 403);
+      } else {
+        throw ApiException(
+          'Login failed: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      final headers = await _authHeaders();
+      await http
+          .post(Uri.parse('$baseUrl/auth/logout'), headers: headers)
+          .timeout(_timeout);
+    } catch (_) {
+      // Even if logout API fails, clear local token
+    } finally {
+      await _storage.deleteToken();
+    }
+  }
+
   // Categories
   Future<List<Category>> getCategories() =>
       _getList('/categories/', Category.fromJson);
@@ -72,22 +144,26 @@ class ApiService {
   // Pins
   Future<List<Pin>> getPins() => _getList('/pins/', Pin.fromJson);
 
-  // Pins
-  Future<Pin> createPin(PinFormData formData, int userId) async {
+  Future<Pin> createPin(PinFormData formData) async {
     try {
       final body = formData.toJson();
-      body['user_id'] = userId;
 
+      final headers = await _authHeaders();
       final response = await http
           .post(
             Uri.parse('$baseUrl/pins/'),
-            headers: {'Content-Type': 'application/json'},
+            headers: headers,
             body: json.encode(body),
           )
           .timeout(_timeout);
 
       if (response.statusCode == 201) {
         return Pin.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 401) {
+        throw ApiException(
+          'Not authenticated. Please log in again.',
+          statusCode: 401,
+        );
       } else {
         throw ApiException(
           'Failed to create pin: ${response.statusCode}',
