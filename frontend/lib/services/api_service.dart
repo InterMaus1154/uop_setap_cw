@@ -70,6 +70,7 @@ class ApiService {
       _getList('/categories/sub-categories', SubCategory.fromJson);
 
   // Pins
+  Future<List<Pin>> getPins() => _getList('/pins/', Pin.fromJson);
   Future<Pin> createPin(PinFormData formData, int userId) async {
     try {
       final body = formData.toJson();

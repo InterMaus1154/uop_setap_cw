@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../models/category.dart';
 import '../models/pin_form_data.dart';
+import '../models/pin.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
@@ -19,6 +20,10 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   final ApiService _apiService = ApiService();
+
+  // Pins from API
+  List<Pin> _pins = [];
+  bool _pinsLoaded = false;
 
   // University of Portsmouth campus coordinates
   static const LatLng _campusCenter = LatLng(50.797864, -1.098353);
@@ -37,6 +42,12 @@ class _MapScreenState extends State<MapScreen> {
   void dispose() {
     _mapController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPins();
   }
 
   /// Fetch categories, levels, and subcategories from API
@@ -113,6 +124,8 @@ class _MapScreenState extends State<MapScreen> {
 
     try {
       await _apiService.createPin(formData, userId);
+      // Refresh pins after creating a new one
+      await _loadPins();
 
       if (mounted) {
         _exitPinPlacementMode();
@@ -133,6 +146,48 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     }
+  }
+
+  Future<void> _loadPins() async {
+    try {
+      final results = await _apiService.getPins();
+      if (!mounted) return;
+      setState(() {
+        _pins = results;
+        _pinsLoaded = true;
+      });
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load pins: $e')));
+      }
+    }
+  }
+
+  void _showPinDetails(Pin pin) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              pin.pinTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            if (pin.pinDescription != null) Text(pin.pinDescription!),
+            const SizedBox(height: 8),
+            Text('Posted by user ${pin.userId}'),
+            const SizedBox(height: 8),
+            Text('Expires: ${pin.pinExpireAt.toLocal()}'),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -156,15 +211,31 @@ class _MapScreenState extends State<MapScreen> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.campusconnect.app',
               ),
-              // Show marker at selected location during placement
+              // Show markers from API and selected location during placement
               MarkerLayer(
                 markers: [
+                  // API pins
+                  for (final pin in _pins)
+                    Marker(
+                      point: LatLng(pin.pinLatitude, pin.pinLongitude),
+                      width: 40,
+                      height: 40,
+                      builder: (context) => GestureDetector(
+                        onTap: () => _showPinDetails(pin),
+                        child: const Icon(
+                          Icons.location_on,
+                          color: Colors.blue,
+                          size: 36,
+                        ),
+                      ),
+                    ),
+                  // Selected location during placement
                   if (_selectedLocation != null)
                     Marker(
                       point: _selectedLocation!,
                       width: 40,
                       height: 40,
-                      child: const Icon(
+                      builder: (context) => const Icon(
                         Icons.location_pin,
                         color: Colors.red,
                         size: 40,
