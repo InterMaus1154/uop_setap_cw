@@ -21,6 +21,15 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 18/02/2026
+**Description:** Added Friend.py schema and friend.py endpoints to allow ability to send, accept, and reject friend requests and delete friends from list.
+
+**Files Created:**
+- backend/schemas/Friend.py
+- backend/routes/friends.py
+
+---
+
 ### Josh up2255832 - 17/02/2026
 **Summary:** Cleaned up redundant user_id from pin creation after reviewing backend changes
 
