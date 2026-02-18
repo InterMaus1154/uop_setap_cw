@@ -25,6 +25,54 @@ class _MapScreenState extends State<MapScreen> {
   List<Pin> _pins = [];
   bool _pinsLoaded = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadPins();
+  }
+
+  Future<void> _loadPins() async {
+    try {
+      final results = await _apiService.getPins();
+      if (!mounted) return;
+      setState(() {
+        _pins = results;
+        _pinsLoaded = true;
+      });
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load pins: $e')));
+      }
+    }
+  }
+
+  void _showPinDetails(Pin pin) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              pin.pinTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            if (pin.pinDescription != null) Text(pin.pinDescription!),
+            const SizedBox(height: 8),
+            Text('Posted by user ${pin.userId}'),
+            const SizedBox(height: 8),
+            Text('Expires: ${pin.pinExpireAt.toLocal()}'),
+          ],
+        ),
+      ),
+    );
+  }
+
   // University of Portsmouth campus coordinates
   static const LatLng _campusCenter = LatLng(50.797864, -1.098353);
   static const double _defaultZoom = 16.0;
@@ -42,12 +90,6 @@ class _MapScreenState extends State<MapScreen> {
   void dispose() {
     _mapController.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPins();
   }
 
   /// Fetch categories, levels, and subcategories from API
@@ -124,7 +166,6 @@ class _MapScreenState extends State<MapScreen> {
 
     try {
       await _apiService.createPin(formData, userId);
-      // Refresh pins after creating a new one
       await _loadPins();
 
       if (mounted) {
@@ -148,48 +189,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _loadPins() async {
-    try {
-      final results = await _apiService.getPins();
-      if (!mounted) return;
-      setState(() {
-        _pins = results;
-        _pinsLoaded = true;
-      });
-    } on ApiException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load pins: $e')));
-      }
-    }
-  }
-
-  void _showPinDetails(Pin pin) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              pin.pinTitle,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            if (pin.pinDescription != null) Text(pin.pinDescription!),
-            const SizedBox(height: 8),
-            Text('Posted by user ${pin.userId}'),
-            const SizedBox(height: 8),
-            Text('Expires: ${pin.pinExpireAt.toLocal()}'),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>().currentUser;
@@ -211,16 +210,15 @@ class _MapScreenState extends State<MapScreen> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.campusconnect.app',
               ),
-              // Show markers from API and selected location during placement
+              // Show API pins and selected location during placement
               MarkerLayer(
                 markers: [
-                  // API pins
                   for (final pin in _pins)
                     Marker(
                       point: LatLng(pin.pinLatitude, pin.pinLongitude),
                       width: 40,
                       height: 40,
-                      builder: (context) => GestureDetector(
+                      child: GestureDetector(
                         onTap: () => _showPinDetails(pin),
                         child: const Icon(
                           Icons.location_on,
@@ -229,13 +227,12 @@ class _MapScreenState extends State<MapScreen> {
                         ),
                       ),
                     ),
-                  // Selected location during placement
                   if (_selectedLocation != null)
                     Marker(
                       point: _selectedLocation!,
                       width: 40,
                       height: 40,
-                      builder: (context) => const Icon(
+                      child: const Icon(
                         Icons.location_pin,
                         color: Colors.red,
                         size: 40,
