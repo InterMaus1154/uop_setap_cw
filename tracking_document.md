@@ -30,6 +30,7 @@ Use this document to log your contributions. Add new entries at the top.
 - Added more subcategories for new categories
 - Added extra pins and refined existing ones made by Luke
 - Modified pin model, so it returns pin color as well
+- Added check for correct sub_cat_id during pin creation
 
 **Files modified:**
 - backend/schemas/Pin.py (added pin_color to PinResponse)
