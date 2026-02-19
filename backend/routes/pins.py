@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session, Query as Q, joinedload
 from typing import Optional
 
 from database.db import get_db
-from models import CategoryLevel
+from models import CategoryLevel, SubCategory
 from models.admin import Admin
 from models.pin import Pin
 from models.category import Category
@@ -57,8 +57,17 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
     # Ensures category exists
     category = db.query(Category).filter(Category.cat_id == pin_data.cat_id).first()
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise HTTPException(status_code=422, detail="Invalid category")
 
+    # check if sub cat exists if provided
+    if pin_data.sub_cat_id:
+        sub_category = (db.query(SubCategory)
+                        .filter(SubCategory.sub_cat_id == pin_data.sub_cat_id,
+                                SubCategory.cat_id == pin_data.cat_id)  # it will return null, if the provided sub_category doesnt belong to the provided category
+                        .first())
+
+        if not sub_category:
+            raise HTTPException(status_code=422, detail="Invalid subcategory")
 
     # Create new pin
     new_pin = Pin(
