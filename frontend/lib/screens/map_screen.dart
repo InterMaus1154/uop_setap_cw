@@ -100,7 +100,8 @@ class _MapScreenState extends State<MapScreen> {
                 children: [
                   Chip(
                     label: Text(catName, style: const TextStyle(fontSize: 12)),
-                    backgroundColor: Colors.blue[50],
+                    backgroundColor: pin.pinColor.withAlpha(30),
+                    side: BorderSide(color: pin.pinColor.withAlpha(80)),
                     visualDensity: VisualDensity.compact,
                   ),
                   if (subCatName != null)
@@ -308,9 +309,9 @@ class _MapScreenState extends State<MapScreen> {
                       height: 40,
                       child: GestureDetector(
                         onTap: () => _showPinDetails(pin),
-                        child: const Icon(
+                        child: Icon(
                           Icons.location_on,
-                          color: Colors.blue,
+                          color: pin.pinColor, // implemented colour by cat
                           size: 36,
                         ),
                       ),

@@ -21,6 +21,17 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 19/02/2026
+**Summary:** Implemented pin colour coding on map using backend hex colours from category levels
+
+**Files Modified:**
+- frontend/lib/models/pin.dart (added pinColorHex field and pinColor getter for hex-to-Color conversion)
+- frontend/lib/screens/map_screen.dart (map markers and category chips now use pin colour from API)
+
+**Notes:** Mark added cat_level_color to the backend, each pin response now includes pin_color as a hex string. Frontend parses it and applies it to markers and detail sheet chips. Falls back to blue if colour is missing.
+
+---
+
 ### Julian up2301253 - 19/02/2026
 **Description:** Added error handling for blocked and and accepted relationship states. Also added permission checks, ensuring only users involved in a relationship can update it.
 
