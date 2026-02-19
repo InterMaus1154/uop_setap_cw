@@ -26,3 +26,7 @@ class Pin(Base):
     user = relationship("User", back_populates="pins")
     reactions = relationship("PinReaction", back_populates="pin")
     reports = relationship("PinReport", back_populates="pin")
+
+    @property
+    def pin_color(self) -> str:
+        return self.category.category_level.cat_level_color

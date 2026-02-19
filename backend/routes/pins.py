@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.params import Depends
-from sqlalchemy.orm import Session, Query as Q
+from sqlalchemy.orm import Session, Query as Q, joinedload
 
 from typing import Optional
 
@@ -22,7 +22,9 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
     """Get all active pins"""
 
     # build query
-    query: Q[Pin] = db.query(Pin).filter(Pin.pin_isactive == True)
+    query: Q[Pin] = (db.query(Pin)
+                     .options(joinedload(Pin.category).joinedload(Category.category_level))
+                     .filter(Pin.pin_isactive == True))
 
     # join category on pins if any id is present
     if cat_id or cat_level_id:
@@ -41,7 +43,9 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
 @router.get("/{pin_id}", response_model=PinResponse)
 def get_pin(pin_id: int, db: Session = Depends(get_db)):
     """Get a specific pin by ID"""
-    pin = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+    pin = (db.query(Pin)
+           .options(joinedload(Pin.category).joinedload(Category.category_level))
+           .filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first())
     if not pin:
         raise HTTPException(status_code=404, detail="Pin not found")
     return pin
@@ -54,6 +58,7 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
     category = db.query(Category).filter(Category.cat_id == pin_data.cat_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
+
 
     # Create new pin
     new_pin = Pin(
@@ -78,7 +83,9 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
 def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
                authenticated: User | Admin = Depends(require_auth)):
     """Update pin details"""
-    pin: Pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
+    pin: Pin = (db.query(Pin)
+                .options(joinedload(Pin.category).joinedload(Category.category_level))
+                .filter(Pin.pin_id == pin_id).first())
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
 
