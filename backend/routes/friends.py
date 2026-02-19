@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 
@@ -8,6 +8,7 @@ from models.user import User
 from models.user_relationship import UserRelationship, UserRelationshipType
 from schemas.Friend import FriendCreate, FriendResponse, FriendUpdate
 from schemas.User import UserResponse
+
 
 router = APIRouter(prefix="/friends", tags=["friends"])
 
@@ -22,7 +23,7 @@ def send_friend_request(payload: FriendCreate, db: Session = Depends(get_db), us
     if not target:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # prevent duplicate or reversed relationships (keeps DB consistent)
+    # prevent duplicate or reversed relationships 
     existing = db.query(UserRelationship).filter(
         or_(
             and_(UserRelationship.user_id == user.user_id, UserRelationship.target_user_id == payload.target_user_id),
@@ -30,7 +31,12 @@ def send_friend_request(payload: FriendCreate, db: Session = Depends(get_db), us
         )
     ).first()
     if existing:
+        if existing.user_rel_status == UserRelationshipType.BLOCKED:
+            raise HTTPException(status_code=403, detail ="Relationship is blocked")
+        if existing.user_rel_status == UserRelationshipType.ACCEPTED:
+            return Response(status_code=204)
         raise HTTPException(status_code=422, detail="Relationship already exists")
+    
 
     rel = UserRelationship(
         user_id=user.user_id,
@@ -61,25 +67,26 @@ def incoming_requests(db: Session = Depends(get_db), user: User = Depends(requir
 
 @router.put("/{rel_id}", response_model=FriendResponse)
 def update_relationship(rel_id: int, payload: FriendUpdate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
-    """Update relationship status (accept / reject / block).
+    """Update relationship status (accept / reject / block)."""
 
-    Note: kept minimal on purpose — no extra permission/enforcement logic added here.
-    """
     rel = db.query(UserRelationship).filter(UserRelationship.user_rel_id == rel_id).first()
     if not rel:
         raise HTTPException(status_code=404, detail="Relationship not found")
-
-    # assign provided status (schema validates allowed values)
+    
+    # only authorised users can change the relationship
+    if rel.user_id != user.user_id and rel.target_user_id != user.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    
+    # assign provided status
     rel.user_rel_status = UserRelationshipType(payload.user_rel_status)
     db.commit()
     db.refresh(rel)
     return rel
 
-
 @router.delete("/{rel_id}", status_code=204)
 def delete_relationship(rel_id: int, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Delete a user relationship (only participants may delete)."""
-    rel = db.query(UserRelationship).filter(UserRelationship.user_rel_id == rel_id).first()
+    rel = db.query(UserRelationship).filter(UserRelationship.user_rel_id == rel_id).first() 
     if not rel:
         raise HTTPException(status_code=404, detail="Relationship not found")
     if rel.user_id != user.user_id and rel.target_user_id != user.user_id:

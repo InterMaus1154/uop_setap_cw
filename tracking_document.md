@@ -21,6 +21,14 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 19/02/2026
+**Description:** Added error handling for blocked and and accepted relationship states. Also added permission checks, ensuring only users involved in a relationship can update it.
+
+**File(s) Modified:**
+- backend/routes/friends.py
+
+---
+
 ### Mark up2306492 - 19/02/2026
 **Summary:** Worked on categories and seeding for them
 
