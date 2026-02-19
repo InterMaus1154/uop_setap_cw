@@ -11,7 +11,7 @@ class Pin(Base):
     cat_id = Column(SmallInteger, ForeignKey("categories.cat_id"), nullable=False)
     sub_cat_id = Column(SmallInteger, ForeignKey("sub_categories.sub_cat_id"), nullable=True)
     user_id = Column(BigInteger, ForeignKey("users.user_id"), nullable=False)
-    pin_title = Column(String(30), nullable=False)
+    pin_title = Column(String(100), nullable=False)
     pin_description = Column(String(300), nullable=True)
     pin_picture_path = Column(String(500), nullable=True)
     pin_latitude = Column(DOUBLE_PRECISION, nullable=False)
