@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 19/02/2026
+**Summary:** Worked on categories and seeding for them
+
+**Details:**
+- Added color for category_level as cat_level_color
+- Added more categories to what Luke has already one
+- Added more subcategories for new categories
+- Added extra pins and refined existing ones made by Luke
+- Modified pin model, so it returns pin color as well
+
+**Files modified:**
+- backend/schemas/Pin.py (added pin_color to PinResponse)
+- backend/models/pin.py (added pin_color as property on the model)
+- backend/routes/pins.py (added loading categories to fetch pin colors)
+- backend/database/seed.py (worked on category levels, categories, subcategories and pinseeder (refined what Luke already had there))
+
 ### Josh up2255832 - 18/02/2026
 **Summary:** Added profile page with bottom nav, pin count endpoint
 
