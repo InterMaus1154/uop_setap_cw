@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 21/02/2026
+**Summary:** Implemented reacting with pins
+
+**Details:**
+- added PATCH /pins/{pin_id}/react endpoint to create or update an interaction
+- added DELETE /pins/{pin_id}/react endpoint to delete an existing interaction between a user and a pin
+- added pin_likes and pin_dislikes properties on Pin model and on PinResponse
+- added user_reaction property on Pin model and on PinResponse to show how a user interacted (or not) with a pin
+- more details in issue [#13](https://github.com/InterMaus1154/uop_setap_cw/issues/13)
+
+**Files modified:**
+- backend/routes/pins.py (added endpoints)
+- backend/models/pin.py (added properties on model)
+- backend/middleware/auth.py (added optional_auth that is needed for user_reaction property)
+- backend/schemas/Pin.py (added extra fields on PinResponse)
+
 ### Josh up2255832 - 19/02/2026
 **Summary:** Implemented pin colour coding on map using backend hex colours from category levels
 
