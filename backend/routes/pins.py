@@ -98,6 +98,7 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
     """Update pin details"""
     pin: Pin = (db.query(Pin)
                 .options(joinedload(Pin.category).joinedload(Category.category_level))
+                .options(joinedload(Pin.reactions))
                 .filter(Pin.pin_id == pin_id).first())
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
