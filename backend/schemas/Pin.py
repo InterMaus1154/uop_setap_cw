@@ -29,6 +29,7 @@ class PinResponse(BaseModel):
     pin_expire_at: datetime
     created_at: datetime
     pin_color: str
+    pin_author_name: str
     pin_likes: int
     pin_dislikes: int
     user_reaction: Literal[1, -1] | None = None

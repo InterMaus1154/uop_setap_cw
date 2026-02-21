@@ -141,6 +141,37 @@ class ApiService {
   Future<List<SubCategory>> getSubCategories() =>
       _getList('/categories/sub-categories', SubCategory.fromJson);
 
+  // Users (single)
+  Future<User> getUserById(int userId) async {
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/users/$userId'))
+          .timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        return User.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 404) {
+        throw ApiException('User not found.', statusCode: 404);
+      } else {
+        throw ApiException(
+          'Server error: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
   // Pins
   Future<List<Pin>> getPins() => _getList('/pins/', Pin.fromJson);
   // this displays pins on users profile of how many they made

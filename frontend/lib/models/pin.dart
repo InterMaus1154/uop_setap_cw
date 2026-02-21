@@ -14,6 +14,7 @@ class Pin {
   final DateTime pinExpireAt;
   final DateTime createdAt;
   final String? pinColorHex;
+  final String? pinAuthorName;
 
   Pin({
     required this.pinId,
@@ -29,6 +30,7 @@ class Pin {
     required this.pinExpireAt,
     required this.createdAt,
     this.pinColorHex,
+    this.pinAuthorName,
   });
 
   /// Parse hex string to a Flutter Color
@@ -57,6 +59,7 @@ class Pin {
       pinExpireAt: DateTime.parse(json['pin_expire_at'] as String),
       createdAt: DateTime.parse(json['created_at'] as String),
       pinColorHex: json['pin_color'] as String?,
+      pinAuthorName: json['pin_author_name'] as String?,
     );
   }
 

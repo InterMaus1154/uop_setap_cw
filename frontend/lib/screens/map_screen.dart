@@ -125,7 +125,7 @@ class _MapScreenState extends State<MapScreen> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Posted by user #${pin.userId}',
+                    'Posted by ${pin.pinAuthorName ?? 'Unknown'}',
                     style: TextStyle(fontSize: 13, color: Colors.grey[600]),
                     overflow: TextOverflow.ellipsis,
                   ),

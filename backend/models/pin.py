@@ -30,6 +30,13 @@ class Pin(Base):
     reports = relationship("PinReport", back_populates="pin")
 
     @property
+    def pin_author_name(self) -> str:
+        """Return display name if set, otherwise first name only (privacy)"""
+        if self.user.user_displayname:
+            return self.user.user_displayname
+        return self.user.user_fname
+
+    @property
     def pin_color(self) -> str:
         return self.category.category_level.cat_level_color
 

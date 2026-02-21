@@ -27,6 +27,7 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
     query: Q[Pin] = (db.query(Pin)
                      .options(joinedload(Pin.category).joinedload(Category.category_level))
                      .options(joinedload(Pin.reactions))
+                     .options(joinedload(Pin.user))
                      .filter(Pin.pin_isactive == True))
 
     # join category on pins if any id is present
@@ -66,6 +67,7 @@ def get_pin(pin_id: int, db: Session = Depends(get_db), user: User | None = Depe
     pin = (db.query(Pin)
            .options(joinedload(Pin.category).joinedload(Category.category_level))
            .options(joinedload(Pin.reactions))
+           .options(joinedload(Pin.user))
            .filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first())
     if not pin:
         raise HTTPException(status_code=404, detail="Pin not found")
@@ -128,6 +130,7 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
     pin: Pin = (db.query(Pin)
                 .options(joinedload(Pin.category).joinedload(Category.category_level))
                 .options(joinedload(Pin.reactions))
+                .options(joinedload(Pin.user))
                 .filter(Pin.pin_id == pin_id).first())
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
