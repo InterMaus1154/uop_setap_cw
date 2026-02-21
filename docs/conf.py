@@ -1,3 +1,3 @@
 project = 'CampusConnect'
-extensions = []
+extensions = ['myst_parser']
 html_theme = 'alabaster'
