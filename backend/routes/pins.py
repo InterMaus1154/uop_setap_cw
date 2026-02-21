@@ -26,6 +26,7 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
     # build query
     query: Q[Pin] = (db.query(Pin)
                      .options(joinedload(Pin.category).joinedload(Category.category_level))
+                     .options(joinedload(Pin.reactions))
                      .filter(Pin.pin_isactive == True))
 
     # join category on pins if any id is present
@@ -47,6 +48,7 @@ def get_pin(pin_id: int, db: Session = Depends(get_db)):
     """Get a specific pin by ID"""
     pin = (db.query(Pin)
            .options(joinedload(Pin.category).joinedload(Category.category_level))
+           .options(joinedload(Pin.reactions))
            .filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first())
     if not pin:
         raise HTTPException(status_code=404, detail="Pin not found")

@@ -3,7 +3,7 @@ from sqlalchemy import Column, BigInteger, SmallInteger, ForeignKey, String, DOU
 from sqlalchemy.orm import relationship
 
 from database.db import Base
-from models import PinReaction
+from models.pin_reaction import PinReaction
 
 
 class Pin(Base):
@@ -26,7 +26,7 @@ class Pin(Base):
     category = relationship("Category", back_populates="pins")
     sub_category = relationship("SubCategory", back_populates="pins")
     user = relationship("User", back_populates="pins")
-    reactions: list[PinReaction] = relationship("PinReaction", back_populates="pin")
+    reactions = relationship("PinReaction", back_populates="pin")
     reports = relationship("PinReport", back_populates="pin")
 
     @property
@@ -34,7 +34,7 @@ class Pin(Base):
         return self.category.category_level.cat_level_color
 
     @property
-    def likes(self) -> int:
+    def pin_likes(self) -> int:
         _likes = 0
         for reaction in self.reactions:
             if reaction.reaction_value == 1:
@@ -42,7 +42,7 @@ class Pin(Base):
         return _likes
 
     @property
-    def dislikes(self) -> int:
+    def pin_dislikes(self) -> int:
         _dislikes = 0
         for reaction in self.reactions:
             if reaction.reaction_value == -1:

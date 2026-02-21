@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, computed_field
 from datetime import datetime
 from typing import Optional, Literal
 
@@ -29,8 +29,11 @@ class PinResponse(BaseModel):
     pin_expire_at: datetime
     created_at: datetime
     pin_color: str
+    pin_likes: int
+    pin_dislikes: int
 
     model_config = ConfigDict(from_attributes=True)
+
 
 
 class PinUpdate(BaseModel):
@@ -42,6 +45,7 @@ class PinUpdate(BaseModel):
     cat_id: Optional[int] = None
     sub_cat_id: Optional[int] = None
     pin_expire_at: Optional[datetime] = None
+
 
 class PinReactionRequest(BaseModel):
     """Schema for pin reaction request, with a single field for the value"""
