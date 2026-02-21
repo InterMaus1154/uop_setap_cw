@@ -15,7 +15,7 @@ __pycache__/
 .vsc
 backend/.idea
 backend/.vsc
-
+backend/.env
 
 # Flutter
 frontend/.dart_tool/
