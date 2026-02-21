@@ -130,9 +130,10 @@ def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(
                  db: Session = Depends(get_db)):
     """React to a pin with like or dislike"""
 
-    # validate value
-    if request.value not in [1, -1]:
-        raise HTTPException(status_code=422, detail="Invalid reaction value. Must be -1 or 1")
+    # check if pin exists
+    pin: Pin | None = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+    if pin is None:
+        raise HTTPException(status_code=404, detail="Pin not found")
 
     # check if reaction already exists
     reaction: PinReaction | None = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
@@ -141,12 +142,15 @@ def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(
     if reaction is not None:
         # update reaction if value is not the same
         if request.value != reaction.reaction_value:
-            reaction.reaction_value = request.value
-            db.commit()
-            db.refresh(reaction)
-            return JSONResponse(status_code=200, content={"message": "Reaction updated"})
+            try:
+                reaction.reaction_value = request.value
+                db.commit()
+                return JSONResponse(status_code=200, content={"message": "Reaction updated"})
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(status_code=500, detail=f"Error at updating reaction. Error: {e}")
         else:
-            return Response(status_code=204)
+            return JSONResponse(status_code=200, content={"message": "Reaction already set"})
 
     # create new reaction
     try:
@@ -155,6 +159,7 @@ def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(
         db.commit()
         return JSONResponse(status_code=201, content={"message": "Reaction successfully created"})
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=f"Error at creating reaction. Error: {e}")
 
 
@@ -162,10 +167,14 @@ def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(
 def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     """Delete pin reaction for logged-in user"""
 
+    # check if pin exists
+    pin: Pin | None = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+    if pin is None:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
     # check for existing
     reaction: PinReaction | None = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
                                                                 PinReaction.user_id == user.user_id).first()
-
     if reaction is not None:
         try:
             # delete if found
@@ -173,6 +182,7 @@ def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Ses
             db.commit()
             return JSONResponse(status_code=200, content={"message": "Reaction removed"})
         except Exception as e:
+            db.rollback()
             raise HTTPException(status_code=500, detail=f"Error at deleting reaction. Error: {e}")
     else:
-        return Response(status_code=204)
+        raise HTTPException(status_code=404, detail="Reaction not found")
