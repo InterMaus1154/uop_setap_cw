@@ -1,12 +1,10 @@
-# \# CampusConnect Documentation
+# CampusConnect Documentation
 
-# ```{toctree}
+```{toctree}
 
-# :maxdepth: 2
+:maxdepth: 2
 
-# 
 
-# api
-
-# ```
+api
+```
 
