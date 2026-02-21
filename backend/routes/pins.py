@@ -135,8 +135,8 @@ def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(
         raise HTTPException(status_code=422, detail="Invalid reaction value. Must be -1 or 1")
 
     # check if reaction already exists
-    reaction: PinReaction = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
-                                                         PinReaction.user_id == user.user_id).first()
+    reaction: PinReaction | None = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
+                                                                PinReaction.user_id == user.user_id).first()
 
     if reaction is not None:
         # update reaction if value is not the same
@@ -153,12 +153,26 @@ def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(
         reaction = PinReaction(user_id=user.user_id, pin_id=pin_id, reaction_value=request.value)
         db.add(reaction)
         db.commit()
-        return JSONResponse(status_code=200, content={"message": "Reaction successfully created"})
+        return JSONResponse(status_code=201, content={"message": "Reaction successfully created"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error at creating reaction. Error: {e}")
 
 
 @router.delete("/{pin_id}/react", status_code=200)
-def delete_pin_reaction(user: User = Depends(require_auth)):
+def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
     """Delete pin reaction for logged-in user"""
-    pass
+
+    # check for existing
+    reaction: PinReaction | None = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
+                                                                PinReaction.user_id == user.user_id).first()
+
+    if reaction is not None:
+        try:
+            # delete if found
+            db.delete(reaction)
+            db.commit()
+            return JSONResponse(status_code=200, content={"message": "Reaction removed"})
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error at deleting reaction. Error: {e}")
+    else:
+        return Response(status_code=204)
