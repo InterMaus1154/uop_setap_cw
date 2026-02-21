@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import Response, JSONResponse
 from fastapi.params import Depends
 from sqlalchemy.orm import Session, Query as Q, joinedload
 
@@ -9,7 +10,8 @@ from models import CategoryLevel, SubCategory
 from models.admin import Admin
 from models.pin import Pin
 from models.category import Category
-from schemas.Pin import PinResponse, PinCreate, PinUpdate
+from models.pin_reaction import PinReaction
+from schemas.Pin import PinResponse, PinCreate, PinUpdate, PinReactionRequest
 from middleware.auth import require_auth
 from models.user import User
 
@@ -118,3 +120,42 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
     db.refresh(pin)
 
     return pin
+
+
+@router.patch("/{pin_id}/react")
+def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(require_auth),
+                 db: Session = Depends(get_db)):
+    """React to a pin with like or dislike"""
+
+    # validate value
+    if request.value not in [1, -1]:
+        raise HTTPException(status_code=422, detail="Invalid reaction value. Must be -1 or 1")
+
+    # check if reaction already exists
+    reaction: PinReaction = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
+                                                         PinReaction.user_id == user.user_id).first()
+
+    if reaction is not None:
+        # update reaction if value is not the same
+        if request.value != reaction.reaction_value:
+            reaction.reaction_value = request.value
+            db.commit()
+            db.refresh(reaction)
+            return JSONResponse(status_code=200, content={"message": "Reaction updated"})
+        else:
+            return Response(status_code=204)
+
+    # create new reaction
+    try:
+        reaction = PinReaction(user_id=user.user_id, pin_id=pin_id, reaction_value=request.value)
+        db.add(reaction)
+        db.commit()
+        return JSONResponse(status_code=200, content={"message": "Reaction successfully created"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error at creating reaction. Error: {e}")
+
+
+@router.delete("/{pin_id}/react", status_code=200)
+def delete_pin_reaction(user: User = Depends(require_auth)):
+    """Delete pin reaction for logged-in user"""
+    pass
