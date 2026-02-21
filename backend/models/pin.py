@@ -3,6 +3,8 @@ from sqlalchemy import Column, BigInteger, SmallInteger, ForeignKey, String, DOU
 from sqlalchemy.orm import relationship
 
 from database.db import Base
+from models import PinReaction
+
 
 class Pin(Base):
     __tablename__ = 'pins'
@@ -20,13 +22,29 @@ class Pin(Base):
     pin_expire_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 
-    #cat_id, user_id, pin_title, pin_latitude, pin_longitude, pin_expire_at
+    # cat_id, user_id, pin_title, pin_latitude, pin_longitude, pin_expire_at
     category = relationship("Category", back_populates="pins")
     sub_category = relationship("SubCategory", back_populates="pins")
     user = relationship("User", back_populates="pins")
-    reactions = relationship("PinReaction", back_populates="pin")
+    reactions: list[PinReaction] = relationship("PinReaction", back_populates="pin")
     reports = relationship("PinReport", back_populates="pin")
 
     @property
     def pin_color(self) -> str:
         return self.category.category_level.cat_level_color
+
+    @property
+    def likes(self) -> int:
+        _likes = 0
+        for reaction in self.reactions:
+            if reaction.reaction_value == 1:
+                _likes += 1
+        return _likes
+
+    @property
+    def dislikes(self) -> int:
+        _dislikes = 0
+        for reaction in self.reactions:
+            if reaction.reaction_value == -1:
+                _dislikes += 1
+        return _dislikes
