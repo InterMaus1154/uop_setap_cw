@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 21/02/2026
+**Summary:** Pin details now show author name instead of user ID
+
+**Files Modified:**
+- backend/models/pin.py (added pin_author_name property, returns display name or first name for privacy)
+- backend/schemas/Pin.py (added pin_author_name to PinResponse)
+- backend/routes/pins.py (added joinedload for user relationship on pin queries)
+- frontend/lib/models/pin.dart (added pinAuthorName field)
+- frontend/lib/screens/map_screen.dart (pin detail sheet shows "Posted by [name]" instead of "user #id")
+- frontend/lib/services/api_service.dart (added getUserById method)
+
+**Notes:** Previously showed raw user ID on pin details. Now resolves to display name if set, otherwise first name only (last name excluded for privacy).
+
+---
+
+
 ### Mark up2306492 - 21/02/2026
 **Summary:** Implemented reacting with pins
 
