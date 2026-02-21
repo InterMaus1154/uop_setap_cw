@@ -48,3 +48,11 @@ class Pin(Base):
             if reaction.reaction_value == -1:
                 _dislikes += 1
         return _dislikes
+
+    @property
+    def user_reaction(self):
+        return getattr(self, '_user_reaction', None)
+
+    @user_reaction.setter
+    def user_reaction(self, value):
+        self._user_reaction = value

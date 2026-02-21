@@ -1,6 +1,5 @@
-from typing import Optional
 
-from fastapi import Request, HTTPException, Header, Depends
+from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
@@ -8,10 +7,15 @@ from database.db import get_db
 from models.user import User
 from models.admin import Admin
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
-def require_auth(credentials: HTTPAuthorizationCredentials = Depends(security),db: Session = Depends(get_db)) -> User | Admin:
+
+def require_auth(credentials: HTTPAuthorizationCredentials = Depends(security),
+                 db: Session = Depends(get_db)) -> User | Admin:
     """Validate token and return authenticated user"""
+
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Unauthenticated")
 
     token = credentials.credentials
 
@@ -30,3 +34,15 @@ def require_auth(credentials: HTTPAuthorizationCredentials = Depends(security),d
         raise HTTPException(status_code=401, detail="Unauthenticated")
 
     return user
+
+
+def optional_auth(credentials: HTTPAuthorizationCredentials = Depends(security),
+                  db: Session = Depends(get_db)) -> User | None:
+    """Return authenticated user or None if no token provided"""
+    print(f"Credentials: {credentials}")
+    if not credentials:
+        return None
+    try:
+        return require_auth(credentials=credentials, db=db)
+    except HTTPException:
+        return None

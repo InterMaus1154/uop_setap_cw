@@ -12,7 +12,7 @@ from models.pin import Pin
 from models.category import Category
 from models.pin_reaction import PinReaction
 from schemas.Pin import PinResponse, PinCreate, PinUpdate, PinReactionRequest
-from middleware.auth import require_auth
+from middleware.auth import require_auth, optional_auth
 from models.user import User
 
 router = APIRouter(prefix="/pins", tags=["pins"])
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/pins", tags=["pins"])
 
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
-             db: Session = Depends(get_db)):
+             db: Session = Depends(get_db), user: User | None = Depends(optional_auth)):
     """Get all active pins"""
 
     # build query
@@ -40,11 +40,28 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
         query = query.filter(Category.cat_level_id.in_(cat_level_id))
 
     pins = query.all()
+
+    for pin in pins:
+        print(f"Pin {pin.pin_id} reactions: {pin.reactions}")
+        print(f"User ID: {user.user_id if user else None}")
+
+    # loop through all pins and if user is logged in
+    # set the status for the pins based on how the user already interacted with it
+    # 1 = like, -1 = dislike, None = no reaction yet
+    # value is set in user_reaction field
+    for pin in pins:
+        pin.user_reaction = None
+        if user:
+            for reaction in pin.reactions:
+                if reaction.user_id == user.user_id:
+                    pin.user_reaction = reaction.reaction_value
+                    break
+
     return pins
 
 
 @router.get("/{pin_id}", response_model=PinResponse)
-def get_pin(pin_id: int, db: Session = Depends(get_db)):
+def get_pin(pin_id: int, db: Session = Depends(get_db), user: User | None = Depends(optional_auth)):
     """Get a specific pin by ID"""
     pin = (db.query(Pin)
            .options(joinedload(Pin.category).joinedload(Category.category_level))
@@ -52,6 +69,18 @@ def get_pin(pin_id: int, db: Session = Depends(get_db)):
            .filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first())
     if not pin:
         raise HTTPException(status_code=404, detail="Pin not found")
+
+    # if user is logged in
+    # set the status for the pins based on how the user already interacted with it
+    # 1 = like, -1 = dislike, None = no reaction yet
+    # value is set in user_reaction field
+    pin.user_reaction = None
+    if user:
+        for reaction in pin.reactions:
+            if reaction.user_id == user.user_id:
+                pin.user_reaction = reaction.reaction_value
+                break
+
     return pin
 
 
@@ -118,6 +147,20 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
         pin.pin_longitude = pin_data.pin_longitude
     if pin_data.pin_expire_at is not None:
         pin.pin_expire_at = pin_data.pin_expire_at
+
+    pin.user_reaction = None
+
+    if isinstance(authenticated, User):
+        user = authenticated
+        # if user is logged in
+        # set the status for the pins based on how the user already interacted with it
+        # 1 = like, -1 = dislike, None = no reaction yet
+        # value is set in user_reaction field
+        if user:
+            for reaction in pin.reactions:
+                if reaction.user_id == user.user_id:
+                    pin.user_reaction = reaction.reaction_value
+                    break
 
     db.commit()
     db.refresh(pin)

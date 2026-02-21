@@ -31,6 +31,7 @@ class PinResponse(BaseModel):
     pin_color: str
     pin_likes: int
     pin_dislikes: int
+    user_reaction: Literal[1, -1] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
