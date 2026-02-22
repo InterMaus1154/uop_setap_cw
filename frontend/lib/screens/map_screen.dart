@@ -66,13 +66,14 @@ class _MapScreenState extends State<MapScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -146,11 +147,43 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ],
             ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setModalState(() {
+                      isLiked = !isLiked;
+                      isDisliked = false;
+                    });
+                  },
+                  icon: Icon(
+                    isLiked ? Icons.thumb_up_alt_rounded : Icons.thumb_up_alt_outlined,
+                    color: isLiked ? Colors.blue : Colors.grey[600],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    setModalState(() {
+                      isDisliked = !isDisliked;
+                      isLiked = false;
+                    });
+                  },
+                  icon: Icon(
+                    isDisliked ? Icons.thumb_down_alt_rounded : Icons.thumb_down_alt_outlined,
+                    color: isDisliked ? Colors.red : Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           ],
+        ),
         ),
       ),
     );
   }
+
+  bool isLiked = false;
+  bool isDisliked = false;
 
   String _formatExpiry(DateTime expireAt) {
     final now = DateTime.now();
