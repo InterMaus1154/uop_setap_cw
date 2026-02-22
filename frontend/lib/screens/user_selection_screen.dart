@@ -329,7 +329,10 @@ class _AnimatedUserCardState extends State<_AnimatedUserCard>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.user.fullName,
+                          (widget.user.useDisplayName
+                                  ? widget.user.displayName
+                                  : null) ??
+                              widget.user.fullName,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
