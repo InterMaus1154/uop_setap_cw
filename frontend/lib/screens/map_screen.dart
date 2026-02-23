@@ -568,36 +568,123 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  List<DropdownMenuItem<String>> get categories {
+    return _categories
+        .map(
+          (cat) => DropdownMenuItem(
+            value: cat.catId.toString(),
+            child: Text(cat.catName),
+          ),
+        )
+        .toList();
+  }
+
+  List<DropdownMenuItem<String>> get categoryLevels {
+    return _categoryLevels
+        .map(
+          (level) => DropdownMenuItem(
+            value: level.catLevelId.toString(),
+            child: Text(level.catLevelName),
+          ),
+        )
+        .toList();
+  }
+
   void _showPinFilterDialog() {
+    int? tempCategoryId;
+    int? tempCategoryLevelId;
+
     showDialog<void>(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            'Filter Pins',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          content: const Text('Filter options would go here...'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Apply filters and refresh pins
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: const Text('Apply Filters'),
-            ),
-          ],
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 400,
+                  maxHeight: 400,
+                ),
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: const Text(
+                    'Filter Pins',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Select Category',
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                        Flexible(
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: DropdownButton<String>(
+                              isExpanded: true, // Fill available width
+                              value: tempCategoryId?.toString(),
+                              items: categories,
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  tempCategoryId = int.tryParse(value ?? '');
+                                });
+                              },
+                              hint: const Text('Choose a category'),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Select Category Level',
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                        Flexible(
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: tempCategoryLevelId?.toString(),
+                              items: categoryLevels,
+                              onChanged: (value) {
+                                setDialogState(() {
+                                  tempCategoryLevelId = int.tryParse(value ?? '');
+                                });
+                              },
+                              hint: const Text('Choose a level'),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Apply filters here if needed
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Apply Filters'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );
