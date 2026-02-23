@@ -525,7 +525,6 @@ class _MapScreenState extends State<MapScreen> {
 
           // Normal mode buttons (hidden during pin placement)
           if (!_isPlacingPin) ...[
-            
             //Pin Filter button
             Positioned(
               top: 60,
@@ -568,8 +567,39 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-  
+
   void _showPinFilterDialog() {
-    
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Filter Pins',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          content: const Text('Filter options would go here...'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // Apply filters and refresh pins
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Apply Filters'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
