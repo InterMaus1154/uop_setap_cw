@@ -27,6 +27,30 @@ class LoginResponse {
 }
 
 class ApiService {
+  // Pin reactions
+  Future<void> reactToPin(int pinId, int value) async {
+    final headers = await _authHeaders();
+    final response = await http.patch(
+      Uri.parse('$baseUrl/pins/$pinId/react'),
+      headers: headers,
+      body: json.encode({'value': value}),
+    );
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw ApiException('Failed to react to pin: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deletePinReaction(int pinId) async {
+    final headers = await _authHeaders();
+    final response = await http.delete(
+      Uri.parse('$baseUrl/pins/$pinId/react'),
+      headers: headers,
+    );
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to remove reaction: ${response.statusCode}');
+    }
+  }
+
   static const String baseUrl = 'http://localhost:8000';
   static const Duration _timeout = Duration(seconds: 10);
   final SecureStorageService _storage = SecureStorageService();

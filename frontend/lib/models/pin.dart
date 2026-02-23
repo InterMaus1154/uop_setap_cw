@@ -16,6 +16,10 @@ class Pin {
   final String? pinColorHex;
   final String? pinAuthorName;
 
+  final int pinLikes;
+  final int pinDislikes;
+  final int? userReaction; // 1=like, -1=dislike, null=none
+
   Pin({
     required this.pinId,
     required this.catId,
@@ -31,6 +35,9 @@ class Pin {
     required this.createdAt,
     this.pinColorHex,
     this.pinAuthorName,
+    required this.pinLikes,
+    required this.pinDislikes,
+    this.userReaction,
   });
 
   /// Parse hex string to a Flutter Color
@@ -60,6 +67,9 @@ class Pin {
       createdAt: DateTime.parse(json['created_at'] as String),
       pinColorHex: json['pin_color'] as String?,
       pinAuthorName: json['pin_author_name'] as String?,
+      pinLikes: json['pin_likes'] as int? ?? 0,
+      pinDislikes: json['pin_dislikes'] as int? ?? 0,
+      userReaction: json['user_reaction'] as int?,
     );
   }
 

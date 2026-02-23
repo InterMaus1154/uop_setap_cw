@@ -66,88 +66,163 @@ class _MapScreenState extends State<MapScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Drag handle
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          int? reaction = pin.userReaction;
+          int likes = pin.pinLikes;
+          int dislikes = pin.pinDislikes;
+          bool isLoggedIn = true; // TODO: Replace with real login check
+
+          Future<void> handleReaction(int value) async {
+            if (!isLoggedIn) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Please log in to react.')),
+              );
+              return;
+            }
+            if (reaction == value) {
+              // Remove reaction
+              await _apiService.deletePinReaction(pin.pinId);
+              setModalState(() {
+                if (value == 1) likes--;
+                if (value == -1) dislikes--;
+                reaction = null;
+              });
+            } else {
+              await _apiService.reactToPin(pin.pinId, value);
+              setModalState(() {
+                if (reaction == 1) likes--;
+                if (reaction == -1) dislikes--;
+                if (value == 1) likes++;
+                if (value == -1) dislikes++;
+                reaction = value;
+              });
+            }
+          }
+
+          return Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            Text(
-              pin.pinTitle,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            // Category chip
-            if (catName != null)
-              Wrap(
-                spacing: 8,
-                children: [
-                  Chip(
-                    label: Text(catName, style: const TextStyle(fontSize: 12)),
-                    backgroundColor: pin.pinColor.withAlpha(30),
-                    side: BorderSide(color: pin.pinColor.withAlpha(80)),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  if (subCatName != null)
-                    Chip(
-                      label: Text(
-                        subCatName,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      backgroundColor: Colors.grey[100],
-                      visualDensity: VisualDensity.compact,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                ],
-              ),
-            if (catName != null) const SizedBox(height: 8),
-            if (pin.pinDescription != null && pin.pinDescription!.isNotEmpty)
-              Text(pin.pinDescription!, style: const TextStyle(fontSize: 14)),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(Icons.person_outline, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'Posted by ${pin.pinAuthorName ?? 'Unknown'}',
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                Text(
+                  pin.pinTitle,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (catName != null)
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      Chip(
+                        label: Text(
+                          catName,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        backgroundColor: pin.pinColor.withAlpha(30),
+                        side: BorderSide(color: pin.pinColor.withAlpha(80)),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      if (subCatName != null)
+                        Chip(
+                          label: Text(
+                            subCatName,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          backgroundColor: Colors.grey[100],
+                          visualDensity: VisualDensity.compact,
+                        ),
+                    ],
+                  ),
+                if (catName != null) const SizedBox(height: 8),
+                if (pin.pinDescription != null &&
+                    pin.pinDescription!.isNotEmpty)
+                  Text(
+                    pin.pinDescription!,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Posted by ${pin.pinAuthorName ?? 'Unknown'}',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.timer_outlined,
+                      size: 16,
+                      color: Colors.grey[600],
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        _formatExpiry(pin.pinExpireAt),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Like/Dislike stats and buttons
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.thumb_up,
+                        color: reaction == 1 ? Colors.blue : Colors.grey,
+                      ),
+                      onPressed: () => handleReaction(1),
+                    ),
+                    Text('$likes'),
+                    const SizedBox(width: 16),
+                    IconButton(
+                      icon: Icon(
+                        Icons.thumb_down,
+                        color: reaction == -1 ? Colors.red : Colors.grey,
+                      ),
+                      onPressed: () => handleReaction(-1),
+                    ),
+                    Text('$dislikes'),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.timer_outlined, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    _formatExpiry(pin.pinExpireAt),
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
