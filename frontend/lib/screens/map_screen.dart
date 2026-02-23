@@ -63,40 +63,70 @@ class _MapScreenState extends State<MapScreen> {
               .firstOrNull
         : null;
 
+    // Track state outside the builder so it persists across rebuilds
+    final pinIndex = _pins.indexWhere((p) => p.pinId == pin.pinId);
+    int? reaction = pin.userReaction;
+    int likes = pin.pinLikes;
+    int dislikes = pin.pinDislikes;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) {
-          int? reaction = pin.userReaction;
-          int likes = pin.pinLikes;
-          int dislikes = pin.pinDislikes;
-          bool isLoggedIn = true; // TODO: Replace with real login check
-
           Future<void> handleReaction(int value) async {
-            if (!isLoggedIn) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Please log in to react.')),
-              );
-              return;
-            }
-            if (reaction == value) {
-              // Remove reaction
-              await _apiService.deletePinReaction(pin.pinId);
-              setModalState(() {
-                if (value == 1) likes--;
-                if (value == -1) dislikes--;
-                reaction = null;
-              });
-            } else {
-              await _apiService.reactToPin(pin.pinId, value);
-              setModalState(() {
-                if (reaction == 1) likes--;
-                if (reaction == -1) dislikes--;
-                if (value == 1) likes++;
-                if (value == -1) dislikes++;
-                reaction = value;
-              });
+            try {
+              if (reaction == value) {
+                // Remove reaction
+                await _apiService.deletePinReaction(pin.pinId);
+                setModalState(() {
+                  if (value == 1) likes--;
+                  if (value == -1) dislikes--;
+                  reaction = null;
+                });
+              } else {
+                await _apiService.reactToPin(pin.pinId, value);
+                setModalState(() {
+                  if (reaction == 1) likes--;
+                  if (reaction == -1) dislikes--;
+                  if (value == 1) likes++;
+                  if (value == -1) dislikes++;
+                  reaction = value;
+                });
+              }
+              // Sync updated state back to the _pins list
+              if (pinIndex != -1) {
+                setState(() {
+                  _pins[pinIndex] = Pin(
+                    pinId: pin.pinId,
+                    catId: pin.catId,
+                    subCatId: pin.subCatId,
+                    userId: pin.userId,
+                    pinTitle: pin.pinTitle,
+                    pinDescription: pin.pinDescription,
+                    pinPicturePath: pin.pinPicturePath,
+                    pinLatitude: pin.pinLatitude,
+                    pinLongitude: pin.pinLongitude,
+                    pinIsActive: pin.pinIsActive,
+                    pinExpireAt: pin.pinExpireAt,
+                    createdAt: pin.createdAt,
+                    pinColorHex: pin.pinColorHex,
+                    pinAuthorName: pin.pinAuthorName,
+                    pinLikes: likes,
+                    pinDislikes: dislikes,
+                    userReaction: reaction,
+                  );
+                });
+              }
+            } on ApiException catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Reaction failed: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             }
           }
 

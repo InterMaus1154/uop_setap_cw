@@ -27,30 +27,6 @@ class LoginResponse {
 }
 
 class ApiService {
-  // Pin reactions
-  Future<void> reactToPin(int pinId, int value) async {
-    final headers = await _authHeaders();
-    final response = await http.patch(
-      Uri.parse('$baseUrl/pins/$pinId/react'),
-      headers: headers,
-      body: json.encode({'value': value}),
-    );
-    if (response.statusCode != 200 && response.statusCode != 201) {
-      throw ApiException('Failed to react to pin: ${response.statusCode}');
-    }
-  }
-
-  Future<void> deletePinReaction(int pinId) async {
-    final headers = await _authHeaders();
-    final response = await http.delete(
-      Uri.parse('$baseUrl/pins/$pinId/react'),
-      headers: headers,
-    );
-    if (response.statusCode != 200) {
-      throw ApiException('Failed to remove reaction: ${response.statusCode}');
-    }
-  }
-
   static const String baseUrl = 'http://localhost:8000';
   static const Duration _timeout = Duration(seconds: 10);
   final SecureStorageService _storage = SecureStorageService();
@@ -70,8 +46,9 @@ class ApiService {
     T Function(Map<String, dynamic>) fromJson,
   ) async {
     try {
+      final headers = await _authHeaders();
       final response = await http
-          .get(Uri.parse('$baseUrl$path'))
+          .get(Uri.parse('$baseUrl$path'), headers: headers)
           .timeout(_timeout);
 
       if (response.statusCode == 200) {
@@ -262,6 +239,65 @@ class ApiService {
       );
     } on FormatException {
       throw ApiException('Invalid response from server.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  // Pin reactions
+  Future<void> reactToPin(int pinId, int value) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http
+          .patch(
+            Uri.parse('$baseUrl/pins/$pinId/react'),
+            headers: headers,
+            body: json.encode({'value': value}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode != 200 && response.statusCode != 201) {
+        throw ApiException(
+          'Failed to react to pin: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<void> deletePinReaction(int pinId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http
+          .delete(Uri.parse('$baseUrl/pins/$pinId/react'), headers: headers)
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) {
+        throw ApiException(
+          'Failed to remove reaction: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('An unexpected error occurred: $e');

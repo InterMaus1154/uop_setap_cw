@@ -21,6 +21,18 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 23/02/2026
+**Summary:** Code review and fix of Theo's pin reactions frontend implementation
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added auth headers to _getList so GET /pins/ sends token for user_reaction, added proper error handling/timeouts to reactToPin and deletePinReaction, moved methods to correct position in class)
+- frontend/lib/screens/map_screen.dart (moved reaction state variables outside StatefulBuilder so they persist across rebuilds, added try/catch around reaction API calls with user-facing error snackbar, removed hardcoded isLoggedIn dead code, added state sync back to _pins list after successful reaction)
+- backend/main.py (added PATCH to CORS allowed methods — preflight OPTIONS requests were returning 400)
+
+**Notes:** Reactions were failing for three reasons: CORS config didn't allow PATCH method (400 on preflight), _getList didn't send auth headers so user_reaction was always null, and StatefulBuilder reinitialised state variables on every rebuild which wiped out UI updates. Also added missing error handling that was absent from the original implementation.
+
+---
+
 ### Josh up2255832 - 21/02/2026
 **Summary:** Pin details now show author name instead of user ID
 
