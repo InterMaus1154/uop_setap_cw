@@ -65,7 +65,7 @@ def incoming_requests(db: Session = Depends(get_db), user: User = Depends(requir
     return rels
 
 
-@router.put("/{rel_id}", response_model=FriendResponse)
+@router.patch("/{rel_id}", response_model=FriendResponse)
 def update_relationship(rel_id: int, payload: FriendUpdate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Update relationship status (accept / reject / block)."""
 
@@ -78,7 +78,7 @@ def update_relationship(rel_id: int, payload: FriendUpdate, db: Session = Depend
         raise HTTPException(status_code=403, detail="Forbidden")
     
     # assign provided status
-    rel.user_rel_status = UserRelationshipType(payload.user_rel_status)
+    rel.user_rel_status = UserRelationshipType(payload.response)
     db.commit()
     db.refresh(rel)
     return rel

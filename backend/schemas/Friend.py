@@ -15,7 +15,7 @@ class FriendCreate(FriendBase):
 
 class FriendUpdate(BaseModel):
     """Payload for updating a relationship status."""
-    user_rel_status: Literal["pending", "accepted", "rejected", "blocked"]
+    response: Literal["accepted", "rejected", "blocked"]
 
 
 class FriendResponse(BaseModel):
