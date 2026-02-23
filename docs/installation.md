@@ -1,0 +1,1 @@
+# CampusConnect: Installation for developers
