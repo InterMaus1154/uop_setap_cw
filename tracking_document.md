@@ -21,6 +21,116 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 21/02/2026
+**Summary:** Pin details now show author name instead of user ID
+
+**Files Modified:**
+- backend/models/pin.py (added pin_author_name property, returns display name or first name for privacy)
+- backend/schemas/Pin.py (added pin_author_name to PinResponse)
+- backend/routes/pins.py (added joinedload for user relationship on pin queries)
+- frontend/lib/models/pin.dart (added pinAuthorName field)
+- frontend/lib/screens/map_screen.dart (pin detail sheet shows "Posted by [name]" instead of "user #id")
+- frontend/lib/services/api_service.dart (added getUserById method)
+
+**Notes:** Previously showed raw user ID on pin details. Now resolves to display name if set, otherwise first name only (last name excluded for privacy).
+
+---
+
+
+### Mark up2306492 - 21/02/2026
+**Summary:** Implemented reacting with pins
+
+**Details:**
+- added PATCH /pins/{pin_id}/react endpoint to create or update an interaction
+- added DELETE /pins/{pin_id}/react endpoint to delete an existing interaction between a user and a pin
+- added pin_likes and pin_dislikes properties on Pin model and on PinResponse
+- added user_reaction property on Pin model and on PinResponse to show how a user interacted (or not) with a pin
+- more details in issue [#13](https://github.com/InterMaus1154/uop_setap_cw/issues/13)
+
+**Files modified:**
+- backend/routes/pins.py (added endpoints)
+- backend/models/pin.py (added properties on model)
+- backend/middleware/auth.py (added optional_auth that is needed for user_reaction property)
+- backend/schemas/Pin.py (added extra fields on PinResponse)
+
+### Josh up2255832 - 19/02/2026
+**Summary:** Implemented pin colour coding on map using backend hex colours from category levels
+
+**Files Modified:**
+- frontend/lib/models/pin.dart (added pinColorHex field and pinColor getter for hex-to-Color conversion)
+- frontend/lib/screens/map_screen.dart (map markers and category chips now use pin colour from API)
+
+**Notes:** Mark added cat_level_color to the backend, each pin response now includes pin_color as a hex string. Frontend parses it and applies it to markers and detail sheet chips. Falls back to blue if colour is missing.
+
+---
+
+### Julian up2301253 - 19/02/2026
+**Description:** Added error handling for blocked and and accepted relationship states. Also added permission checks, ensuring only users involved in a relationship can update it.
+
+**File(s) Modified:**
+- backend/routes/friends.py
+
+---
+
+### Mark up2306492 - 19/02/2026
+**Summary:** Worked on categories and seeding for them
+
+**Details:**
+- Added color for category_level as cat_level_color
+- Added more categories to what Luke has already one
+- Added more subcategories for new categories
+- Added extra pins and refined existing ones made by Luke
+- Modified pin model, so it returns pin color as well
+- Added check for correct sub_cat_id during pin creation
+
+**Files modified:**
+- backend/schemas/Pin.py (added pin_color to PinResponse)
+- backend/models/pin.py (added pin_color as property on the model)
+- backend/routes/pins.py (added loading categories to fetch pin colors)
+- backend/database/seed.py (worked on category levels, categories, subcategories and pinseeder (refined what Luke already had there))
+
+### Josh up2255832 - 18/02/2026
+**Summary:** Added profile page with bottom nav, pin count endpoint
+
+**Files Created:**
+- frontend/lib/screens/profile_screen.dart (profile page with avatar, name, email, pin count, logout)
+
+**Files Modified:**
+- frontend/lib/screens/home_screen.dart (converted to bottom nav bar with Map and Profile tabs)
+- frontend/lib/screens/map_screen.dart (removed top bar, cleaned up unused imports)
+- frontend/lib/services/api_service.dart (added getMyPinCount method)
+- backend/routes/users.py (added GET /users/me/pin-count endpoint)
+
+**Notes:** Forgot to git pull before merging to master, caused divergent branches with Julian's friend  commits. Resolved with a merge commit, no work lost. Lesson learned  always pull before merging lol.
+
+---
+
+### Julian up2301253 - 18/02/2026
+**Description:** Added Friend.py schema and friend.py endpoints to allow ability to send, accept, and reject friend requests and delete friends from list.
+
+**Files Created:**
+- backend/schemas/Friend.py
+- backend/routes/friends.py
+
+---
+
+### Josh up2255832 - 18/02/2026
+**Summary:** Code reviewed and fixed pin display on map, improved pin detail sheet
+
+**Files Modified:**
+- frontend/lib/screens/map_screen.dart (removed dead _pinsLoaded variable, added loading indicator, styled pin detail bottom sheet to match creation sheet, added category/subcategory chips, formatted expiry as relative time, added placement mode guard on pin taps, clientbside expired pin filter, fixed RenderFlex overflow on narrow screens)
+
+**Issues encountered and resolved:**
+1. Dead code, _pinsLoaded was set but never read, replaced with _isLoadingPins driving a spinner
+2. Pin detail sheet was unstyled and inconsistent with creation sheet, added drag handle, rounded corners, matching layout
+3. Raw DateTime shown for expiry, formatted as readable time
+5. RenderFlex overflow on small screens, wrapped text in Expanded with ellipsis overflow
+6. Category/subcategory not shown on pin details, added chip display with lookup from cached data
+
+**Notes:** Categories now load on map, so they're available when tapping pins. will discuss colour coding with team
+
+---
+
 ### Josh up2255832 - 17/02/2026
 **Summary:** Cleaned up redundant user_id from pin creation after reviewing backend changes
 

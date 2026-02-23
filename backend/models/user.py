@@ -15,6 +15,7 @@ class User(Base):
     user_lname = Column(String(60), nullable=False)
     user_email = Column(String(250), nullable=False, unique=True)
     user_displayname = Column(String(30), nullable=True)
+    user_use_displayname = Column(Boolean, nullable=False, server_default=text("false"), default=False)
     user_isactive = Column(Boolean, nullable=False, server_default=text("true"), default=True)
     user_token = Column(String(500), nullable=True)
     last_login = Column(DateTime, nullable=True)

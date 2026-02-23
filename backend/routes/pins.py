@@ -1,16 +1,18 @@
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import Response, JSONResponse
 from fastapi.params import Depends
-from sqlalchemy.orm import Session, Query as Q
+from sqlalchemy.orm import Session, Query as Q, joinedload
 
 from typing import Optional
 
 from database.db import get_db
-from models import CategoryLevel
+from models import CategoryLevel, SubCategory
 from models.admin import Admin
 from models.pin import Pin
 from models.category import Category
-from schemas.Pin import PinResponse, PinCreate, PinUpdate
-from middleware.auth import require_auth
+from models.pin_reaction import PinReaction
+from schemas.Pin import PinResponse, PinCreate, PinUpdate, PinReactionRequest
+from middleware.auth import require_auth, optional_auth
 from models.user import User
 
 router = APIRouter(prefix="/pins", tags=["pins"])
@@ -18,11 +20,15 @@ router = APIRouter(prefix="/pins", tags=["pins"])
 
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
-             db: Session = Depends(get_db)):
+             db: Session = Depends(get_db), user: User | None = Depends(optional_auth)):
     """Get all active pins"""
 
     # build query
-    query: Q[Pin] = db.query(Pin).filter(Pin.pin_isactive == True)
+    query: Q[Pin] = (db.query(Pin)
+                     .options(joinedload(Pin.category).joinedload(Category.category_level))
+                     .options(joinedload(Pin.reactions))
+                     .options(joinedload(Pin.user))
+                     .filter(Pin.pin_isactive == True))
 
     # join category on pins if any id is present
     if cat_id or cat_level_id:
@@ -35,15 +41,48 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
         query = query.filter(Category.cat_level_id.in_(cat_level_id))
 
     pins = query.all()
+
+    for pin in pins:
+        print(f"Pin {pin.pin_id} reactions: {pin.reactions}")
+        print(f"User ID: {user.user_id if user else None}")
+
+    # loop through all pins and if user is logged in
+    # set the status for the pins based on how the user already interacted with it
+    # 1 = like, -1 = dislike, None = no reaction yet
+    # value is set in user_reaction field
+    for pin in pins:
+        pin.user_reaction = None
+        if user:
+            for reaction in pin.reactions:
+                if reaction.user_id == user.user_id:
+                    pin.user_reaction = reaction.reaction_value
+                    break
+
     return pins
 
 
 @router.get("/{pin_id}", response_model=PinResponse)
-def get_pin(pin_id: int, db: Session = Depends(get_db)):
+def get_pin(pin_id: int, db: Session = Depends(get_db), user: User | None = Depends(optional_auth)):
     """Get a specific pin by ID"""
-    pin = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+    pin = (db.query(Pin)
+           .options(joinedload(Pin.category).joinedload(Category.category_level))
+           .options(joinedload(Pin.reactions))
+           .options(joinedload(Pin.user))
+           .filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first())
     if not pin:
         raise HTTPException(status_code=404, detail="Pin not found")
+
+    # if user is logged in
+    # set the status for the pins based on how the user already interacted with it
+    # 1 = like, -1 = dislike, None = no reaction yet
+    # value is set in user_reaction field
+    pin.user_reaction = None
+    if user:
+        for reaction in pin.reactions:
+            if reaction.user_id == user.user_id:
+                pin.user_reaction = reaction.reaction_value
+                break
+
     return pin
 
 
@@ -53,7 +92,17 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
     # Ensures category exists
     category = db.query(Category).filter(Category.cat_id == pin_data.cat_id).first()
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise HTTPException(status_code=422, detail="Invalid category")
+
+    # check if sub cat exists if provided
+    if pin_data.sub_cat_id:
+        sub_category = (db.query(SubCategory)
+                        .filter(SubCategory.sub_cat_id == pin_data.sub_cat_id,
+                                SubCategory.cat_id == pin_data.cat_id)  # it will return null, if the provided sub_category doesnt belong to the provided category
+                        .first())
+
+        if not sub_category:
+            raise HTTPException(status_code=422, detail="Invalid subcategory")
 
     # Create new pin
     new_pin = Pin(
@@ -78,7 +127,11 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
 def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
                authenticated: User | Admin = Depends(require_auth)):
     """Update pin details"""
-    pin: Pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
+    pin: Pin = (db.query(Pin)
+                .options(joinedload(Pin.category).joinedload(Category.category_level))
+                .options(joinedload(Pin.reactions))
+                .options(joinedload(Pin.user))
+                .filter(Pin.pin_id == pin_id).first())
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
 
@@ -98,7 +151,84 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
     if pin_data.pin_expire_at is not None:
         pin.pin_expire_at = pin_data.pin_expire_at
 
+    pin.user_reaction = None
+
+    if isinstance(authenticated, User):
+        user = authenticated
+        # if user is logged in
+        # set the status for the pins based on how the user already interacted with it
+        # 1 = like, -1 = dislike, None = no reaction yet
+        # value is set in user_reaction field
+        if user:
+            for reaction in pin.reactions:
+                if reaction.user_id == user.user_id:
+                    pin.user_reaction = reaction.reaction_value
+                    break
+
     db.commit()
     db.refresh(pin)
 
     return pin
+
+
+@router.patch("/{pin_id}/react")
+def react_to_pin(request: PinReactionRequest, pin_id: int, user: User = Depends(require_auth),
+                 db: Session = Depends(get_db)):
+    """React to a pin with like or dislike"""
+
+    # check if pin exists
+    pin: Pin | None = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+    if pin is None:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    # check if reaction already exists
+    reaction: PinReaction | None = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
+                                                                PinReaction.user_id == user.user_id).first()
+
+    if reaction is not None:
+        # update reaction if value is not the same
+        if request.value != reaction.reaction_value:
+            try:
+                reaction.reaction_value = request.value
+                db.commit()
+                return JSONResponse(status_code=200, content={"message": "Reaction updated"})
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(status_code=500, detail=f"Error at updating reaction. Error: {e}")
+        else:
+            return JSONResponse(status_code=200, content={"message": "Reaction already set"})
+
+    # create new reaction
+    try:
+        reaction = PinReaction(user_id=user.user_id, pin_id=pin_id, reaction_value=request.value)
+        db.add(reaction)
+        db.commit()
+        return JSONResponse(status_code=201, content={"message": "Reaction successfully created"})
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error at creating reaction. Error: {e}")
+
+
+@router.delete("/{pin_id}/react", status_code=200)
+def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Session = Depends(get_db)):
+    """Delete pin reaction for logged-in user"""
+
+    # check if pin exists
+    pin: Pin | None = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+    if pin is None:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    # check for existing
+    reaction: PinReaction | None = db.query(PinReaction).filter(PinReaction.pin_id == pin_id,
+                                                                PinReaction.user_id == user.user_id).first()
+    if reaction is not None:
+        try:
+            # delete if found
+            db.delete(reaction)
+            db.commit()
+            return JSONResponse(status_code=200, content={"message": "Reaction removed"})
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"Error at deleting reaction. Error: {e}")
+    else:
+        raise HTTPException(status_code=404, detail="Reaction not found")

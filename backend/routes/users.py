@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, Query as Q
 from database.db import get_db
 from middleware.auth import require_auth
 from models.user import User
+from models.pin import Pin
 from schemas.User import UserResponse, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -43,6 +44,13 @@ def update_user(user_data: UserUpdate, user: User = Depends(require_auth), db: S
 def get_me(user: User = Depends(require_auth)):
     """Return profile data for the logged-in user"""
     return user
+
+
+@router.get('/me/pin-count')
+def get_my_pin_count(user: User = Depends(require_auth), db: Session = Depends(get_db)):
+    """Return the number of pins created by the logged-in user"""
+    count = db.query(Pin).filter(Pin.user_id == user.user_id, Pin.pin_isactive == True).count()
+    return {"pin_count": count}
 
 
 @router.patch("/deactivate", status_code=200)

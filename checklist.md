@@ -10,7 +10,7 @@
 - [ ] Add category colours from the backend to categories
 - [ ] Add on frontend a friend list
 - [ ] On backend add the ability to search users by their email
-- [ ] On backend add the ability to add friends, accept, reject requests
+- [X] On backend add the ability to add friends, accept, reject requests
 - [ ] On frontend, send request,display incoming/outgoing requests, accept and reject them
 - [ ] Backend, allow user to edit their personal information (potentially name and display name only)
 - [ ] Frontend, form for allowing user to edit their information (probably a profile page)
