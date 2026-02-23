@@ -14,6 +14,8 @@ from models.pin_reaction import PinReaction
 from schemas.Pin import PinResponse, PinCreate, PinUpdate, PinReactionRequest
 from middleware.auth import require_auth, optional_auth
 from models.user import User
+from models.pin_report import PinReport
+from schemas.pin_reporting import PinReportRequest
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
@@ -232,3 +234,48 @@ def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Ses
             raise HTTPException(status_code=500, detail=f"Error at deleting reaction. Error: {e}")
     else:
         raise HTTPException(status_code=404, detail="Reaction not found")
+    
+@router.post("/{pin_id}/report", status_code=201)
+def report_pin(
+        request: PinReportRequest,
+        pin_id: int,
+        user: User = Depends(require_auth),
+        db: Session = Depends(get_db)
+):
+    """Report a pin"""
+
+    # check if the pin exists
+    pin = db.query(Pin).filter(
+        Pin.pin_id == pin_id,
+        Pin.pin_isactive == True
+    ).first()
+
+    if not pin:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    # stopping duplicate reports from happening by the same user on same pin
+    existing_report = db.query(PinReport).filter(
+        PinReport.pin_id == pin_id,
+        PinReport.user_id == user.user_id
+    ).first()
+
+    if existing_report:
+        raise HTTPException(
+            status_code=400,
+            detail="You already reported this pin"
+        )
+
+    # create the report
+    report = PinReport(
+        pin_id=pin_id,
+        user_id=user.user_id,
+        report_type=request.report_type
+    )
+
+    try:
+        db.add(report)
+        db.commit()
+        return {"message": "Pin reported successfully"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
