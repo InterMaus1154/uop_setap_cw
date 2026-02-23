@@ -525,6 +525,20 @@ class _MapScreenState extends State<MapScreen> {
 
           // Normal mode buttons (hidden during pin placement)
           if (!_isPlacingPin) ...[
+            
+            //Pin Filter button
+            Positioned(
+              top: 60,
+              right: 16,
+              child: FloatingActionButton.small(
+                heroTag: 'filter',
+                backgroundColor: Colors.white,
+                onPressed: () {
+                  _showPinFilterDialog();
+                },
+                child: const Icon(Icons.filter_list, color: Colors.blue),
+              ),
+            ),
             // Recenter button
             Positioned(
               bottom: 100,
@@ -553,5 +567,9 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
     );
+  }
+  
+  void _showPinFilterDialog() {
+    
   }
 }
