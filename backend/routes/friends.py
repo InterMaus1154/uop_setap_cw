@@ -64,8 +64,27 @@ def incoming_requests(db: Session = Depends(get_db), user: User = Depends(requir
     ).all()
     return rels
 
+@router.get("/sent", response_model=list[FriendResponse])
+def sent_requests(db: Session = Depends(get_db), user: User = Depends(require_auth)):
+    """List outgoing (pending) friend requests."""
+    rels = db.query(UserRelationship).filter(
+        UserRelationship.user_id == user.user_id,
+        UserRelationship.user_rel_status == UserRelationshipType.PENDING
+    ).all()
+    return rels
 
-@router.put("/{rel_id}", response_model=FriendResponse)
+
+@router.get("/blocked", response_model=list[FriendResponse])
+def blocked_users(db: Session = Depends(get_db), user: User = Depends(require_auth)):
+    """List blocked users by logged-in user."""
+    rels = db.query(UserRelationship).filter(
+        UserRelationship.user_id == user.user_id,
+        UserRelationship.user_rel_status == UserRelationshipType.BLOCKED
+    ).all()
+    return rels
+
+
+@router.patch("/{rel_id}", response_model=FriendResponse)
 def update_relationship(rel_id: int, payload: FriendUpdate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Update relationship status (accept / reject / block)."""
 
@@ -78,7 +97,7 @@ def update_relationship(rel_id: int, payload: FriendUpdate, db: Session = Depend
         raise HTTPException(status_code=403, detail="Forbidden")
     
     # assign provided status
-    rel.user_rel_status = UserRelationshipType(payload.user_rel_status)
+    rel.user_rel_status = UserRelationshipType(payload.response)
     db.commit()
     db.refresh(rel)
     return rel
