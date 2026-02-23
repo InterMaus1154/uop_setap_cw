@@ -2,6 +2,8 @@
 ```{toctree}
 :maxdepth: 2
 
+users
+installation
 api
 ```
 

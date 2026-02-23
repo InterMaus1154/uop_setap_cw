@@ -1,1 +1,1 @@
-# CampusConnect: User Manual
+# User Manual
