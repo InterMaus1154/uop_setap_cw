@@ -174,7 +174,24 @@ class ApiService {
   }
 
   // Pins
-  Future<List<Pin>> getPins() => _getList('/pins/', Pin.fromJson);
+  Future<List<Pin>> getPins({List<int>? catIds, List<int>? catLevelIds}) async {
+    String path = '/pins/';
+
+    final params = <String>[];
+    if (catIds != null && catIds.isNotEmpty) {
+      params.addAll(catIds.map((id) => 'cat_id=$id'));
+    }
+    if (catLevelIds != null && catLevelIds.isNotEmpty) {
+      params.addAll(catLevelIds.map((id) => 'cat_level_id=$id'));
+    }
+
+    if (params.isNotEmpty) {
+      path += '?${params.join('&')}';
+    }
+
+    return _getList(path, Pin.fromJson);
+  }
+
   // this displays pins on users profile of how many they made
   // undecided if they should decrease as pins expire or just continue like a tally
   Future<int> getMyPinCount() async {

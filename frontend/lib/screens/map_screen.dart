@@ -29,9 +29,12 @@ class _MapScreenState extends State<MapScreen> {
     _loadCategories();
   }
 
-  Future<void> _loadPins() async {
+  Future<void> _loadPins({List<int>? catIds, List<int>? catLevelIds}) async {
     try {
-      final results = await _apiService.getPins();
+      final results = await _apiService.getPins(
+        catIds: catIds,
+        catLevelIds: catLevelIds,
+      );
       if (!mounted) return;
       setState(() {
         _pins = results;
@@ -654,7 +657,9 @@ class _MapScreenState extends State<MapScreen> {
                               items: categoryLevels,
                               onChanged: (value) {
                                 setDialogState(() {
-                                  tempCategoryLevelId = int.tryParse(value ?? '');
+                                  tempCategoryLevelId = int.tryParse(
+                                    value ?? '',
+                                  );
                                 });
                               },
                               hint: const Text('Choose a level'),
@@ -671,7 +676,7 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Apply filters here if needed
+                        _applyFilters(tempCategoryId, tempCategoryLevelId);
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -689,4 +694,13 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
   }
+  void _applyFilters(int? tempCategoryId, int? tempCategoryLevelId) {
+  setState(() => _isLoadingPins = true);
+  _loadPins(
+    catIds: tempCategoryId != null ? [tempCategoryId] : null,
+    catLevelIds: tempCategoryLevelId != null ? [tempCategoryLevelId] : null,
+  );
 }
+}
+
+
