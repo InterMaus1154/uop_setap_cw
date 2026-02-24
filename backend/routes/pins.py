@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response, JSONResponse
 from fastapi.params import Depends
 from sqlalchemy.orm import Session, Query as Q, joinedload
+from sqlalchemy import or_
 
 from typing import Optional
 
@@ -34,17 +35,16 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
     if cat_id or cat_level_id:
         query = query.join(Pin.category)
 
+    conditions = []
     if cat_id:
-        query = query.filter(Category.cat_id.in_(cat_id))
+        conditions.append(Category.cat_id.in_(cat_id))
 
     if cat_level_id:
-        query = query.filter(Category.cat_level_id.in_(cat_level_id))
+        conditions.append(Category.cat_level_id.in_(cat_level_id))
+
+    query = query.filter(or_(*conditions))
 
     pins = query.all()
-
-    for pin in pins:
-        print(f"Pin {pin.pin_id} reactions: {pin.reactions}")
-        print(f"User ID: {user.user_id if user else None}")
 
     # loop through all pins and if user is logged in
     # set the status for the pins based on how the user already interacted with it

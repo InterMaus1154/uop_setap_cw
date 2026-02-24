@@ -21,6 +21,15 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 23/02/2026
+**Description:** Added /sent and /blocked endpoints and updated code to match spec.
+
+**File(s) Modified:**
+- backend/routes/friends.py
+- backend/schemas/Friend.py
+
+---
+
 ### Josh up2255832 - 23/02/2026
 **Summary:** Code review and fix of Theo's pin reactions frontend implementation
 
