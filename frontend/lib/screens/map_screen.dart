@@ -286,6 +286,10 @@ class _MapScreenState extends State<MapScreen> {
   List<SubCategory> _subCategories = [];
   bool _categoriesLoaded = false;
 
+  // Active filter selections
+  List<int> _activeCategoryIds = [];
+  List<int> _activeCategoryLevelIds = [];
+
   @override
   void dispose() {
     _mapController.dispose();
@@ -571,31 +575,10 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  List<DropdownMenuItem<String>> get categories {
-    return _categories
-        .map(
-          (cat) => DropdownMenuItem(
-            value: cat.catId.toString(),
-            child: Text(cat.catName),
-          ),
-        )
-        .toList();
-  }
-
-  List<DropdownMenuItem<String>> get categoryLevels {
-    return _categoryLevels
-        .map(
-          (level) => DropdownMenuItem(
-            value: level.catLevelId.toString(),
-            child: Text(level.catLevelName),
-          ),
-        )
-        .toList();
-  }
-
   void _showPinFilterDialog() {
-    int? tempCategoryId;
-    int? tempCategoryLevelId;
+    // Initialize with current active filters
+    List<int> selectedCategoryIds = List.from(_activeCategoryIds);
+    List<int> selectedCategoryLevelIds = List.from(_activeCategoryLevelIds);
 
     showDialog<void>(
       context: context,
@@ -609,7 +592,7 @@ class _MapScreenState extends State<MapScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(
                   maxWidth: 400,
-                  maxHeight: 400,
+                  maxHeight: 600,
                 ),
                 child: AlertDialog(
                   shape: RoundedRectangleBorder(
@@ -622,61 +605,124 @@ class _MapScreenState extends State<MapScreen> {
                   content: SingleChildScrollView(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Select Category',
-                          style: TextStyle(fontSize: 14, color: Colors.black),
-                        ),
-                        Flexible(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: DropdownButton<String>(
-                              isExpanded: true, // Fill available width
-                              value: tempCategoryId?.toString(),
-                              items: categories,
-                              onChanged: (value) {
-                                setDialogState(() {
-                                  tempCategoryId = int.tryParse(value ?? '');
-                                });
-                              },
-                              hint: const Text('Choose a category'),
-                            ),
+                          'Select Categories',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
+                        const SizedBox(height: 8),
+                        if (_categories.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              'No categories available',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          )
+                        else
+                          ...(_categories.map((cat) {
+                            final isSelected = selectedCategoryIds.contains(
+                              cat.catId,
+                            );
+                            return CheckboxListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                cat.catName,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              value: isSelected,
+                              onChanged: (bool? value) {
+                                setDialogState(() {
+                                  if (value == true) {
+                                    selectedCategoryIds.add(cat.catId);
+                                  } else {
+                                    selectedCategoryIds.remove(cat.catId);
+                                  }
+                                });
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          })),
                         const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 8),
                         const Text(
-                          'Select Category Level',
-                          style: TextStyle(fontSize: 14, color: Colors.black),
-                        ),
-                        Flexible(
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: DropdownButton<String>(
-                              isExpanded: true,
-                              value: tempCategoryLevelId?.toString(),
-                              items: categoryLevels,
-                              onChanged: (value) {
-                                setDialogState(() {
-                                  tempCategoryLevelId = int.tryParse(
-                                    value ?? '',
-                                  );
-                                });
-                              },
-                              hint: const Text('Choose a level'),
-                            ),
+                          'Select Category Levels',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
                           ),
                         ),
+                        const SizedBox(height: 8),
+                        if (_categoryLevels.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              'No category levels available',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          )
+                        else
+                          ...(_categoryLevels.map((level) {
+                            final isSelected = selectedCategoryLevelIds
+                                .contains(level.catLevelId);
+                            return CheckboxListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                level.catLevelName,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              value: isSelected,
+                              onChanged: (bool? value) {
+                                setDialogState(() {
+                                  if (value == true) {
+                                    selectedCategoryLevelIds.add(
+                                      level.catLevelId,
+                                    );
+                                  } else {
+                                    selectedCategoryLevelIds.remove(
+                                      level.catLevelId,
+                                    );
+                                  }
+                                });
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          })),
                       ],
                     ),
                   ),
                   actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Clear all filters
+                        _applyFilters(null, null);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Clear All'),
+                    ),
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Cancel'),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        _applyFilters(tempCategoryId, tempCategoryLevelId);
+                        _applyFilters(
+                          selectedCategoryIds.isEmpty
+                              ? null
+                              : selectedCategoryIds,
+                          selectedCategoryLevelIds.isEmpty
+                              ? null
+                              : selectedCategoryLevelIds,
+                        );
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
@@ -694,13 +740,14 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
   }
-  void _applyFilters(int? tempCategoryId, int? tempCategoryLevelId) {
-  setState(() => _isLoadingPins = true);
-  _loadPins(
-    catIds: tempCategoryId != null ? [tempCategoryId] : null,
-    catLevelIds: tempCategoryLevelId != null ? [tempCategoryLevelId] : null,
-  );
-}
-}
 
-
+  void _applyFilters(List<int>? categoryIds, List<int>? categoryLevelIds) {
+    setState(() {
+      _isLoadingPins = true;
+      // Store the active filters
+      _activeCategoryIds = categoryIds ?? [];
+      _activeCategoryLevelIds = categoryLevelIds ?? [];
+    });
+    _loadPins(catIds: categoryIds, catLevelIds: categoryLevelIds);
+  }
+}
