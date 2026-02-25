@@ -21,6 +21,16 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 25/02/2026
+**Summary:** Wrote installation documentation for ReadTheDocs
+
+**Files Modified/Created:**
+- docs/installation.md (full developer installation guide covering backend, frontend, all OS platforms, troubleshooting)
+- docs/conf.py (added sphinx_design extension and colon_fence for tabbed content)
+- docs/requirements.txt (added sphinx-design dependency)
+
+---
+
 ### Julian up2301253 - 23/02/2026
 **Description:** Added /sent and /blocked endpoints and updated code to match spec.
 
