@@ -3,7 +3,6 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from models.location_sharing import LocationSharing
 from models.user_relationship import UserRelationship, UserRelationshipType
 from models.pin_report import PinReport, PinReportType
 from models.admin import Admin
@@ -499,22 +498,6 @@ def seed_user_relationships():
     print("User relationships seeded")
 
 
-def seed_location_sharing():
-    print("Seeding location sharing")
-
-    # Example data for location sharing
-    location_sharing_data = [
-        LocationSharing(user_id=1, target_user_id=2, is_enabled=True),
-        LocationSharing(user_id=1, target_user_id=3, is_enabled=False),
-        LocationSharing(user_id=2, target_user_id=3, is_enabled=True),
-        LocationSharing(user_id=2, target_user_id=4, is_enabled=False),
-        LocationSharing(user_id=3, target_user_id=4, is_enabled=True),
-    ]
-
-    seed_template(location_sharing_data)
-
-    print("Location sharing seeded")
-
 
 def seed_template(data_to_seed):
     db = SessionLocal()
@@ -536,7 +519,6 @@ def seed_all():
     seed_pin_reactions()
     seed_pin_reports()
     seed_user_relationships()
-    seed_location_sharing()
     print("Finished seeding")
 
 
