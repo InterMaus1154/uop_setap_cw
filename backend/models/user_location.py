@@ -17,3 +17,4 @@ class UserLocation(Base):
 
     user = relationship("User", back_populates="user_locations")
 
+
