@@ -3,7 +3,7 @@ from sqlalchemy import Column, BigInteger, SmallInteger, ForeignKey, String, DOU
 from sqlalchemy.orm import relationship
 
 from database.db import Base
-from models.pin_reaction import PinReaction
+
 
 
 class Pin(Base):
