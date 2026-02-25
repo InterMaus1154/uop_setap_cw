@@ -21,6 +21,25 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 25/02/2026
+
+**Description:**
+- added user_locations and location_permissions tables to ERD (erd image updated)
+- created UserLocation and LocationPermission models in Python
+
+
+**Files created**
+- backend/models/user_location.py
+- backend/models/location_permission.py
+- database/erd2.jpg
+
+### Mark up2306492 - 24/02/2026
+
+**Description:** Fix pin filtering to work with or logic (minor bug)
+
+**Files modified:**
+- backend/routes/pins.py
+
 ### Julian up2301253 - 23/02/2026
 **Description:** Added /sent and /blocked endpoints and updated code to match spec.
 

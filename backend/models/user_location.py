@@ -14,6 +14,7 @@ class UserLocation(Base):
     longitude = Column(DOUBLE_PRECISION, nullable=False)
     is_enabled = Column(Boolean, nullable=False, default=True, server_default="true")
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, onupdate=func.now(), default=func.now(), server_default=func.now())
 
     user = relationship("User", back_populates="user_locations")
     location_permissions = relationship("LocationPermission", back_populates="user_location")
