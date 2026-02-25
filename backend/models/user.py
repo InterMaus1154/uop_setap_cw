@@ -28,14 +28,12 @@ class User(Base):
     bans = relationship("UserBan", back_populates="user")
     sent_messages = relationship("Message", foreign_keys="[Message.sender_id]", back_populates="sender")
     received_messages = relationship("Message", foreign_keys="[Message.receiver_id]", back_populates="receiver")
-    shared_locations = relationship("LocationSharing", foreign_keys="[LocationSharing.user_id]", back_populates="user")
-    received_locations = relationship("LocationSharing", foreign_keys="[LocationSharing.target_user_id]",
-                                      back_populates="target_user")
     sent_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.user_id]",
                                       back_populates="requester")
     received_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.target_user_id]",
                                           back_populates="addressee")
-    user_locations = relationship('UserLocation', back_populates="user")
+    user_locations = relationship('UserLocation', back_populates="user") # the sharings which this user initiated
+    location_permissions = relationship("LocationPermission", foreign_keys="[LocationPermission.user_id]", back_populates="user") # the locations which are shared with this user
 
     @property
     def friends(self) -> list["User"]:
