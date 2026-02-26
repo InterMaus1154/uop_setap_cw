@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 26/02/2026 (busy busy coding day for me today!)
+**Summary:** Added unit tests for friends feature — FriendRequest model, FriendProvider, and ApiService friend methods (25 tests). Refactored ApiService and FriendProvider to accept dependencies via constructor injection so mocked HTTP client and storage can be passed in tests. Removed singleton pattern from SecureStorageService to make it mockable — no functional impact since FlutterSecureStorage is stateless and all instances read/write the same OS keychain.
+
+**Files Created:**
+- frontend/test/models/friend_request_test.dart (6 tests: fromJson, toJson, round-trip, all statuses, missing field, bad date)
+- frontend/test/providers/friend_provider_test.dart (3 tests: initial state, clear resets state, clear notifies listeners)
+- frontend/test/services/api_service_friends_test.dart (16 tests: getFriends, searchUsers, getIncomingRequests, getSentRequests, sendFriendRequest with 201/204/403/422, updateFriendRequest with 200/403/404, deleteFriendRequest with 204/403/404)
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (constructor injection for http.Client and SecureStorageService, replaced top-level http calls with injected client)
+- frontend/lib/providers/friend_provider.dart (constructor injection for ApiService)
+- frontend/lib/services/secure_storage_service.dart (removed singleton pattern, plain constructor for mockability)
+- frontend/pubspec.yaml (added mockito and build_runner dev dependencies)
+
+---
+
 ### Josh up2255832 - 26/02/2026
 **Summary:** Implemented friends feature frontend — FriendRequest model, ApiService friend methods, FriendProvider state management, FriendsScreen with tabs (friends list, incoming/outgoing requests), UserSearchDelegate with add friend flow and status code handling, profile screen integration. Also fixed backend UserLocation back_populates bug.
 

@@ -30,7 +30,12 @@ class LoginResponse {
 class ApiService {
   static const String baseUrl = 'http://localhost:8000';
   static const Duration _timeout = Duration(seconds: 10);
-  final SecureStorageService _storage = SecureStorageService();
+  final SecureStorageService _storage;
+  final http.Client _httpClient;
+
+  ApiService({SecureStorageService? storage, http.Client? httpClient})
+    : _storage = storage ?? SecureStorageService(),
+      _httpClient = httpClient ?? http.Client();
 
   /// Get auth headers with Bearer token if available
   Future<Map<String, String>> _authHeaders() async {
@@ -48,7 +53,7 @@ class ApiService {
   ) async {
     try {
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .get(Uri.parse('$baseUrl$path'), headers: headers)
           .timeout(_timeout);
 
@@ -83,7 +88,7 @@ class ApiService {
   // Auth
   Future<LoginResponse> login(String email) async {
     try {
-      final response = await http
+      final response = await _httpClient
           .post(
             Uri.parse('$baseUrl/auth/login'),
             headers: {'Content-Type': 'application/json'},
@@ -123,7 +128,7 @@ class ApiService {
   Future<void> logout() async {
     try {
       final headers = await _authHeaders();
-      await http
+      await _httpClient
           .post(Uri.parse('$baseUrl/auth/logout'), headers: headers)
           .timeout(_timeout);
     } catch (_) {
@@ -146,7 +151,7 @@ class ApiService {
   // Users (single)
   Future<User> getUserById(int userId) async {
     try {
-      final response = await http
+      final response = await _httpClient
           .get(Uri.parse('$baseUrl/users/$userId'))
           .timeout(_timeout);
 
@@ -198,7 +203,7 @@ class ApiService {
   Future<int> getMyPinCount() async {
     try {
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .get(Uri.parse('$baseUrl/users/me/pin-count'), headers: headers)
           .timeout(_timeout);
 
@@ -226,7 +231,7 @@ class ApiService {
       final body = formData.toJson();
 
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .post(
             Uri.parse('$baseUrl/pins/'),
             headers: headers,
@@ -267,7 +272,7 @@ class ApiService {
   Future<void> reactToPin(int pinId, int value) async {
     try {
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .patch(
             Uri.parse('$baseUrl/pins/$pinId/react'),
             headers: headers,
@@ -298,7 +303,7 @@ class ApiService {
   Future<void> deletePinReaction(int pinId) async {
     try {
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .delete(Uri.parse('$baseUrl/pins/$pinId/react'), headers: headers)
           .timeout(_timeout);
 
@@ -337,7 +342,7 @@ class ApiService {
   Future<FriendRequest> sendFriendRequest(int targetUserId) async {
     try {
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .post(
             Uri.parse('$baseUrl/friends/'),
             headers: headers,
@@ -379,7 +384,7 @@ class ApiService {
   Future<FriendRequest> updateFriendRequest(int relId, String response) async {
     try {
       final headers = await _authHeaders();
-      final res = await http
+      final res = await _httpClient
           .patch(
             Uri.parse('$baseUrl/friends/$relId'),
             headers: headers,
@@ -416,7 +421,7 @@ class ApiService {
   Future<void> deleteFriendRequest(int relId) async {
     try {
       final headers = await _authHeaders();
-      final response = await http
+      final response = await _httpClient
           .delete(Uri.parse('$baseUrl/friends/$relId'), headers: headers)
           .timeout(_timeout);
 

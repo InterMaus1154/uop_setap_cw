@@ -4,7 +4,10 @@ import '../models/user.dart';
 import '../services/api_service.dart';
 
 class FriendProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
+
+  FriendProvider({ApiService? apiService})
+    : _apiService = apiService ?? ApiService();
 
   // Core lists
   List<User> _friends = [];
