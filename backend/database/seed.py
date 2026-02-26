@@ -41,7 +41,7 @@ def seed_users():
         User(user_fname="David", user_lname="Taylor", user_email="davidtaylor@port.ac.uk", user_displayname="Taylor_D",
              user_use_displayname=True),
         User(user_fname="Lisa", user_lname="Anderson", user_email="lisaanderson@port.ac.uk"),
-        User(user_fname="Test", user_lname="Test", user_email="test@test.app", user_token="WOxWFwRDtQ")
+        User(user_fname="Test", user_lname="Test", user_email="test@test.app", user_token="fbde5c7f68cdd28e9105cdbafa6556eb")
 
     ]
     seed_template(users)
