@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/friend_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
+import 'friends_screen.dart';
 import 'user_selection_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -37,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    context.read<FriendProvider>().clear();
     await context.read<UserProvider>().logout();
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -88,6 +91,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 32),
                 _buildStatCard(),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const FriendsScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.people),
+                    label: const Text('Friends'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[400],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,
