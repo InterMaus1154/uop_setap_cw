@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../models/category.dart';
 import '../models/pin.dart';
 import '../models/pin_form_data.dart';
+import '../models/friend_request.dart';
 import '../models/user.dart';
 import 'secure_storage_service.dart';
 
@@ -304,6 +305,130 @@ class ApiService {
       if (response.statusCode != 200) {
         throw ApiException(
           'Failed to remove reaction: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  // Friends
+  Future<List<User>> getFriends() => _getList('/friends/', User.fromJson);
+
+  Future<List<User>> searchUsers(String email) =>
+      _getList('/users/search/$email', User.fromJson);
+
+  Future<List<FriendRequest>> getIncomingRequests() =>
+      _getList('/friends/requests', FriendRequest.fromJson);
+
+  Future<List<FriendRequest>> getSentRequests() =>
+      _getList('/friends/sent', FriendRequest.fromJson);
+
+  Future<FriendRequest> sendFriendRequest(int targetUserId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/friends/'),
+            headers: headers,
+            body: json.encode({'target_user_id': targetUserId}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 201) {
+        return FriendRequest.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 204) {
+        throw ApiException('You are already friends.', statusCode: 204);
+      } else if (response.statusCode == 403) {
+        final detail =
+            json.decode(response.body)['detail'] ?? 'Relationship is blocked';
+        throw ApiException(detail, statusCode: 403);
+      } else if (response.statusCode == 422) {
+        final detail = json.decode(response.body)['detail'] ?? 'Request failed';
+        throw ApiException(detail, statusCode: 422);
+      } else {
+        throw ApiException(
+          'Failed to send friend request: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<FriendRequest> updateFriendRequest(int relId, String response) async {
+    try {
+      final headers = await _authHeaders();
+      final res = await http
+          .patch(
+            Uri.parse('$baseUrl/friends/$relId'),
+            headers: headers,
+            body: json.encode({'response': response}),
+          )
+          .timeout(_timeout);
+
+      if (res.statusCode == 200) {
+        return FriendRequest.fromJson(json.decode(res.body));
+      } else if (res.statusCode == 403) {
+        throw ApiException('Forbidden.', statusCode: 403);
+      } else if (res.statusCode == 404) {
+        throw ApiException('Relationship not found.', statusCode: 404);
+      } else {
+        throw ApiException(
+          'Failed to update request: ${res.statusCode}',
+          statusCode: res.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<void> deleteFriendRequest(int relId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await http
+          .delete(Uri.parse('$baseUrl/friends/$relId'), headers: headers)
+          .timeout(_timeout);
+
+      if (response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 403) {
+        throw ApiException('Forbidden.', statusCode: 403);
+      } else if (response.statusCode == 404) {
+        throw ApiException('Relationship not found.', statusCode: 404);
+      } else {
+        throw ApiException(
+          'Failed to delete request: ${response.statusCode}',
           statusCode: response.statusCode,
         );
       }
