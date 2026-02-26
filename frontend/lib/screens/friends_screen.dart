@@ -20,10 +20,12 @@ class _FriendsScreenState extends State<FriendsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    final provider = context.read<FriendProvider>();
-    provider.loadFriends();
-    provider.loadIncomingRequests();
-    provider.loadOutgoingRequests();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<FriendProvider>();
+      provider.loadFriends();
+      provider.loadIncomingRequests();
+      provider.loadOutgoingRequests();
+    });
   }
 
   @override
@@ -153,6 +155,9 @@ class _IncomingRequestsTab extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.check, color: Colors.green),
                 tooltip: 'Accept',
+                iconSize: 20,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
                 onPressed: () => _handleAction(
                   context,
                   () => context.read<FriendProvider>().acceptRequest(
@@ -163,6 +168,9 @@ class _IncomingRequestsTab extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.close, color: Colors.red),
                 tooltip: 'Reject',
+                iconSize: 20,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
                 onPressed: () => _handleAction(
                   context,
                   () => context.read<FriendProvider>().rejectRequest(
@@ -173,6 +181,9 @@ class _IncomingRequestsTab extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.block, color: Colors.grey),
                 tooltip: 'Block',
+                iconSize: 20,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(8),
                 onPressed: () => _handleAction(
                   context,
                   () => context.read<FriendProvider>().blockRequest(

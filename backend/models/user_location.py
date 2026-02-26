@@ -16,7 +16,7 @@ class UserLocation(Base):
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
     updated_at = Column(DateTime, nullable=False, onupdate=func.now(), default=func.now(), server_default=func.now())
 
-    user = relationship("User", back_populates="user_locations")
+    user = relationship("User", back_populates="user_location")
     location_permissions = relationship("LocationPermission", back_populates="user_location")
 
 
