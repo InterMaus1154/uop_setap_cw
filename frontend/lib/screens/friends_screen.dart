@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user.dart';
 import '../providers/friend_provider.dart';
+import '../providers/user_provider.dart';
+import '../services/api_service.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -54,9 +56,14 @@ class _FriendsScreenState extends State<FriendsScreen>
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
+              final currentUserId =
+                  context.read<UserProvider>().currentUser?.userId ?? 0;
               showSearch(
                 context: context,
-                delegate: UserSearchDelegate(context.read<FriendProvider>()),
+                delegate: UserSearchDelegate(
+                  context.read<FriendProvider>(),
+                  currentUserId: currentUserId,
+                ),
               );
             },
           ),
@@ -318,11 +325,15 @@ Future<void> _handleAction(
   }
 }
 
-// --- UserSearchDelegate (task 6 placeholder) ---
+// --- UserSearchDelegate ---
 
 class UserSearchDelegate extends SearchDelegate<User?> {
   final FriendProvider friendProvider;
-  UserSearchDelegate(this.friendProvider);
+  final ApiService _apiService = ApiService();
+  final int _currentUserId;
+
+  UserSearchDelegate(this.friendProvider, {required int currentUserId})
+    : _currentUserId = currentUserId;
 
   @override
   List<Widget>? buildActions(BuildContext context) {
@@ -340,9 +351,7 @@ class UserSearchDelegate extends SearchDelegate<User?> {
   }
 
   @override
-  Widget buildResults(BuildContext context) {
-    return const Center(child: Text('Search will be implemented in task 6'));
-  }
+  Widget buildResults(BuildContext context) => _buildSearchResults(context);
 
   @override
   Widget buildSuggestions(BuildContext context) {
@@ -354,6 +363,105 @@ class UserSearchDelegate extends SearchDelegate<User?> {
         ),
       );
     }
-    return const Center(child: Text('Search will be implemented in task 6'));
+    return _buildSearchResults(context);
+  }
+
+  Widget _buildSearchResults(BuildContext context) {
+    if (query.length < 3) {
+      return const Center(
+        child: Text(
+          'Type at least 3 characters to search',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return FutureBuilder<List<User>>(
+      future: _apiService.searchUsers(query),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
+        final results = (snapshot.data ?? [])
+            .where((u) => u.userId != _currentUserId)
+            .toList();
+        if (results.isEmpty) {
+          return const Center(
+            child: Text('No users found', style: TextStyle(color: Colors.grey)),
+          );
+        }
+        return ListView.builder(
+          itemCount: results.length,
+          itemBuilder: (context, index) {
+            final user = results[index];
+            return _SearchResultTile(
+              user: user,
+              friendProvider: friendProvider,
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _SearchResultTile extends StatefulWidget {
+  final User user;
+  final FriendProvider friendProvider;
+  const _SearchResultTile({required this.user, required this.friendProvider});
+
+  @override
+  State<_SearchResultTile> createState() => _SearchResultTileState();
+}
+
+class _SearchResultTileState extends State<_SearchResultTile> {
+  bool _sent = false;
+  String? _message;
+
+  Future<void> _sendRequest() async {
+    try {
+      await widget.friendProvider.sendRequest(widget.user.userId);
+      if (mounted)
+        setState(() {
+          _sent = true;
+          _message = null;
+        });
+    } on ApiException catch (e) {
+      if (mounted) setState(() => _message = e.message);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (widget.user.useDisplayName && widget.user.displayName != null)
+        ? widget.user.displayName!
+        : widget.user.fullName;
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: Colors.blue[400],
+        child: Text(
+          name.isNotEmpty ? name[0].toUpperCase() : '?',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+      title: Text(name),
+      subtitle: _message != null
+          ? Text(_message!, style: const TextStyle(color: Colors.orange))
+          : Text(widget.user.email, style: TextStyle(color: Colors.grey[600])),
+      trailing: _sent
+          ? const Icon(Icons.check, color: Colors.green)
+          : TextButton(
+              onPressed: _sendRequest,
+              child: const Text('Add Friend'),
+            ),
+    );
   }
 }
