@@ -14,4 +14,4 @@ class LocationPermission(Base):
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 
     user_location = relationship("UserLocation", back_populates="location_permissions", uselist=False)
-    user = relationship("User", back_populates="location_permissions", useList=False)
+    user = relationship("User", back_populates="location_permissions", uselist=False)
