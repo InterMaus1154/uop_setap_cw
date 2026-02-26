@@ -21,6 +21,20 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+
+### Mark up2306492 - 26/02/2026
+
+**Description:**
+- explored how to do API testing in Python
+- created a test demo for authentication endpoints which we can use as a "template" for later testing
+- added a test user that can be used for testing, making testing more easy
+
+**Files Created:**
+- backend/tests/base.py
+- backend/tests/test_auth.py
+- backend/tests/test_demo.py
+- backend/conftest.py
+
 ### Josh up2255832 - 26/02/2026 (busy busy coding day for me today!)
 **Summary:** Added unit tests for friends feature — FriendRequest model, FriendProvider, and ApiService friend methods (25 tests). Refactored ApiService and FriendProvider to accept dependencies via constructor injection so mocked HTTP client and storage can be passed in tests. Removed singleton pattern from SecureStorageService to make it mockable — no functional impact since FlutterSecureStorage is stateless and all instances read/write the same OS keychain.
 
