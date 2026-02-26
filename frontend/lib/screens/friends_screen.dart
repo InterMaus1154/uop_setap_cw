@@ -429,11 +429,12 @@ class _SearchResultTileState extends State<_SearchResultTile> {
   Future<void> _sendRequest() async {
     try {
       await widget.friendProvider.sendRequest(widget.user.userId);
-      if (mounted)
+      if (mounted) {
         setState(() {
           _sent = true;
           _message = null;
         });
+      }
     } on ApiException catch (e) {
       if (mounted) setState(() => _message = e.message);
     }
