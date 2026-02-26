@@ -32,8 +32,10 @@ class User(Base):
                                       back_populates="requester")
     received_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.target_user_id]",
                                           back_populates="addressee")
-    user_locations = relationship('UserLocation', back_populates="user") # the sharings which this user initiated
-    location_permissions = relationship("LocationPermission", foreign_keys="[LocationPermission.user_id]", back_populates="user") # the locations which are shared with this user
+    user_location = relationship('UserLocation', back_populates="user"
+                                 , uselist=False)  # the sharing which this user initiated
+    location_permissions = relationship("LocationPermission", foreign_keys="[LocationPermission.user_id]",
+                                        back_populates="user")  # the locations which are shared with this user
 
     @property
     def friends(self) -> list["User"]:
