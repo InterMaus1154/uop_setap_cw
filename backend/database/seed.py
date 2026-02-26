@@ -23,16 +23,25 @@ def seed_users():
     print("Seeding users")
 
     users = [
-        User(user_fname="John", user_lname="Doe", user_email="johndoe@port.ac.uk", user_displayname="JDoe92", user_use_displayname=True),
-        User(user_fname="Jane", user_lname="Doe", user_email="janedoe@port.ac.uk", user_displayname="JaneDoe23", user_use_displayname=False),
-        User(user_fname="Carl", user_lname="Johnson", user_email="carljohnson@port.ac.uk", user_displayname="CJ_Da_Great", user_use_displayname=True),
-        User(user_fname="Alice", user_lname="Smith", user_email="alicesmith@port.ac.uk", user_displayname="AliceS", user_use_displayname=False),
-        User(user_fname="Michael", user_lname="Brown", user_email="michaelbrown@port.ac.uk", user_displayname="MikeBrown88", user_use_displayname=True),
+        User(user_fname="John", user_lname="Doe", user_email="johndoe@port.ac.uk", user_displayname="JDoe92",
+             user_use_displayname=True),
+        User(user_fname="Jane", user_lname="Doe", user_email="janedoe@port.ac.uk", user_displayname="JaneDoe23",
+             user_use_displayname=False),
+        User(user_fname="Carl", user_lname="Johnson", user_email="carljohnson@port.ac.uk",
+             user_displayname="CJ_Da_Great", user_use_displayname=True),
+        User(user_fname="Alice", user_lname="Smith", user_email="alicesmith@port.ac.uk", user_displayname="AliceS",
+             user_use_displayname=False),
+        User(user_fname="Michael", user_lname="Brown", user_email="michaelbrown@port.ac.uk",
+             user_displayname="MikeBrown88", user_use_displayname=True),
         User(user_fname="Sarah", user_lname="Wilson", user_email="sarahwilson@port.ac.uk"),
-        User(user_fname="James", user_lname="Davis", user_email="jamesdavis@port.ac.uk", user_displayname="JDavis_", user_use_displayname=True),
-        User(user_fname="Emma", user_lname="Miller", user_email="emmamiller@port.ac.uk", user_displayname="EmmaMiller", user_use_displayname=False),
-        User(user_fname="David", user_lname="Taylor", user_email="davidtaylor@port.ac.uk", user_displayname="Taylor_D", user_use_displayname=True),
+        User(user_fname="James", user_lname="Davis", user_email="jamesdavis@port.ac.uk", user_displayname="JDavis_",
+             user_use_displayname=True),
+        User(user_fname="Emma", user_lname="Miller", user_email="emmamiller@port.ac.uk", user_displayname="EmmaMiller",
+             user_use_displayname=False),
+        User(user_fname="David", user_lname="Taylor", user_email="davidtaylor@port.ac.uk", user_displayname="Taylor_D",
+             user_use_displayname=True),
         User(user_fname="Lisa", user_lname="Anderson", user_email="lisaanderson@port.ac.uk"),
+        User(user_fname="Test", user_lname="Test", user_email="test@test.app", user_token="WOxWFwRDtQ")
 
     ]
     seed_template(users)
@@ -496,7 +505,6 @@ def seed_user_relationships():
     seed_template(user_relationships)
 
     print("User relationships seeded")
-
 
 
 def seed_template(data_to_seed):
