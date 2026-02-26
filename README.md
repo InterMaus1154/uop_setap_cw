@@ -30,6 +30,11 @@ Run the app:
 flutter run
 ```
 
+Run the unit tests:
+```bash
+flutter test test/models/ test/providers/ test/services/
+```
+
 ## Project Structure
 
 ```
