@@ -21,6 +21,24 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 26/02/2026
+**Summary:** Implemented friends feature frontend — FriendRequest model, ApiService friend methods, FriendProvider state management, FriendsScreen with tabs (friends list, incoming/outgoing requests), UserSearchDelegate with add friend flow and status code handling, profile screen integration. Also fixed backend UserLocation back_populates bug.
+
+**Files Created:**
+- frontend/lib/models/friend_request.dart
+- frontend/lib/providers/friend_provider.dart
+- frontend/lib/screens/friends_screen.dart
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added 7 friend-related API methods)
+- frontend/lib/screens/profile_screen.dart (added Friends button, clear provider on logout)
+- frontend/lib/main.dart (switched to MultiProvider with FriendProvider)
+- backend/models/user_location.py (fixed back_populates from plural to singular)
+
+**Notes:** Backend friend endpoints were already built by Julian. Frontend wires up to all of them: friend list, search, send/accept/reject/block/cancel requests. UserSearchDelegate handles all response codes (201/204/403/422). FriendProvider resolves user names via parallel lookups with caching.
+
+---
+
 ### Josh up2255832 - 25/02/2026
 **Summary:** Wrote installation documentation for ReadTheDocs
 
