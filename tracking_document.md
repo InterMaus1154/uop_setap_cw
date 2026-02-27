@@ -21,6 +21,15 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 27/02/2026
+
+**Description:**
+- added pin_expire_at filter for `GET /pins` that filters pins based on pin_expire_at, where expire_at <= selected expire_at
+- refined Josh's `pin_author_name` property on `pin` model to show displayname only if user said so
+
+**Files modified:**
+- backend/models/pin.py
+- backend/routes/pins.py
 
 ### Mark up2306492 - 26/02/2026
 
