@@ -26,6 +26,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 **Description:**
 - explored how to do API testing in Python
+- installed pytest as a package
 - created a test demo for authentication endpoints which we can use as a "template" for later testing
 - added a test user that can be used for testing, making testing more easy
 

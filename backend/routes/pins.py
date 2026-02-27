@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response, JSONResponse
 from fastapi.params import Depends
 from sqlalchemy.orm import Session, Query as Q, joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
-from typing import Optional
+from typing import Optional, Type
 
 from database.db import get_db
 from models import CategoryLevel, SubCategory
@@ -16,33 +16,41 @@ from schemas.Pin import PinResponse, PinCreate, PinUpdate, PinReactionRequest
 from middleware.auth import require_auth, optional_auth
 from models.user import User
 
+from datetime import datetime
+
 router = APIRouter(prefix="/pins", tags=["pins"])
 
 
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
+             pin_expire_at: Optional[datetime] = Query(default=None),
              db: Session = Depends(get_db), user: User | None = Depends(optional_auth)):
     """Get all active pins"""
 
     # build query
-    query: Q[Pin] = (db.query(Pin)
-                     .options(joinedload(Pin.category).joinedload(Category.category_level))
-                     .options(joinedload(Pin.reactions))
-                     .options(joinedload(Pin.user))
-                     .filter(Pin.pin_isactive == True))
+    query: Q[Type[Pin]] = (db.query(Pin)
+                           .options(joinedload(Pin.category).joinedload(Category.category_level))
+                           .options(joinedload(Pin.reactions))
+                           .options(joinedload(Pin.user))
+                           .filter(Pin.pin_isactive == True))
 
     # join category on pins if any id is present
     if cat_id or cat_level_id:
         query = query.join(Pin.category)
 
-    conditions = []
+    category_conditions = []
     if cat_id:
-        conditions.append(Category.cat_id.in_(cat_id))
+        category_conditions.append(Category.cat_id.in_(cat_id))
 
     if cat_level_id:
-        conditions.append(Category.cat_level_id.in_(cat_level_id))
+        category_conditions.append(Category.cat_level_id.in_(cat_level_id))
 
-    query = query.filter(or_(*conditions))
+    query = query.filter(or_(*category_conditions))
+
+
+    if pin_expire_at:
+        end_of_day = pin_expire_at.replace(hour=23, minute=59, second=50)
+        query = query.filter(Pin.pin_expire_at <= end_of_day)
 
     pins = query.all()
 

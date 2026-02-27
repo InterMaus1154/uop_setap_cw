@@ -30,9 +30,14 @@ Run the app:
 flutter run
 ```
 
-Run the unit tests:
+Run the flutter unit tests:
 ```bash
 flutter test test/models/ test/providers/ test/services/
+```
+
+Run python unit tests in backend folder:
+```bash
+pytest -v
 ```
 
 ## Project Structure
