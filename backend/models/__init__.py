@@ -12,5 +12,6 @@ from models.user_ban import UserBan
 from models.message import Message
 from models.location_sharing import LocationSharing
 from models.user_relationship import UserRelationship
+from models.invitation_code import InvitationCode
 
-__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message", "UserRelationship"]
+__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message", "UserRelationship", "InvitationCode"]
