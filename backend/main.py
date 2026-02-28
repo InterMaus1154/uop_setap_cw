@@ -8,6 +8,7 @@ from routes.pins import router as pins_router
 from routes.categories import router as categories_router
 from routes.auth import router as auth_router
 from routes.friends import router as friends_router
+from routes.invitations import router as invitations_router
 
 load_dotenv()
 
@@ -27,6 +28,7 @@ app.include_router(users_router)
 app.include_router(pins_router)
 app.include_router(categories_router)
 app.include_router(friends_router)
+app.include_router(invitations_router)
 
 
 
