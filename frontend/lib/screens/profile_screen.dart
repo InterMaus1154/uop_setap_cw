@@ -140,14 +140,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('Show display name under pins'),
-                    Switch(
-                      value: _showDisplayName,
-                      onChanged: (val) async {
-                        setState(() {
-                          _showDisplayName = val;
-                        });
-                        await _saveDisplayNamePreference(val);
+                    const Text('Show under pins: '),
+                    ChoiceChip(
+                      label: const Text('Full Name'),
+                      selected: !_showDisplayName,
+                      onSelected: (selected) async {
+                        if (selected) {
+                          setState(() {
+                            _showDisplayName = false;
+                          });
+                          await _saveDisplayNamePreference(false);
+                        }
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                      label: const Text('Display Name'),
+                      selected: _showDisplayName,
+                      onSelected: (selected) async {
+                        if (selected) {
+                          setState(() {
+                            _showDisplayName = true;
+                          });
+                          await _saveDisplayNamePreference(true);
+                        }
                       },
                     ),
                   ],
