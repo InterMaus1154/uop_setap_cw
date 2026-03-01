@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/category.dart';
 import '../models/pin_form_data.dart';
+import '../providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class PinCreationSheet extends StatefulWidget {
   final LatLng location;
@@ -95,6 +97,10 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = Provider.of<UserProvider>(
+      context,
+      listen: false,
+    ).isLoggedIn;
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -111,17 +117,35 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+              // Top bar with drag handle and menu
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                ),
+                  if (isLoggedIn)
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      onSelected: (value) {
+                        // TODO: Handle menu actions (report, etc.)
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<String>(
+                          value: 'report',
+                          child: Text('Report'),
+                        ),
+                      ],
+                    ),
+                ],
               ),
               const Text(
                 'Create Pin',

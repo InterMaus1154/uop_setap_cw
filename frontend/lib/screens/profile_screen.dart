@@ -59,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _fnameController;
   late TextEditingController _lnameController;
   late TextEditingController _displayNameController;
-  bool _isEditing = false;
+  final bool _isEditing = false;
 
   @override
   void initState() {
@@ -175,9 +175,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _saveProfile,
-                    child: _isLoading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Text('Save Changes'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[400],
                       foregroundColor: Colors.white,
@@ -186,6 +183,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    child: _isLoading
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Text('Save Changes'),
                   ),
                 ),
                 const SizedBox(height: 32),
