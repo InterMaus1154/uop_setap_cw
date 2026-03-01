@@ -34,6 +34,8 @@ class User(Base):
                                       back_populates="requester")
     received_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.target_user_id]",
                                           back_populates="addressee")
+    user_location = relationship("UserLocation", back_populates="user", uselist=False)
+    location_permissions = relationship("LocationPermission", back_populates="user")
 
     @property
     def friends(self) -> list["User"]:
