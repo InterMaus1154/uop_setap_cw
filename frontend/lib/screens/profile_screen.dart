@@ -78,8 +78,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : _displayNameController.text,
       );
-      final user = context.read<UserProvider>().currentUser;
-      await context.read<UserProvider>().login(user?.email ?? '');
+      // Fetch updated user profile and update provider
+      final updatedUser = await _apiService.getUserById(
+        context.read<UserProvider>().currentUser?.userId ?? 0,
+      );
+      context.read<UserProvider>().updateUser(updatedUser);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
       );
