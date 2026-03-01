@@ -15,4 +15,4 @@ from models.user_location import UserLocation
 from models.location_permission import LocationPermission
 from models.invitation_code import InvitationCode
 
-__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "UserBan", "Message", "UserRelationship", 'UserLocation', 'LocationPermission', "InvitationCode"]
+__all__ = ['Base', 'User', 'CategoryLevel', 'Category', "SubCategory", "Pin", "PinReaction", "PinReport", "UserReport", "Admin", "Message", "UserRelationship", "InvitationCode", "UserLocation", "LocationPermission"]
