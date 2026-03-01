@@ -158,7 +158,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     labelText: 'First Name',
                     border: OutlineInputBorder(),
                   ),
-                  enabled: true,
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -167,7 +166,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     labelText: 'Last Name',
                     border: OutlineInputBorder(),
                   ),
-                  enabled: true,
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -176,7 +174,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     labelText: 'Display Name (optional)',
                     border: OutlineInputBorder(),
                   ),
-                  enabled: true,
                 ),
                 const SizedBox(height: 8),
                 Text(
