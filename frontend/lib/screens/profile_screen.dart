@@ -50,24 +50,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _saveDisplayNamePreference(bool useDisplayName) async {
-    setState(() => _isLoading = true);
-    try {
-      await _apiService.updateUserDisplayNamePreference(useDisplayName);
-      final user = context.read<UserProvider>().currentUser;
-      await context.read<UserProvider>().login(user?.email ?? '');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Display name preference updated')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update preference: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
   Future<void> _saveProfile() async {
     setState(() => _isLoading = true);
     try {
@@ -78,6 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : _displayNameController.text,
       );
+      await _apiService.updateUserDisplayNamePreference(_showDisplayName);
       // Fetch updated user profile and update provider
       final updatedUser = await _apiService.getUserById(
         context.read<UserProvider>().currentUser?.userId ?? 0,
@@ -152,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() {
                             _showDisplayName = false;
                           });
-                          await _saveDisplayNamePreference(false);
+                          await _saveProfile();
                         }
                       },
                     ),
@@ -165,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() {
                             _showDisplayName = true;
                           });
-                          await _saveDisplayNamePreference(true);
+                          await _saveProfile();
                         }
                       },
                     ),
