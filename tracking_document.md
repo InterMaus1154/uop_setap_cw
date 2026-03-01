@@ -21,6 +21,38 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 01/03/2026
+**Description: Location Sharing**
+- Added user location sharing endpoints for storing and updating user GPS coordinates
+- Added location permissions endpoints for sharing location with specific friends
+- Added endpoint to retrieve friends who are sharing their location with the logged-in user
+
+**Files Created:**
+- backend/models/user_location.py
+- backend/models/location_permission.py
+- backend/schemas/UserLocation.py
+- backend/schemas/LocationPermission.py
+- backend/routes/user_locations.py
+
+---
+
+### Julian up2301253 - 01/03/2026
+**Description: Invitation Codes**
+- Added invitation codes feature allowing registered users to generate 12-character invite codes for guests
+- Added guest login via invitation code with automatic guest account creation (24hr expiry)
+- Restricted code generation to 5 per week per user
+
+**Files Created:**
+- backend/models/invitation_code.py
+- backend/schemas/InvitationCode.py
+- backend/routes/invitations.py
+
+**Files Modified:**
+- backend/main.py
+- backend/models/__init__.py
+
+---
+
 ### Mark up2306492 - 27/02/2026
 
 **Description:**
