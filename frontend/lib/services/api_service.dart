@@ -28,6 +28,42 @@ class LoginResponse {
 }
 
 class ApiService {
+  Future<void> updateUserDisplayNamePreference(bool useDisplayName) async {
+    final headers = await _authHeaders();
+    final body = json.encode({'user_use_displayname': useDisplayName});
+    final response = await _httpClient
+        .patch(Uri.parse('$baseUrl/users/me'), headers: headers, body: body)
+        .timeout(_timeout);
+    if (response.statusCode != 200) {
+      throw ApiException(
+        'Failed to update display name preference: ${response.statusCode}',
+        statusCode: response.statusCode,
+      );
+    }
+  }
+
+  Future<void> updateUserProfile({
+    required String fname,
+    required String lname,
+    String? displayName,
+  }) async {
+    final headers = await _authHeaders();
+    final body = json.encode({
+      'user_fname': fname,
+      'user_lname': lname,
+      'user_displayname': displayName,
+    });
+    final response = await _httpClient
+        .patch(Uri.parse('$baseUrl/users/me'), headers: headers, body: body)
+        .timeout(_timeout);
+    if (response.statusCode != 200) {
+      throw ApiException(
+        'Failed to update profile: ${response.statusCode}',
+        statusCode: response.statusCode,
+      );
+    }
+  }
+
   static const String baseUrl = 'http://localhost:8000';
   static const Duration _timeout = Duration(seconds: 10);
   final SecureStorageService _storage;
