@@ -15,8 +15,11 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final ApiService _apiService = ApiService();
+  final _formKey = GlobalKey<FormState>();
   int? _pinCount;
   bool _isLoading = true;
+  bool _isEditing = false;
+  bool _isSaving = false;
 
   late TextEditingController _fnameController;
   late TextEditingController _lnameController;
@@ -51,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    setState(() => _isLoading = true);
+    setState(() => _isSaving = true);
     try {
       await _apiService.updateUserProfile(
         fname: _fnameController.text,
@@ -59,23 +62,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
         displayName: _displayNameController.text.isEmpty
             ? null
             : _displayNameController.text,
+        useDisplayName: _showDisplayName,
       );
-      await _apiService.updateUserDisplayNamePreference(_showDisplayName);
-      // Fetch updated user profile and update provider
+      if (!mounted) return;
       final updatedUser = await _apiService.getUserById(
         context.read<UserProvider>().currentUser?.userId ?? 0,
       );
+      if (!mounted) return;
       context.read<UserProvider>().updateUser(updatedUser);
+      setState(() => _isEditing = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  void _cancelEdit() {
+    final user = context.read<UserProvider>().currentUser;
+    setState(() {
+      _fnameController.text = user?.firstName ?? '';
+      _lnameController.text = user?.lastName ?? '';
+      _displayNameController.text = user?.displayName ?? '';
+      _showDisplayName = user?.useDisplayName ?? false;
+      _isEditing = false;
+    });
   }
 
   Future<void> _logout() async {
@@ -99,188 +116,319 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<UserProvider>().currentUser;
     final initials = _getInitials(user?.firstName ?? '', user?.lastName ?? '');
-    _showDisplayName = user?.useDisplayName ?? false;
+    final displayName = user?.displayName;
+    final fullName = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              // Avatar
+              CircleAvatar(
+                radius: 48,
+                backgroundColor: Colors.blue[400],
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Name
+              Text(
+                fullName,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A1A2E),
+                ),
+              ),
+              if (displayName != null && displayName.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  displayName,
+                  style: TextStyle(fontSize: 15, color: Colors.grey[600]),
+                ),
+              ],
+              const SizedBox(height: 4),
+              Text(
+                user?.email ?? '',
+                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+              ),
+              const SizedBox(height: 20),
+              // Edit profile section
+              _buildEditSection(),
+              const SizedBox(height: 20),
+              // Stats
+              _buildStatCard(),
+              const SizedBox(height: 16),
+              // Friends button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const FriendsScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.people),
+                  label: const Text('Friends'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[400],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Logout
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _logout,
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Logout'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red[400],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEditSection() {
+    if (!_isEditing) {
+      return SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => setState(() => _isEditing = true),
+          icon: const Icon(Icons.edit, size: 18),
+          label: const Text('Edit Profile'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.blue[700],
+            side: BorderSide(color: Colors.blue[300]!),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x14000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(height: 40),
-                CircleAvatar(
-                  radius: 48,
-                  backgroundColor: Colors.blue[400],
-                  child: Text(
-                    initials,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
+                const Text(
+                  'Edit Profile',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A1A2E),
+                  ),
+                ),
+                IconButton(
+                  onPressed: _cancelEdit,
+                  icon: const Icon(Icons.close, size: 20),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _fnameController,
+              decoration: InputDecoration(
+                labelText: 'First Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'First name is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _lnameController,
+              decoration: InputDecoration(
+                labelText: 'Last Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Last name is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: _displayNameController,
+              decoration: InputDecoration(
+                labelText: 'Display Name (optional)',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            // Display name preference toggle
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.visibility, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Show under pins',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Show under pins: '),
-                    ChoiceChip(
-                      label: const Text('Full Name'),
-                      selected: !_showDisplayName,
-                      onSelected: (selected) async {
-                        if (selected) {
-                          setState(() {
-                            _showDisplayName = false;
-                          });
-                          await _saveProfile();
-                        }
-                      },
+                  _buildToggleButton('Full Name', !_showDisplayName, () {
+                    setState(() => _showDisplayName = false);
+                  }),
+                  const SizedBox(width: 6),
+                  _buildToggleButton('Display Name', _showDisplayName, () {
+                    setState(() => _showDisplayName = true);
+                  }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Save / Cancel buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _isSaving ? null : _cancelEdit,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.grey[700],
+                      side: BorderSide(color: Colors.grey[300]!),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    ChoiceChip(
-                      label: const Text('Display Name'),
-                      selected: _showDisplayName,
-                      onSelected: (selected) async {
-                        if (selected) {
-                          setState(() {
-                            _showDisplayName = true;
-                          });
-                          await _saveProfile();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                TextFormField(
-                  controller: _fnameController,
-                  decoration: const InputDecoration(
-                    labelText: 'First Name *',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'First name is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _lnameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Last Name *',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Last name is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Display Name (optional)',
-                    border: OutlineInputBorder(),
+                    child: const Text('Cancel'),
                   ),
                 ),
-                const SizedBox(height: 16),
-                const SizedBox(height: 16),
-                Builder(
-                  builder: (formContext) => ElevatedButton(
-                    onPressed: _isLoading
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _isSaving
                         ? null
                         : () async {
-                            final form = Form.of(formContext);
-                            if (form != null && !form.validate()) return;
-                            await _saveProfile();
+                            if (_formKey.currentState?.validate() ?? false) {
+                              await _saveProfile();
+                            }
                           },
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Save Changes'),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  user?.email ?? '',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green[400],
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: _isLoading
+                    child: _isSaving
                         ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
                           )
                         : const Text('Save Changes'),
                   ),
                 ),
-                const SizedBox(height: 32),
-                _buildStatCard(),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const FriendsScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.people),
-                    label: const Text('Friends'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[400],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _logout,
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Logout'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[400],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
               ],
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(String label, bool isSelected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue[400] : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? Colors.blue[400]! : Colors.grey[300]!,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : Colors.grey[600],
           ),
         ),
       ),

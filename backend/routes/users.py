@@ -25,14 +25,17 @@ def update_user(user_data: UserUpdate, user: User = Depends(require_auth), db: S
     """Update the logged-in user's details"""
 
     # only update fields that are present
-    if user_data.user_fname:
+    if user_data.user_fname is not None:
         user.user_fname = user_data.user_fname
 
-    if user_data.user_lname:
+    if user_data.user_lname is not None:
         user.user_lname = user_data.user_lname
 
-    if user_data.user_display_name:
+    if user_data.user_display_name is not None:
         user.user_displayname = user_data.user_display_name
+
+    if user_data.user_use_displayname is not None:
+        user.user_use_displayname = user_data.user_use_displayname
 
     db.commit()
     db.refresh(user)
