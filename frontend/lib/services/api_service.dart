@@ -216,7 +216,11 @@ class ApiService {
   }
 
   // Pins
-  Future<List<Pin>> getPins({List<int>? catIds, List<int>? catLevelIds}) async {
+  Future<List<Pin>> getPins({
+    List<int>? catIds,
+    List<int>? catLevelIds,
+    DateTime? pinExpireAt,
+  }) async {
     String path = '/pins/';
 
     final params = <String>[];
@@ -225,6 +229,11 @@ class ApiService {
     }
     if (catLevelIds != null && catLevelIds.isNotEmpty) {
       params.addAll(catLevelIds.map((id) => 'cat_level_id=$id'));
+    }
+    if (pinExpireAt != null) {
+      params.add(
+        'pin_expire_at=${Uri.encodeQueryComponent(pinExpireAt.toIso8601String())}',
+      );
     }
 
     if (params.isNotEmpty) {

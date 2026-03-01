@@ -29,11 +29,16 @@ class _MapScreenState extends State<MapScreen> {
     _loadCategories();
   }
 
-  Future<void> _loadPins({List<int>? catIds, List<int>? catLevelIds}) async {
+  Future<void> _loadPins({
+    List<int>? catIds,
+    List<int>? catLevelIds,
+    DateTime? pinExpireAt,
+  }) async {
     try {
       final results = await _apiService.getPins(
         catIds: catIds,
         catLevelIds: catLevelIds,
+        pinExpireAt: pinExpireAt,
       );
       if (!mounted) return;
       setState(() {
@@ -291,24 +296,6 @@ class _MapScreenState extends State<MapScreen> {
   List<int> _activeCategoryLevelIds = [];
   DateTime? _activeExpiryDate;
 
-  bool _matchesExpiryDateFilter(Pin pin) {
-    if (_activeExpiryDate == null) return true;
-
-    final endOfSelectedDay = DateTime(
-      _activeExpiryDate!.year,
-      _activeExpiryDate!.month,
-      _activeExpiryDate!.day,
-      23,
-      59,
-      59,
-      999,
-      999,
-    );
-    final localPinExpiry = pin.pinExpireAt.toLocal();
-
-    return !localPinExpiry.isAfter(endOfSelectedDay);
-  }
-
   String _formatFilterDate(DateTime date) {
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');
@@ -438,9 +425,7 @@ class _MapScreenState extends State<MapScreen> {
               MarkerLayer(
                 markers: [
                   for (final pin in _pins.where(
-                    (p) =>
-                        p.pinExpireAt.isAfter(DateTime.now()) &&
-                        _matchesExpiryDateFilter(p),
+                    (p) => p.pinExpireAt.isAfter(DateTime.now()),
                   ))
                     Marker(
                       point: LatLng(pin.pinLatitude, pin.pinLongitude),
@@ -837,6 +822,10 @@ class _MapScreenState extends State<MapScreen> {
       _activeCategoryLevelIds = categoryLevelIds ?? [];
       _activeExpiryDate = expiryDate;
     });
-    _loadPins(catIds: categoryIds, catLevelIds: categoryLevelIds);
+    _loadPins(
+      catIds: categoryIds,
+      catLevelIds: categoryLevelIds,
+      pinExpireAt: expiryDate,
+    );
   }
 }
