@@ -168,23 +168,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-                TextField(
+                TextFormField(
                   controller: _fnameController,
                   decoration: const InputDecoration(
-                    labelText: 'First Name',
+                    labelText: 'First Name *',
                     border: OutlineInputBorder(),
                   ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'First name is required';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 8),
-                TextField(
+                TextFormField(
                   controller: _lnameController,
                   decoration: const InputDecoration(
-                    labelText: 'Last Name',
+                    labelText: 'Last Name *',
                     border: OutlineInputBorder(),
                   ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Last name is required';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 8),
-                TextField(
+                TextFormField(
                   controller: _displayNameController,
                   decoration: const InputDecoration(
                     labelText: 'Display Name (optional)',
@@ -192,19 +204,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () async {
-                          await _saveProfile();
-                        },
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Save Changes'),
+                const SizedBox(height: 16),
+                Builder(
+                  builder: (formContext) => ElevatedButton(
+                    onPressed: _isLoading
+                        ? null
+                        : () async {
+                            final form = Form.of(formContext);
+                            if (form != null && !form.validate()) return;
+                            await _saveProfile();
+                          },
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text('Save Changes'),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
