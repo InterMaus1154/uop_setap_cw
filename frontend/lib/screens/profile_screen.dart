@@ -1,41 +1,3 @@
-      Future<void> _saveDisplayNamePreference(bool useDisplayName) async {
-        setState(() => _isLoading = true);
-        try {
-          await _apiService.updateUserDisplayNamePreference(useDisplayName);
-          await context.read<UserProvider>().login(user?.email ?? '');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Display name preference updated')),
-          );
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to update preference: $e')),
-          );
-        } finally {
-          setState(() => _isLoading = false);
-        }
-      }
-    bool _showDisplayName = false;
-  Future<void> _saveProfile() async {
-    setState(() => _isLoading = true);
-    try {
-      await _apiService.updateUserProfile(
-        fname: _fnameController.text,
-        lname: _lnameController.text,
-        displayName: _displayNameController.text.isEmpty ? null : _displayNameController.text,
-      );
-      // Optionally refresh user data in provider
-      await context.read<UserProvider>().login(user?.email ?? '');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update profile: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/friend_provider.dart';
@@ -59,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _fnameController;
   late TextEditingController _lnameController;
   late TextEditingController _displayNameController;
-  final bool _isEditing = false;
+  bool _showDisplayName = false;
 
   @override
   void initState() {
@@ -68,7 +30,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = context.read<UserProvider>().currentUser;
     _fnameController = TextEditingController(text: user?.firstName ?? '');
     _lnameController = TextEditingController(text: user?.lastName ?? '');
-    _displayNameController = TextEditingController(text: user?.displayName ?? '');
+    _displayNameController = TextEditingController(
+      text: user?.displayName ?? '',
+    );
+    _showDisplayName = user?.useDisplayName ?? false;
   }
 
   Future<void> _loadPinCount() async {
@@ -85,6 +50,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _saveDisplayNamePreference(bool useDisplayName) async {
+    setState(() => _isLoading = true);
+    try {
+      await _apiService.updateUserDisplayNamePreference(useDisplayName);
+      final user = context.read<UserProvider>().currentUser;
+      await context.read<UserProvider>().login(user?.email ?? '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Display name preference updated')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update preference: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    setState(() => _isLoading = true);
+    try {
+      await _apiService.updateUserProfile(
+        fname: _fnameController.text,
+        lname: _lnameController.text,
+        displayName: _displayNameController.text.isEmpty
+            ? null
+            : _displayNameController.text,
+      );
+      final user = context.read<UserProvider>().currentUser;
+      await context.read<UserProvider>().login(user?.email ?? '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to update profile: $e')));
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _logout() async {
     context.read<FriendProvider>().clear();
     await context.read<UserProvider>().logout();
@@ -94,6 +101,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         (route) => false,
       );
     }
+  }
+
+  String _getInitials(String firstName, String lastName) {
+    final first = firstName.isNotEmpty ? firstName[0] : '?';
+    final last = lastName.isNotEmpty ? lastName[0] : '?';
+    return '$first$last';
   }
 
   @override
@@ -184,7 +197,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text('Save Changes'),
                   ),
                 ),
@@ -280,11 +297,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
-  }
-
-  String _getInitials(String first, String last) {
-    final f = first.isNotEmpty ? first[0] : '?';
-    final l = last.isNotEmpty ? last[0] : '?';
-    return '$f$l'.toUpperCase();
   }
 }
