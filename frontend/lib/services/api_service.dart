@@ -7,6 +7,7 @@ import '../models/pin.dart';
 import '../models/pin_form_data.dart';
 import '../models/friend_request.dart';
 import '../models/user.dart';
+import '../models/user_location.dart';
 import 'secure_storage_service.dart';
 
 class ApiException implements Exception {
@@ -483,4 +484,154 @@ class ApiService {
       throw ApiException('An unexpected error occurred: $e');
     }
   }
+
+  // User Locations
+  Future<UserLocation> createOrUpdateUserLocation(
+    double latitude,
+    double longitude,
+  ) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl/user-locations/'),
+            headers: headers,
+            body: json.encode({'latitude': latitude, 'longitude': longitude}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        return UserLocation.fromJson(json.decode(response.body));
+      } else {
+        throw ApiException(
+          'Failed to create/update location: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } on FormatException {
+      throw ApiException('Invalid response from server.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<UserLocation> updateUserLocation({
+    double? latitude,
+    double? longitude,
+    bool? isEnabled,
+  }) async {
+    try {
+      final headers = await _authHeaders();
+      final body = <String, dynamic>{};
+      if (latitude != null) body['latitude'] = latitude;
+      if (longitude != null) body['longitude'] = longitude;
+      if (isEnabled != null) body['is_enabled'] = isEnabled;
+
+      final response = await _httpClient
+          .patch(
+            Uri.parse('$baseUrl/user-locations/'),
+            headers: headers,
+            body: json.encode(body),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        return UserLocation.fromJson(json.decode(response.body));
+      } else {
+        throw ApiException(
+          'Failed to update location: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } on FormatException {
+      throw ApiException('Invalid response from server.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<UserLocation> getUserLocation() async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .get(Uri.parse('$baseUrl/user-locations/'), headers: headers)
+          .timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        return UserLocation.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 404) {
+        throw ApiException('User location not found.', statusCode: 404);
+      } else {
+        throw ApiException(
+          'Failed to get location: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } on FormatException {
+      throw ApiException('Invalid response from server.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<void> deleteUserLocation() async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .delete(Uri.parse('$baseUrl/user-locations/'), headers: headers)
+          .timeout(_timeout);
+
+      if (response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 404) {
+        throw ApiException('User location not found.', statusCode: 404);
+      } else {
+        throw ApiException(
+          'Failed to delete location: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<List<UserLocation>> getFriendsLocations() =>
+      _getList('/user-locations/friends', UserLocation.fromJson);
 }
