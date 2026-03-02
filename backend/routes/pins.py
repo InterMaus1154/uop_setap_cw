@@ -15,6 +15,7 @@ from schemas.Pin import PinResponse, PinCreate, PinUpdate, PinReactionRequest
 from middleware.auth import require_auth, optional_auth
 from models.user import User
 from models.pin_report import PinReport
+from models.pin_report import PinReportType
 from schemas.pin_reporting import PinReportRequest
 
 router = APIRouter(prefix="/pins", tags=["pins"])
@@ -279,3 +280,10 @@ def report_pin(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/report-types")
+def get_report_types():
+
+    """Return all valid pin report types"""
+    
+    return [report_type.value for report_type in PinReportType]
