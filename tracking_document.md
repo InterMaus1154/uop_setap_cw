@@ -168,7 +168,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 - backend/routes/pins.py
 
 
-### Theodore up2282406 - 02/03/2026
+### Theodore up2282406 - 23/02/2026
 **Summary:** Added like and dislike buttons to the frontend pin display. Implemented interactive UI for users to react to pins, with status saved and reflected in the backend.
 
 **Files Modified/Created:**
