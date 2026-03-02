@@ -320,7 +320,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 - backend/routes/pins.py
 - backend/models/pin.py
 
-**Notes:** Used API endpoint to fetch pins and display them. Added error handling/loading state. (Add any extra context or details about your implementation.)
+**Notes:** Used API endpoint to fetch pins and display them. Added error handling/loading state. 
 - Mapped backend pin model to frontend display format.
 - Added pagination and filtering for pins.
 - Ensured pins are only shown if not expired.
