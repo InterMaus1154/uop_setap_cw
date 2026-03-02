@@ -47,7 +47,7 @@ Use this document to log your contributions. Add new entries at the top.
 - Updated pin model and API to respect user’s display name setting.
 - Added toggle control in frontend for users to set their preference.
 - Tested with different user settings to ensure correct display.
--Once again , the preferences were not showing that they were actually being saved , but Josh came to the rescue and resolved it 
+-Once again , the preferences were not showing that they were actually being saved , but Josh came to the rescue and resolved it , I beleive it had to do with slight issues in the backend
 
 
 ### Julian up2301253 - 01/03/2026
