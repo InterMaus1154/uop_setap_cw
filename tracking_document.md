@@ -340,7 +340,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 - Added pagination and filtering for pins.
 - Ensured pins are only shown if not expired.
 - Improved UI with pin details, author info, and reaction buttons.
-- Tested with sample data and handled edge cases (e.g., no pins available).
+- Tested with sample data and handled edge cases, Added error message for failed pin fetches. (e.g., no pins available).
 
 
 
