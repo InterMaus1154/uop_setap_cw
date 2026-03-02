@@ -16,7 +16,7 @@ from middleware.auth import require_auth, optional_auth
 from models.user import User
 from models.pin_report import PinReport
 from models.pin_report import PinReportType
-from schemas.pin_reporting import PinReportRequest
+from schemas.pin_reporting import PinReportRequest, PinReportResponse
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
@@ -287,3 +287,26 @@ def get_report_types():
     """Return all valid pin report types"""
     
     return [report_type.value for report_type in PinReportType]
+
+@router.get("/{pin_id}/reports", response_model=list[PinReportResponse])
+def get_pin_reports(
+        pin_id: int,
+        user: User = Depends(require_auth),
+        db: Session = Depends(get_db)
+):
+    """Return all reports for a given pin"""
+
+    # Check pin exists
+    pin = db.query(Pin).filter(
+        Pin.pin_id == pin_id,
+        Pin.pin_isactive == True
+    ).first()
+
+    if not pin:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    reports = db.query(PinReport).filter(
+        PinReport.pin_id == pin_id
+    ).all()
+
+    return reports
