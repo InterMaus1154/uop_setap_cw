@@ -53,6 +53,13 @@ Use this document to log your contributions. Add new entries at the top.
 
 --
 
+### Luke up2264308 - 01/03/2026
+**Summary** 
+Added pin filtering based on expiry date so that you can put a date in and then have it only show the pins that expire before or on that date 
+**Files Modified** 
+- frontend/lib/screens/map_screen.dart
+- frontend/services/api_service.dart
+
 ### Josh up2255832 - 01/03/2026
 **Summary:** Fixed Theo's profile editing bug — changes to name/display name weren't saving. Fixed frontend API calls (wrong HTTP method, wrong endpoint, wrong field names), backend schema (missing field, truthy checks), and profile screen UI (duplicate save button, broken validation, state overwrite on rebuild). Restyled profile screen with collapsible edit form. Added backend and frontend tests to catch regressions.
 
@@ -188,6 +195,14 @@ Use this document to log your contributions. Add new entries at the top.
 - backend/schemas/Friend.py
 
 ---
+
+### Luke up2264308 - 23/02/2026
+**Summary** Added pin filtering on the frontend based on categories and category levels 
+
+**Files modified**
+- frontend/lib/screens/map_screen.dart
+- frontend/services/api_service.dart
+
 
 ### Josh up2255832 - 23/02/2026
 **Summary:** Code review and fix of Theo's pin reactions frontend implementation
@@ -455,6 +470,13 @@ Once endpoints exist, I can wire up the API calls and remove hardcoded data.
 **Notes:** Read the erd, frontend models are aligned with backend DB schema and ready for API integration. Added defensive casting for latitude/longitude to handle int/double JSON inconsistencies.(this issue was alerted from a code review by the flutter discord community) Map screen has UI scaffolding, just needs pin fetching and creation endpoints wired up.
 
 ---
+
+
+### Luke up2264308 - 06/02/2026
+**Summary** Added sample data in the database to allow for easier testing of things such as sample users, categories, pins, etc.
+
+**Files Modified/Created:**
+- backend/database/seed.py
 
 ### Josh up2255832 - 31/01/2026 
 **Summary:** Created test user flow branch with fake login system for UI testing
