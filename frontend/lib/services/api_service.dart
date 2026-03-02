@@ -28,33 +28,21 @@ class LoginResponse {
 }
 
 class ApiService {
-  Future<void> updateUserDisplayNamePreference(bool useDisplayName) async {
-    final headers = await _authHeaders();
-    final body = json.encode({'user_use_displayname': useDisplayName});
-    final response = await _httpClient
-        .patch(Uri.parse('$baseUrl/users/me'), headers: headers, body: body)
-        .timeout(_timeout);
-    if (response.statusCode != 200) {
-      throw ApiException(
-        'Failed to update display name preference: ${response.statusCode}',
-        statusCode: response.statusCode,
-      );
-    }
-  }
-
   Future<void> updateUserProfile({
     required String fname,
     required String lname,
     String? displayName,
+    required bool useDisplayName,
   }) async {
     final headers = await _authHeaders();
     final body = json.encode({
       'user_fname': fname,
       'user_lname': lname,
-      'user_displayname': displayName,
+      'user_display_name': displayName,
+      'user_use_displayname': useDisplayName,
     });
     final response = await _httpClient
-        .patch(Uri.parse('$baseUrl/users/me'), headers: headers, body: body)
+        .put(Uri.parse('$baseUrl/users/'), headers: headers, body: body)
         .timeout(_timeout);
     if (response.statusCode != 200) {
       throw ApiException(
@@ -216,7 +204,11 @@ class ApiService {
   }
 
   // Pins
-  Future<List<Pin>> getPins({List<int>? catIds, List<int>? catLevelIds}) async {
+  Future<List<Pin>> getPins({
+    List<int>? catIds,
+    List<int>? catLevelIds,
+    DateTime? pinExpireAt,
+  }) async {
     String path = '/pins/';
 
     final params = <String>[];
@@ -225,6 +217,11 @@ class ApiService {
     }
     if (catLevelIds != null && catLevelIds.isNotEmpty) {
       params.addAll(catLevelIds.map((id) => 'cat_level_id=$id'));
+    }
+    if (pinExpireAt != null) {
+      params.add(
+        'pin_expire_at=${Uri.encodeQueryComponent(pinExpireAt.toIso8601String())}',
+      );
     }
 
     if (params.isNotEmpty) {

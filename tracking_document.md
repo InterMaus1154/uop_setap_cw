@@ -21,6 +21,56 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 01/03/2026
+**Description: Location Sharing**
+- Added user location sharing endpoints for storing and updating user GPS coordinates
+- Added location permissions endpoints for sharing location with specific friends
+- Added endpoint to retrieve friends who are sharing their location with the logged-in user
+
+**Files Created:**
+- backend/models/user_location.py
+- backend/models/location_permission.py
+- backend/schemas/UserLocation.py
+- backend/schemas/LocationPermission.py
+- backend/routes/user_locations.py
+
+---
+
+### Julian up2301253 - 01/03/2026
+**Description: Invitation Codes**
+- Added invitation codes feature allowing registered users to generate 12-character invite codes for guests
+- Added guest login via invitation code with automatic guest account creation (24hr expiry)
+- Restricted code generation to 5 per week per user
+
+**Files Created:**
+- backend/models/invitation_code.py
+- backend/schemas/InvitationCode.py
+- backend/routes/invitations.py
+
+**Files Modified:**
+- backend/main.py
+- backend/models/__init__.py
+
+--
+
+### Josh up2255832 - 01/03/2026
+**Summary:** Fixed Theo's profile editing bug — changes to name/display name weren't saving. Fixed frontend API calls (wrong HTTP method, wrong endpoint, wrong field names), backend schema (missing field, truthy checks), and profile screen UI (duplicate save button, broken validation, state overwrite on rebuild). Restyled profile screen with collapsible edit form. Added backend and frontend tests to catch regressions.
+
+**Files Modified:**
+- frontend/lib/screens/profile_screen.dart (fixed all UI bugs, restyled with collapsible edit form)
+- frontend/lib/services/api_service.dart (fixed updateUserProfile to use PUT /users/ with correct field names, removed updateUserDisplayNamePreference)
+- backend/schemas/User.py (added user_use_displayname to UserUpdate)
+- backend/routes/users.py (fixed truthy checks, added user_use_displayname handling)
+- backend/requirements.txt (added hypothesis, httpx)
+- .gitignore (added .hypothesis/)
+
+**Files Created:**
+- backend/tests/test_profile_update_bugs.py (4 backend bug condition tests)
+- backend/tests/test_profile_preservation.py (4 backend preservation tests including property-based)
+- frontend/test/screens/profile_screen_bugs_test.dart (2 frontend widget tests)
+
+---
+
 ### Mark up2306492 - 27/02/2026
 
 **Description:**

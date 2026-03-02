@@ -24,6 +24,7 @@ class UserUpdate(BaseModel):
     user_display_name: Optional[str] = Field(None, max_length=30)
     user_fname: Optional[str] = Field(None, max_length=60)
     user_lname: Optional[str] = Field(None, max_length=60)
+    user_use_displayname: Optional[bool] = None
 
 
 class UserResponse(UserBase):

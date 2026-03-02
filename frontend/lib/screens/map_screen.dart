@@ -29,11 +29,16 @@ class _MapScreenState extends State<MapScreen> {
     _loadCategories();
   }
 
-  Future<void> _loadPins({List<int>? catIds, List<int>? catLevelIds}) async {
+  Future<void> _loadPins({
+    List<int>? catIds,
+    List<int>? catLevelIds,
+    DateTime? pinExpireAt,
+  }) async {
     try {
       final results = await _apiService.getPins(
         catIds: catIds,
         catLevelIds: catLevelIds,
+        pinExpireAt: pinExpireAt,
       );
       if (!mounted) return;
       setState(() {
@@ -289,6 +294,13 @@ class _MapScreenState extends State<MapScreen> {
   // Active filter selections
   List<int> _activeCategoryIds = [];
   List<int> _activeCategoryLevelIds = [];
+  DateTime? _activeExpiryDate;
+
+  String _formatFilterDate(DateTime date) {
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
+  }
 
   @override
   void dispose() {
@@ -579,6 +591,7 @@ class _MapScreenState extends State<MapScreen> {
     // Initialize with current active filters
     List<int> selectedCategoryIds = List.from(_activeCategoryIds);
     List<int> selectedCategoryLevelIds = List.from(_activeCategoryLevelIds);
+    DateTime? selectedExpiryDate = _activeExpiryDate;
 
     showDialog<void>(
       context: context,
@@ -653,6 +666,61 @@ class _MapScreenState extends State<MapScreen> {
                         const Divider(),
                         const SizedBox(height: 8),
                         const Text(
+                          'Maximum Expiry Date',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  final now = DateTime.now();
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: selectedExpiryDate ?? now,
+                                    firstDate: DateTime(now.year - 1),
+                                    lastDate: DateTime(now.year + 10),
+                                  );
+                                  if (pickedDate != null) {
+                                    setDialogState(() {
+                                      selectedExpiryDate = pickedDate;
+                                    });
+                                  }
+                                },
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  size: 16,
+                                ),
+                                label: Text(
+                                  selectedExpiryDate == null
+                                      ? 'Show pins expiring on/before...'
+                                      : 'On/before ${_formatFilterDate(selectedExpiryDate!)}',
+                                ),
+                              ),
+                            ),
+                            if (selectedExpiryDate != null) ...[
+                              const SizedBox(width: 8),
+                              IconButton(
+                                tooltip: 'Clear date',
+                                onPressed: () {
+                                  setDialogState(() {
+                                    selectedExpiryDate = null;
+                                  });
+                                },
+                                icon: const Icon(Icons.clear),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        const Text(
                           'Select Category Levels',
                           style: TextStyle(
                             fontSize: 16,
@@ -704,7 +772,7 @@ class _MapScreenState extends State<MapScreen> {
                     TextButton(
                       onPressed: () {
                         // Clear all filters
-                        _applyFilters(null, null);
+                        _applyFilters(null, null, null);
                         Navigator.pop(context);
                       },
                       child: const Text('Clear All'),
@@ -722,6 +790,7 @@ class _MapScreenState extends State<MapScreen> {
                           selectedCategoryLevelIds.isEmpty
                               ? null
                               : selectedCategoryLevelIds,
+                          selectedExpiryDate,
                         );
                         Navigator.pop(context);
                       },
@@ -741,13 +810,22 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void _applyFilters(List<int>? categoryIds, List<int>? categoryLevelIds) {
+  void _applyFilters(
+    List<int>? categoryIds,
+    List<int>? categoryLevelIds,
+    DateTime? expiryDate,
+  ) {
     setState(() {
       _isLoadingPins = true;
       // Store the active filters
       _activeCategoryIds = categoryIds ?? [];
       _activeCategoryLevelIds = categoryLevelIds ?? [];
+      _activeExpiryDate = expiryDate;
     });
-    _loadPins(catIds: categoryIds, catLevelIds: categoryLevelIds);
+    _loadPins(
+      catIds: categoryIds,
+      catLevelIds: categoryLevelIds,
+      pinExpireAt: expiryDate,
+    );
   }
 }

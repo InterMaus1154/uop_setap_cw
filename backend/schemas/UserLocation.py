@@ -1,38 +1,33 @@
-from pydantic import BaseModel, ConfigDict
+"""
+Pydantic schema for UserLocation for response and request validation
+"""
+
+from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
 
-class UserLocationBase(BaseModel):
-    user_id: int
-    latitude: float
-    longitude: float
-    is_enabled: bool
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class CreateUserLocation(BaseModel):
-    """Create schema for a user location creation."""
-    # user_id is passed from the authenticated user, not from a request payload
+    """Schema for creating a user location"""
     latitude: float
     longitude: float
-    is_enabled: bool
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 class UpdateUserLocation(BaseModel):
-    """Update schema for UserLocation. All fields are optional"""
+    """Schema for updating a user location"""
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     is_enabled: Optional[bool] = None
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class UserLocationResponse(UserLocationBase):
+class UserLocationResponse(BaseModel):
+    """Schema for user location response"""
+    user_loc_id: int
+    user_id: int
+    latitude: float
+    longitude: float
+    is_enabled: bool
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = {"from_attributes": True}
