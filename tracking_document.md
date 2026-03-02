@@ -36,6 +36,9 @@ Use this document to log your contributions. Add new entries at the top.
 
 ---
 
+### Theodore up2282406 - 01/03/2026 
+**Summary:** Added toggle functionality for displaying pin author name. Users can choose whether their display name is shown on pins.
+
 ### Julian up2301253 - 01/03/2026
 **Description: Invitation Codes**
 - Added invitation codes feature allowing registered users to generate 12-character invite codes for guests
