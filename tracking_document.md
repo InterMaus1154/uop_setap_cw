@@ -160,6 +160,26 @@ Use this document to log your contributions. Add new entries at the top.
 **Files modified:**
 - backend/routes/pins.py
 
+
+### Theodore up2282406 - 02/03/2026
+**Summary:** Added like and dislike buttons to the frontend pin display. Implemented interactive UI for users to react to pins, with status saved and reflected in the backend.
+
+**Files Modified/Created:**
+- frontend/lib/widgets/pin_card.dart
+- frontend/lib/screens/pins_screen.dart
+- frontend/lib/services/pin_service.dart
+- backend/routes/pins.py (if backend API was updated)
+
+**Notes:**
+- Created like/dislike buttons with visual feedback for selected state.
+- Connected buttons to API endpoints to save user reactions.
+- Updated pin UI to show current reaction status for each user.
+- Handled optimistic UI updates and error states.
+- Ensured backend saves and returns reaction status correctly.
+- when i had finished coding , there were still issues with the likes/dislikes not saving , Josh helped out to make sure this was resolved with Testing  multiple users and edge cases (e.g., toggling reactions, removing reaction).
+
+
+
 ### Julian up2301253 - 23/02/2026
 **Description:** Added /sent and /blocked endpoints and updated code to match spec.
 
