@@ -199,6 +199,7 @@ Use this document to log your contributions. Add new entries at the top.
 - backend/routes/pins.py (added loading categories to fetch pin colors)
 - backend/database/seed.py (worked on category levels, categories, subcategories and pinseeder (refined what Luke already had there))
 
+
 ### Josh up2255832 - 18/02/2026
 **Summary:** Added profile page with bottom nav, pin count endpoint
 
@@ -223,6 +224,26 @@ Use this document to log your contributions. Add new entries at the top.
 - backend/routes/friends.py
 
 ---
+
+### Theodore up2282406 - 18/02/2026
+
+**Summary:** Implemented frontend and backend logic for displaying pins to users. Integrated API to fetch pins and render them in the UI. Added loading and error states for better user experience.
+
+**Files Modified/Created:**
+-  frontend/lib/screens/pins_screen.dart
+- frontend/lib/widgets/pin_card.dart
+- backend/routes/pins.py
+- backend/models/pin.py
+
+**Notes:** Used API endpoint to fetch pins and display them. Added error handling/loading state. (Add any extra context or details about your implementation.)
+- Mapped backend pin model to frontend display format.
+- Added pagination and filtering for pins.
+- Ensured pins are only shown if not expired.
+- Improved UI with pin details, author info, and reaction buttons.
+- Tested with sample data and handled edge cases (e.g., no pins available).
+
+
+
 
 ### Josh up2255832 - 18/02/2026
 **Summary:** Code reviewed and fixed pin display on map, improved pin detail sheet
