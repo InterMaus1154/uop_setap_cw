@@ -21,6 +21,10 @@ class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   final ApiService _apiService = ApiService();
 
+  // Hold a reference so we can safely call stopPolling() in dispose
+  // (context.read is not safe after the widget is deactivated)
+  late final LocationProvider _locationProvider;
+
   // Pins from API
   List<Pin> _pins = [];
   bool _isLoadingPins = true;
@@ -34,9 +38,9 @@ class _MapScreenState extends State<MapScreen> {
     // Initialise location provider and start polling for friend positions
     // Use addPostFrameCallback to avoid notifyListeners() during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final locationProvider = context.read<LocationProvider>();
-      locationProvider.init();
-      locationProvider.startPolling();
+      _locationProvider = context.read<LocationProvider>();
+      _locationProvider.init();
+      _locationProvider.startPolling();
     });
   }
 
@@ -319,7 +323,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void dispose() {
     // Stop polling when leaving the map screen
-    context.read<LocationProvider>().stopPolling();
+    _locationProvider.stopPolling();
     _mapController.dispose();
     super.dispose();
   }
