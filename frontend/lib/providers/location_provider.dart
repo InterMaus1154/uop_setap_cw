@@ -89,13 +89,15 @@ class LocationProvider extends ChangeNotifier {
     }
   }
 
-  /// Start polling friend locations every 20 seconds.
-  /// The map screen calls this in initState.
+  /// Start polling every 20 seconds.
+  /// Each tick fetches friend locations and, if sharing is enabled,
+  /// pushes the user's current GPS coordinates to the backend.
   void startPolling() {
     // Don't create duplicate timers
     _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 20), (_) {
       _refreshFriendLocations();
+      _pushOwnLocationIfSharing();
     });
   }
 
@@ -217,6 +219,24 @@ class LocationProvider extends ChangeNotifier {
       notifyListeners();
     } on ApiException {
       // Silently keep previous data — don't spam the user with errors
+    }
+  }
+
+  /// Push the user's current GPS coordinates to the backend.
+  /// Only runs when sharing is enabled so we don't waste battery/network.
+  Future<void> _pushOwnLocationIfSharing() async {
+    if (!isSharingEnabled) return;
+
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      _myLocation = await _apiService.updateUserLocation(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
+    } on ApiException {
+      // Silently ignore — next tick will retry
+    } catch (_) {
+      // GPS can fail (e.g. services disabled mid-session) — don't crash
     }
   }
 
