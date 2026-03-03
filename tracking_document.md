@@ -21,6 +21,26 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 03/03/2026
+**Summary:** Built friend location sharing frontend — friends can see each other's live location on the map with toggleable sharing. Created Dart models for UserLocation and LocationPermission, added ApiService methods for location and permission endpoints, built LocationProvider with GPS integration and 20s polling, registered provider in widget tree, added friend markers (teal avatars with initials and name tooltips) and share toggle FAB to map screen, added per-friend permission switches to friends screen. Fixed 404 handling for users without location records, build context lint warning, and setState-during-build crash.
+
+**Files Created:**
+- frontend/lib/models/user_location.dart
+- frontend/lib/models/location_permission.dart
+- frontend/lib/providers/location_provider.dart
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added 8 location/permission API methods)
+- frontend/lib/screens/map_screen.dart (friend markers, share toggle FAB, polling lifecycle)
+- frontend/lib/screens/friends_screen.dart (per-friend location sharing switches)
+- frontend/lib/main.dart (registered LocationProvider, added clear on logout)
+- frontend/lib/screens/profile_screen.dart (clear LocationProvider on logout)
+- frontend/pubspec.yaml (added geolocator package)
+
+**Notes:** Backend location endpoints were built by Julian. Frontend wires up to all of them. Friend markers show teal circle avatars with the friend's initial, tap to see their name. Share toggle FAB (bottom-left of map) enables/disables your own location sharing. Per-friend switches on the friends list control who can see you. Polling refreshes friend positions every 20 seconds. 404s from the backend (no location record yet) are handled gracefully as empty state.
+
+---
+
 ### Julian up2301253 - 01/03/2026
 **Description: Location Sharing**
 - Added user location sharing endpoints for storing and updating user GPS coordinates
