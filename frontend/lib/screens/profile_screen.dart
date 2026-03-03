@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/friend_provider.dart';
+import '../providers/location_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import 'friends_screen.dart';
@@ -97,6 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _logout() async {
     context.read<FriendProvider>().clear();
+    context.read<LocationProvider>().clear();
     await context.read<UserProvider>().logout();
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
