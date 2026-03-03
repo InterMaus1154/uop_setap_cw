@@ -109,16 +109,24 @@ class LocationProvider extends ChangeNotifier {
 
   /// Toggle the user's location sharing on or off.
   /// If no location record exists yet, creates one using the device's GPS.
+  /// When re-enabling, refreshes GPS coordinates so the position is current.
   Future<void> toggleSharing() async {
     try {
       if (_myLocation == null) {
         // First time enabling — get device GPS and create a record
         await _createLocationFromGPS();
+      } else if (_myLocation!.isEnabled) {
+        // Currently on → turn off (no GPS needed)
+        _myLocation = await _apiService.updateUserLocation(isEnabled: false);
       } else {
-        // Toggle the existing record's is_enabled flag
-        final newEnabled = !_myLocation!.isEnabled;
+        // Currently off → turn on with fresh GPS coordinates
+        final position = await _getCurrentPosition();
+        if (position == null) return; // GPS failed, error already set
+
         _myLocation = await _apiService.updateUserLocation(
-          isEnabled: newEnabled,
+          latitude: position.latitude,
+          longitude: position.longitude,
+          isEnabled: true,
         );
       }
       _error = null;
@@ -129,35 +137,39 @@ class LocationProvider extends ChangeNotifier {
     }
   }
 
-  /// Get the device's GPS position and create a location record on the backend.
-  /// Handles location permission requests from the OS.
-  Future<void> _createLocationFromGPS() async {
-    // Check if location services are enabled on the device
+  /// Get the device's current GPS position.
+  /// Returns null if location services are unavailable or permission denied.
+  Future<Position?> _getCurrentPosition() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _error = 'Location services are disabled. Please enable them.';
       notifyListeners();
-      return;
+      return null;
     }
 
-    // Check and request OS-level location permission
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         _error = 'Location permission denied.';
         notifyListeners();
-        return;
+        return null;
       }
     }
     if (permission == LocationPermission.deniedForever) {
       _error = 'Location permission permanently denied. Enable in settings.';
       notifyListeners();
-      return;
+      return null;
     }
 
-    // Get the current position and send it to the backend
-    final position = await Geolocator.getCurrentPosition();
+    return await Geolocator.getCurrentPosition();
+  }
+
+  /// Get the device's GPS position and create a location record on the backend.
+  Future<void> _createLocationFromGPS() async {
+    final position = await _getCurrentPosition();
+    if (position == null) return; // GPS failed, error already set
+
     _myLocation = await _apiService.createOrUpdateUserLocation(
       position.latitude,
       position.longitude,
