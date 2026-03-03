@@ -8,6 +8,7 @@ import '../models/pin_form_data.dart';
 import '../models/friend_request.dart';
 import '../models/user.dart';
 import '../models/user_location.dart';
+import '../models/location_permission.dart';
 import 'secure_storage_service.dart';
 
 class ApiException implements Exception {
@@ -634,4 +635,89 @@ class ApiService {
 
   Future<List<UserLocation>> getFriendsLocations() =>
       _getList('/user-locations/friends', UserLocation.fromJson);
+
+  // Location Permissions — controls which friends can see your location
+
+  /// Share your location with a specific friend.
+  /// The backend validates that the target user is actually your friend.
+  Future<LocationPermission> createLocationPermission(int userId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl/location-permissions/'),
+            headers: headers,
+            body: json.encode({'user_id': userId}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 201) {
+        return LocationPermission.fromJson(json.decode(response.body));
+      } else if (response.statusCode == 404) {
+        throw ApiException(
+          'Location not found. Enable location sharing first.',
+          statusCode: 404,
+        );
+      } else if (response.statusCode == 403) {
+        throw ApiException('User is not your friend.', statusCode: 403);
+      } else {
+        throw ApiException(
+          'Failed to share location: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } on FormatException {
+      throw ApiException('Invalid response from server.');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  /// Stop sharing your location with a specific friend.
+  Future<void> deleteLocationPermission(int userId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .delete(
+            Uri.parse('$baseUrl/location-permissions/$userId'),
+            headers: headers,
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 204) {
+        return;
+      } else if (response.statusCode == 404) {
+        throw ApiException('Permission not found.', statusCode: 404);
+      } else {
+        throw ApiException(
+          'Failed to revoke permission: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  /// Get the list of friends you are currently sharing your location with.
+  Future<List<LocationPermission>> getLocationPermissions() =>
+      _getList('/location-permissions/', LocationPermission.fromJson);
 }
