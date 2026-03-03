@@ -70,12 +70,17 @@ class LocationProvider extends ChangeNotifier {
       }
 
       // Fetch friend locations and permissions in parallel
-      final results = await Future.wait([
-        _apiService.getFriendsLocations(),
-        _apiService.getLocationPermissions(),
-      ]);
-      _friendLocations = results[0] as List<UserLocation>;
-      _permissions = results[1] as List<model.LocationPermission>;
+      // Permissions returns 404 if the user has no location record — treat as empty
+      _friendLocations = await _apiService.getFriendsLocations();
+      try {
+        _permissions = await _apiService.getLocationPermissions();
+      } on ApiException catch (e) {
+        if (e.statusCode == 404) {
+          _permissions = [];
+        } else {
+          rethrow;
+        }
+      }
     } on ApiException catch (e) {
       _error = e.message;
     } finally {
@@ -204,12 +209,18 @@ class LocationProvider extends ChangeNotifier {
   }
 
   /// Reload the permissions list from the backend.
+  /// Returns empty list if user has no location record yet (404).
   Future<void> refreshPermissions() async {
     try {
       _permissions = await _apiService.getLocationPermissions();
       _error = null;
     } on ApiException catch (e) {
-      _error = e.message;
+      if (e.statusCode == 404) {
+        _permissions = [];
+        _error = null;
+      } else {
+        _error = e.message;
+      }
     } finally {
       notifyListeners();
     }

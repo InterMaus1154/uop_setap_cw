@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user.dart';
 import '../providers/friend_provider.dart';
+import '../providers/location_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 
@@ -25,6 +26,8 @@ class _FriendsScreenState extends State<FriendsScreen>
       provider.loadFriends();
       provider.loadIncomingRequests();
       provider.loadOutgoingRequests();
+      // Load location permissions so the share toggles show correct state
+      context.read<LocationProvider>().refreshPermissions();
     });
   }
 
@@ -91,6 +94,8 @@ class _FriendsListTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<FriendProvider>();
+    // Watch location provider so toggles update when permissions change
+    final locationProvider = context.watch<LocationProvider>();
 
     if (provider.friendsLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -110,7 +115,30 @@ class _FriendsListTab extends StatelessWidget {
       itemCount: provider.friends.length,
       itemBuilder: (context, index) {
         final friend = provider.friends[index];
-        return _UserTile(user: friend);
+        // Check if we're currently sharing location with this friend
+        final isSharing = locationProvider.permissions.any(
+          (p) => p.userId == friend.userId,
+        );
+        return _UserTile(
+          user: friend,
+          isSharingLocation: isSharing,
+          onToggleSharing: (value) async {
+            if (value) {
+              await locationProvider.grantPermission(friend.userId);
+            } else {
+              await locationProvider.revokePermission(friend.userId);
+            }
+            // Show error if the toggle failed
+            if (context.mounted && locationProvider.error != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(locationProvider.error!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        );
       },
     );
   }
@@ -251,7 +279,14 @@ class _OutgoingRequestsTab extends StatelessWidget {
 
 class _UserTile extends StatelessWidget {
   final User user;
-  const _UserTile({required this.user});
+  final bool isSharingLocation;
+  final ValueChanged<bool>? onToggleSharing;
+
+  const _UserTile({
+    required this.user,
+    this.isSharingLocation = false,
+    this.onToggleSharing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +303,19 @@ class _UserTile extends StatelessWidget {
       ),
       title: Text(name),
       subtitle: Text(user.email, style: TextStyle(color: Colors.grey[600])),
+      // Location sharing toggle — lets you choose who can see your location
+      trailing: onToggleSharing != null
+          ? Tooltip(
+              message: isSharingLocation
+                  ? 'Stop sharing location with $name'
+                  : 'Share location with $name',
+              child: Switch(
+                value: isSharingLocation,
+                activeThumbColor: Colors.teal,
+                onChanged: onToggleSharing,
+              ),
+            )
+          : null,
     );
   }
 }

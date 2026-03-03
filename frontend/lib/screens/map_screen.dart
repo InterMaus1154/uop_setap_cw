@@ -32,9 +32,12 @@ class _MapScreenState extends State<MapScreen> {
     _loadCategories();
 
     // Initialise location provider and start polling for friend positions
-    final locationProvider = context.read<LocationProvider>();
-    locationProvider.init();
-    locationProvider.startPolling();
+    // Use addPostFrameCallback to avoid notifyListeners() during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final locationProvider = context.read<LocationProvider>();
+      locationProvider.init();
+      locationProvider.startPolling();
+    });
   }
 
   Future<void> _loadPins({
@@ -659,7 +662,7 @@ class _MapScreenState extends State<MapScreen> {
                     : Colors.white,
                 onPressed: () async {
                   await locationProvider.toggleSharing();
-                  if (mounted && locationProvider.error != null) {
+                  if (context.mounted && locationProvider.error != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(locationProvider.error!),
