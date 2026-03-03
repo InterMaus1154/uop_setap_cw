@@ -6,7 +6,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entry Template
 
-```
+```     
 ### [Your Name and up number] - [Date] [Time]
 **Summary:** Brief description of what you did
 
