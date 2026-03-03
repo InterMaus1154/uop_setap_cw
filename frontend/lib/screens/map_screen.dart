@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import '../models/category.dart';
 import '../models/pin_form_data.dart';
 import '../models/pin.dart';
+import '../providers/friend_provider.dart';
+import '../providers/location_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
 
@@ -27,6 +30,11 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _loadPins();
     _loadCategories();
+
+    // Initialise location provider and start polling for friend positions
+    final locationProvider = context.read<LocationProvider>();
+    locationProvider.init();
+    locationProvider.startPolling();
   }
 
   Future<void> _loadPins({
@@ -302,8 +310,13 @@ class _MapScreenState extends State<MapScreen> {
     return '${date.year}-$month-$day';
   }
 
+  // Track which friend marker is tapped to show their name tooltip
+  int? _selectedFriendUserId;
+
   @override
   void dispose() {
+    // Stop polling when leaving the map screen
+    context.read<LocationProvider>().stopPolling();
     _mapController.dispose();
     super.dispose();
   }
@@ -347,6 +360,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _onMapTap(TapPosition tapPosition, LatLng location) {
+    // Dismiss any open friend tooltip
+    if (_selectedFriendUserId != null) {
+      setState(() => _selectedFriendUserId = null);
+    }
     if (_isPlacingPin) {
       setState(() => _selectedLocation = location);
     }
@@ -404,6 +421,91 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch location provider so the map rebuilds when friend positions update
+    final locationProvider = context.watch<LocationProvider>();
+    final friendProvider = context.read<FriendProvider>();
+
+    // Build friend markers from the polled locations
+    final friendMarkers = <Marker>[];
+    for (final loc in locationProvider.friendLocations) {
+      if (!loc.isEnabled) continue;
+
+      // Resolve the friend's name from the cache (or fetch it)
+      final cachedUser = friendProvider.userCache[loc.userId];
+      final displayName = cachedUser != null
+          ? (cachedUser.displayName ?? cachedUser.firstName)
+          : '?';
+      final initial = displayName.isNotEmpty
+          ? displayName[0].toUpperCase()
+          : '?';
+
+      // Kick off a background resolve if we don't have this user cached yet
+      if (cachedUser == null) {
+        friendProvider.resolveUser(loc.userId).then((_) {
+          if (mounted) setState(() {});
+        });
+      }
+
+      friendMarkers.add(
+        Marker(
+          point: LatLng(loc.latitude, loc.longitude),
+          width: 40,
+          height: 40,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                // Toggle tooltip: tap again to dismiss
+                _selectedFriendUserId = _selectedFriendUserId == loc.userId
+                    ? null
+                    : loc.userId;
+              });
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Friend avatar circle with their initial
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.teal,
+                  child: Text(
+                    initial,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                // Tooltip popup showing the friend's name
+                if (_selectedFriendUserId == loc.userId)
+                  Positioned(
+                    bottom: 40,
+                    left: -30,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        displayName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -453,6 +555,8 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                 ],
               ),
+              // Friend location markers — separate layer so they render on top of pins
+              if (friendMarkers.isNotEmpty) MarkerLayer(markers: friendMarkers),
             ],
           ),
 
@@ -544,6 +648,39 @@ class _MapScreenState extends State<MapScreen> {
 
           // Normal mode buttons (hidden during pin placement)
           if (!_isPlacingPin) ...[
+            // Location sharing toggle (bottom-left)
+            Positioned(
+              bottom: 32,
+              left: 16,
+              child: FloatingActionButton.small(
+                heroTag: 'shareLocation',
+                backgroundColor: locationProvider.isSharingEnabled
+                    ? Colors.teal
+                    : Colors.white,
+                onPressed: () async {
+                  await locationProvider.toggleSharing();
+                  if (mounted && locationProvider.error != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(locationProvider.error!),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                tooltip: locationProvider.isSharingEnabled
+                    ? 'Stop sharing location'
+                    : 'Share my location',
+                child: Icon(
+                  locationProvider.isSharingEnabled
+                      ? Icons.location_on
+                      : Icons.location_off,
+                  color: locationProvider.isSharingEnabled
+                      ? Colors.white
+                      : Colors.grey,
+                ),
+              ),
+            ),
             //Pin Filter button
             Positioned(
               top: 60,
