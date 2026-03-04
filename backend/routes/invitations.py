@@ -75,6 +75,25 @@ def create_invitation_code(
     db.refresh(invitation)
     return invitation
 
+@router.get("/invitation-codes", status_code=200, response_model=list[InvitationCodeResponse])
+def get_active_invitation_codes(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_auth)
+):
+    """Return all active invitation codes for the user"""
+
+    now = datetime.utcnow()
+    codes = (
+        db.query(InvitationCode)
+        .filter(
+            InvitationCode.creator_id == current_user.user_id,
+            InvitationCode.expires_at > now,
+            InvitationCode.is_used == False
+        )
+        .all()
+    )
+    return codes
+
 @router.post("/login/code", status_code=200, response_model=UserLoginResponse)
 def login_with_code(
     request: LoginWithCodeRequest,
