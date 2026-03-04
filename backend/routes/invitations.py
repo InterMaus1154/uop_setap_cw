@@ -75,7 +75,7 @@ def create_invitation_code(
     db.refresh(invitation)
     return invitation
 
-@router.post("/login/code", status_code=200, response_model=UserLoginResponse)
+@router.post("/auth/login/code", status_code=200, response_model=UserLoginResponse, tags=['auth'])
 def login_with_code(
     request: LoginWithCodeRequest,
     db: Session = Depends(get_db)
