@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Pin {
   final int pinId;
   final int catId;
@@ -11,6 +13,12 @@ class Pin {
   final bool pinIsActive;
   final DateTime pinExpireAt;
   final DateTime createdAt;
+  final String? pinColorHex;
+  final String? pinAuthorName;
+
+  final int pinLikes;
+  final int pinDislikes;
+  final int? userReaction; // 1=like, -1=dislike, null=none
 
   Pin({
     required this.pinId,
@@ -25,7 +33,23 @@ class Pin {
     required this.pinIsActive,
     required this.pinExpireAt,
     required this.createdAt,
+    this.pinColorHex,
+    this.pinAuthorName,
+    required this.pinLikes,
+    required this.pinDislikes,
+    this.userReaction,
   });
+
+  /// Parse hex string to a Flutter Color
+  Color get pinColor {
+    if (pinColorHex == null || pinColorHex!.isEmpty) return Colors.blue;
+    try {
+      final hex = pinColorHex!.replaceFirst('#', '');
+      return Color(int.parse('FF$hex', radix: 16));
+    } catch (_) {
+      return Colors.blue;
+    }
+  }
 
   factory Pin.fromJson(Map<String, dynamic> json) {
     return Pin(
@@ -41,6 +65,11 @@ class Pin {
       pinIsActive: json['pin_isactive'] as bool,
       pinExpireAt: DateTime.parse(json['pin_expire_at'] as String),
       createdAt: DateTime.parse(json['created_at'] as String),
+      pinColorHex: json['pin_color'] as String?,
+      pinAuthorName: json['pin_author_name'] as String?,
+      pinLikes: json['pin_likes'] as int? ?? 0,
+      pinDislikes: json['pin_dislikes'] as int? ?? 0,
+      userReaction: json['user_reaction'] as int?,
     );
   }
 

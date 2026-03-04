@@ -8,14 +8,17 @@ README~
 
 # Python
 backend/venv/
+venv/
 __pycache__/
 *.pyc
+.hypothesis/
 *.bak
+**/*.bak
 .idea
 .vsc
 backend/.idea
 backend/.vsc
-
+backend/.env
 
 # Flutter
 frontend/.dart_tool/

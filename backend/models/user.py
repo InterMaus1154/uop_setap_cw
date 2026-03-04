@@ -15,6 +15,7 @@ class User(Base):
     user_lname = Column(String(60), nullable=False)
     user_email = Column(String(250), nullable=False, unique=True)
     user_displayname = Column(String(30), nullable=True)
+    user_use_displayname = Column(Boolean, nullable=False, server_default=text("false"), default=False)
     user_isactive = Column(Boolean, nullable=False, server_default=text("true"), default=True)
     user_token = Column(String(500), nullable=True)
     last_login = Column(DateTime, nullable=True)
@@ -27,9 +28,6 @@ class User(Base):
     bans = relationship("UserBan", back_populates="user")
     sent_messages = relationship("Message", foreign_keys="[Message.sender_id]", back_populates="sender")
     received_messages = relationship("Message", foreign_keys="[Message.receiver_id]", back_populates="receiver")
-    shared_locations = relationship("LocationSharing", foreign_keys="[LocationSharing.user_id]", back_populates="user")
-    received_locations = relationship("LocationSharing", foreign_keys="[LocationSharing.target_user_id]",
-                                      back_populates="target_user")
     sent_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.user_id]",
                                       back_populates="requester")
     received_relationships = relationship("UserRelationship", foreign_keys="[UserRelationship.target_user_id]",

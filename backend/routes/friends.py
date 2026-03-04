@@ -83,7 +83,6 @@ def blocked_users(db: Session = Depends(get_db), user: User = Depends(require_au
     ).all()
     return rels
 
-
 @router.patch("/{rel_id}", response_model=FriendResponse)
 def update_relationship(rel_id: int, payload: FriendUpdate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Update relationship status (accept / reject / block)."""
@@ -113,8 +112,3 @@ def delete_relationship(rel_id: int, db: Session = Depends(get_db), user: User =
     db.delete(rel)
     db.commit()
     return
-    
-    
-    
-
-
