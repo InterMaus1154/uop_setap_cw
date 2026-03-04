@@ -1,11 +1,19 @@
 # RestAPI Documentation
-## Content
+
+```{toctree}
+:maxdepth 1
+:caption Endpoints specification
+
+auth
+```
+
+## Page Content
 - [Overview](#overview)
 - [What is a REST API?](#what-is-a-rest-api)
 - [Authentication](#authentication)
     - [Overview](#overview-1)
     - [Authentication Logic](#authentication-logic)
-- [Endpoints](#endpoints)
+- [Endpoints](#endpoints-overview)
 
 ## Overview
 This document will guide you through the different API endpoints used for **CampusConnect**. Using this API, you can even create your own frontend in your preferred language/framework.\
@@ -25,6 +33,7 @@ There are four main types of requests:
 For example, sending a `GET` request to `/pins` would return a list of pins, while sending a `POST` request to `/pins` would create a new one.
 
 ## Authentication
+
 ### Overview
 Some routes are protected by authentication, while some routes are partially protected - they need authentication only for extra logic/functionality.\
 As this is just a prototype, we simplified the login functionality to just only using email, and not email+password.\
@@ -35,4 +44,16 @@ Protected routes require the `Authorization` header to contain a `Bearer` token 
 A token can be obtained from either `POST /auth/login` or `POST /login/code` endpoints.\
 For missing or invalid token, a protected route will return `401` HTTP status.
 
-## Endpoints
+## Endpoints Overview
+
+Our endpoints are categorised logically, and have the prefix for the entity they represent.\
+All of our endpoints returns and expects JSON.\
+This section just provides a basic description of the endpoints. To see the required request and response, click on each individual endpoint and will take you to the corresponding page.
+
+### Auth endpoints
+
+| Method | Endpoint | Description | Auth Required |
+| ------ | -------- | ----------- | ------------- |
+| POST | [/auth/login](auth.md#post-authlogin) | Login with email | No |
+| POST | [/auth/logout](auth.md#post-authlogout) | Logout | Yes |
+| POST | [/auth/login/code](auth.md#post-authlogincode) | Login with invitation code | No | 

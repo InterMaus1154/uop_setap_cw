@@ -4,7 +4,8 @@
 
 users
 installation
-api
+api/index
+api/auth
 ```
 
 ## About
