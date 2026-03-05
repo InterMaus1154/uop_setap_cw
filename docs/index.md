@@ -6,7 +6,6 @@ users
 installation
 frontend/index
 api/index
-api/auth
 ```
 
 ## About

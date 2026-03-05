@@ -57,3 +57,4 @@ This section just provides a basic description of the endpoints. To see the requ
 | POST | [/auth/login](auth.md#post-authlogin) | Login with email | No |
 | POST | [/auth/logout](auth.md#post-authlogout) | Logout | Yes |
 | POST | [/auth/login/code](auth.md#post-authlogincode) | Login with invitation code | No | 
+
