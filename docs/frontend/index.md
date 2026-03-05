@@ -91,3 +91,84 @@ flutter test test/models/ test/providers/ test/services/
 ```{note}
 The default `widget_test.dart` in the test root is a Flutter template file and is not maintained. It can be ignored.
 ```
+
+## State Management
+
+The app uses the [Provider](https://pub.dev/packages/provider) package for state management. All providers are registered at the top of the widget tree in `main.dart` using `MultiProvider`:
+
+```dart
+MultiProvider(
+  providers: [
+    ChangeNotifierProvider(create: (_) => UserProvider()),
+    ChangeNotifierProvider(create: (_) => FriendProvider()),
+    ChangeNotifierProvider(create: (_) => LocationProvider()),
+  ],
+  child: MaterialApp(...),
+)
+```
+
+This makes all three providers available to every screen in the app via `context.watch<T>()` (to rebuild on changes) or `context.read<T>()` (for one-off access without rebuilding).
+
+### UserProvider
+
+Manages the currently logged-in user.
+
+| Property / Method | Description |
+|-------------------|-------------|
+| `currentUser` | The logged-in `User` object, or `null` if not logged in |
+| `isLoggedIn` | Whether a user is currently authenticated |
+| `isLoading` | `true` while a login request is in progress |
+| `login(email)` | Calls `POST /auth/login`, stores the returned user and auth token |
+| `logout()` | Calls `POST /auth/logout`, clears the token and user state |
+| `updateUser(user)` | Directly sets the current user (used after profile edits) |
+
+### FriendProvider
+
+Manages the friends list, friend requests, and a user name resolution cache.
+
+| Property / Method | Description |
+|-------------------|-------------|
+| `friends` | List of accepted `User` friends |
+| `incomingRequests` | Pending `FriendRequest` objects sent to the current user |
+| `outgoingRequests` | Pending `FriendRequest` objects sent by the current user |
+| `userCache` | `Map<int, User>` cache for resolved user names (avoids repeat lookups) |
+| `loadFriends()` | Fetches the friends list from `GET /friends/` |
+| `loadIncomingRequests()` | Fetches incoming requests and resolves sender names |
+| `loadOutgoingRequests()` | Fetches outgoing requests and resolves target names |
+| `resolveUser(userId)` | Looks up a user by ID, caches the result, returns a fallback on failure |
+| `sendRequest(userId)` | Sends a friend request via `POST /friends/` |
+| `acceptRequest(relId)` | Accepts a request, then reloads friends and incoming lists |
+| `rejectRequest(relId)` | Rejects a request, reloads incoming list |
+| `blockRequest(relId)` | Blocks a request, reloads incoming list |
+| `cancelRequest(relId)` | Cancels an outgoing request, reloads outgoing list |
+| `clear()` | Resets all state to defaults — called on logout |
+
+### LocationProvider
+
+Manages location sharing, GPS polling, and per-friend permissions.
+
+| Property / Method | Description |
+|-------------------|-------------|
+| `myLocation` | The current user's `UserLocation` record, or `null` if not yet created |
+| `isSharingEnabled` | Whether the user is actively sharing their location |
+| `friendLocations` | List of `UserLocation` objects for friends sharing with the current user |
+| `permissions` | List of `LocationPermission` records (friends the user is sharing with) |
+| `isLoading` | `true` during initial data fetch |
+| `error` | Error message from the last failed operation, or `null` |
+| `init()` | Fetches own location, friend locations, and permissions from the backend |
+| `startPolling()` | Starts a 20-second timer that refreshes friend locations and pushes own GPS |
+| `stopPolling()` | Cancels the polling timer |
+| `toggleSharing()` | Toggles location sharing on/off — creates a record on first use, refreshes GPS on re-enable |
+| `grantPermission(friendId)` | Shares your location with a friend (creates location record if needed) |
+| `revokePermission(friendId)` | Stops sharing your location with a friend |
+| `refreshPermissions()` | Reloads the permissions list from the backend |
+| `clear()` | Cancels polling, resets all state — called on logout |
+
+### Patterns
+
+A few patterns are consistent across all providers:
+
+- **Constructor injection**: `FriendProvider` and `LocationProvider` accept an optional `ApiService` parameter. In production the default instance is used; in tests a mocked service can be passed in.
+- **`clear()` on logout**: Every provider has a `clear()` method that resets state to defaults. These are all called when the user logs out (from `ProfileScreen`).
+- **Loading and error state**: Each provider tracks `isLoading` and `error` so screens can show spinners and error messages.
+- **`notifyListeners()`**: Called after every state change so widgets using `context.watch<T>()` rebuild automatically.
