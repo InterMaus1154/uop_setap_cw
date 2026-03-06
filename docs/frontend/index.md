@@ -172,3 +172,153 @@ A few patterns are consistent across all providers:
 - **`clear()` on logout**: Every provider has a `clear()` method that resets state to defaults. These are all called when the user logs out (from `ProfileScreen`).
 - **Loading and error state**: Each provider tracks `isLoading` and `error` so screens can show spinners and error messages.
 - **`notifyListeners()`**: Called after every state change so widgets using `context.watch<T>()` rebuild automatically.
+
+## API Service
+
+All backend communication goes through a single class: `ApiService` in `lib/services/api_service.dart`. There is no direct HTTP usage anywhere else in the codebase — screens and providers always go through `ApiService`.
+
+### Configuration
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `baseUrl` | `http://localhost:8000` | Backend server address |
+| `_timeout` | 10 seconds | Request timeout for all HTTP calls |
+
+The constructor accepts optional `http.Client` and `SecureStorageService` parameters for dependency injection. In production the defaults are used; in tests mocked versions can be passed in:
+
+```dart
+// Production (default)
+final api = ApiService();
+
+// Testing with mocks
+final api = ApiService(storage: mockStorage, httpClient: mockClient);
+```
+
+### Authentication
+
+Auth tokens are managed by `SecureStorageService`, a thin wrapper around `flutter_secure_storage` that stores the token in the OS keychain. `ApiService` reads the token and attaches it to every request via the `_authHeaders()` helper:
+
+```dart
+Future<Map<String, String>> _authHeaders() async {
+  final token = await _storage.getToken();
+  return {
+    'Content-Type': 'application/json',
+    if (token != null) 'Authorization': 'Bearer $token',
+  };
+}
+```
+
+On login, the token is saved automatically. On logout, it is cleared both server-side (via `POST /auth/logout`) and locally.
+
+### Error Handling
+
+All methods throw `ApiException` on failure. This is a custom exception class that carries a human-readable `message` and an optional `statusCode`:
+
+```dart
+class ApiException implements Exception {
+  final String message;
+  final int? statusCode;
+}
+```
+
+Every HTTP call catches the following error types and wraps them in `ApiException`:
+
+| Exception | Message |
+|-----------|---------|
+| `SocketException` | No internet connection |
+| `TimeoutException` | Request timed out |
+| `ClientException` | Could not connect to server |
+| `FormatException` | Invalid response from server |
+
+Callers (providers and screens) catch `ApiException` and display the message in a `SnackBar` or set it on an error state field.
+
+### The `_getList` Helper
+
+Most GET endpoints return a JSON array. Rather than repeating the same fetch-decode-map logic, `_getList` handles it generically:
+
+```dart
+Future<List<T>> _getList<T>(
+  String path,
+  T Function(Map<String, dynamic>) fromJson,
+)
+```
+
+Usage is a one-liner per endpoint:
+
+```dart
+Future<List<User>> getFriends() => _getList('/friends/', User.fromJson);
+Future<List<Pin>> getCategories() => _getList('/categories/', Category.fromJson);
+```
+
+### Methods by Domain
+
+#### Auth
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `login(email)` | POST | `/auth/login` | `LoginResponse` (user + token) |
+| `logout()` | POST | `/auth/logout` | void (clears token even if request fails) |
+
+#### Users
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `getUsers()` | GET | `/users/` | `List<User>` |
+| `getUserById(userId)` | GET | `/users/{userId}` | `User` |
+| `searchUsers(email)` | GET | `/users/search/{email}` | `List<User>` |
+| `updateUserProfile(...)` | PUT | `/users/` | void |
+| `getMyPinCount()` | GET | `/users/me/pin-count` | `int` |
+
+#### Pins
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `getPins({catIds, catLevelIds, pinExpireAt})` | GET | `/pins/` (with query params) | `List<Pin>` |
+| `createPin(formData)` | POST | `/pins/` | `Pin` |
+| `reactToPin(pinId, value)` | PATCH | `/pins/{pinId}/react` | void |
+| `deletePinReaction(pinId)` | DELETE | `/pins/{pinId}/react` | void |
+
+#### Categories
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `getCategories()` | GET | `/categories/` | `List<Category>` |
+| `getCategoryLevels()` | GET | `/categories/levels` | `List<CategoryLevel>` |
+| `getSubCategories()` | GET | `/categories/sub-categories` | `List<SubCategory>` |
+
+#### Friends
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `getFriends()` | GET | `/friends/` | `List<User>` |
+| `getIncomingRequests()` | GET | `/friends/requests` | `List<FriendRequest>` |
+| `getSentRequests()` | GET | `/friends/sent` | `List<FriendRequest>` |
+| `sendFriendRequest(targetUserId)` | POST | `/friends/` | `FriendRequest` |
+| `updateFriendRequest(relId, response)` | PATCH | `/friends/{relId}` | `FriendRequest` |
+| `deleteFriendRequest(relId)` | DELETE | `/friends/{relId}` | void |
+
+#### User Locations
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `createOrUpdateUserLocation(lat, lng)` | POST | `/user-locations/` | `UserLocation` |
+| `updateUserLocation({lat, lng, isEnabled})` | PATCH | `/user-locations/` | `UserLocation` |
+| `getUserLocation()` | GET | `/user-locations/` | `UserLocation` |
+| `deleteUserLocation()` | DELETE | `/user-locations/` | void |
+| `getFriendsLocations()` | GET | `/user-locations/friends` | `List<UserLocation>` |
+
+#### Location Permissions
+
+| Method | HTTP | Endpoint | Returns |
+|--------|------|----------|---------|
+| `createLocationPermission(userId)` | POST | `/location-permissions/` | `LocationPermission` |
+| `deleteLocationPermission(userId)` | DELETE | `/location-permissions/{userId}` | void |
+| `getLocationPermissions()` | GET | `/location-permissions/` | `List<LocationPermission>` |
+
+### Adding a New Endpoint
+
+To add a new API method:
+
+1. If it returns a JSON array, use `_getList` with the model's `fromJson` factory
+2. If it returns a single object or needs custom logic, follow the existing pattern: `_authHeaders()`, `_httpClient.verb(...)`, status code checks, wrap errors in `ApiException`
+3. Add the corresponding model in `lib/models/` if one doesn't exist yet
