@@ -6,7 +6,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entry Template
 
-```
+```     
 ### [Your Name and up number] - [Date] [Time]
 **Summary:** Brief description of what you did
 
@@ -20,6 +20,224 @@ Use this document to log your contributions. Add new entries at the top.
 ---
 
 ## Entries
+
+### Josh up2255832 - 03/03/2026
+**Summary:** Built friend location sharing frontend — friends can see each other's live location on the map with toggleable sharing. Created Dart models for UserLocation and LocationPermission, added ApiService methods for location and permission endpoints, built LocationProvider with GPS integration and 20s polling, registered provider in widget tree, added friend markers (teal avatars with initials and name tooltips) and share toggle FAB to map screen, added per-friend permission switches to friends screen. Fixed 404 handling for users without location records, build context lint warning, and setState-during-build crash.
+
+**Files Created:**
+- frontend/lib/models/user_location.dart
+- frontend/lib/models/location_permission.dart
+- frontend/lib/providers/location_provider.dart
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added 8 location/permission API methods)
+- frontend/lib/screens/map_screen.dart (friend markers, share toggle FAB, polling lifecycle)
+- frontend/lib/screens/friends_screen.dart (per-friend location sharing switches)
+- frontend/lib/main.dart (registered LocationProvider, added clear on logout)
+- frontend/lib/screens/profile_screen.dart (clear LocationProvider on logout)
+- frontend/pubspec.yaml (added geolocator package)
+
+**Notes:** Backend location endpoints were built by Julian. Frontend wires up to all of them. Friend markers show teal circle avatars with the friend's initial, tap to see their name. Share toggle FAB (bottom-left of map) enables/disables your own location sharing. Per-friend switches on the friends list control who can see you. Polling refreshes friend positions every 20 seconds. 404s from the backend (no location record yet) are handled gracefully as empty state.
+
+---
+
+### Julian up2301253 - 01/03/2026
+**Description: Location Sharing**
+- Added user location sharing endpoints for storing and updating user GPS coordinates
+- Added location permissions endpoints for sharing location with specific friends
+- Added endpoint to retrieve friends who are sharing their location with the logged-in user
+
+**Files Created:**
+- backend/models/user_location.py
+- backend/models/location_permission.py
+- backend/schemas/UserLocation.py
+- backend/schemas/LocationPermission.py
+- backend/routes/user_locations.py
+
+---
+
+### Theodore up2282406 - 01/03/2026 
+**Summary:** Added toggle functionality for displaying pin author name. Users can choose whether their display name is shown on pins.
+
+**Files Modified/Created:**
+- frontend/lib/widgets/pin_card.dart 
+
+**Notes:**
+- Implemented backend logic to store user preference for showing display name.
+- Updated pin model and API to respect user’s display name setting.
+- Added toggle control in frontend for users to set their preference.
+-Added a boolean field to the user or pin model to store display name preference.
+- Tested with different user settings to ensure correct display.
+-Once again , the preferences were not showing that they were actually being saved , but Josh came to the rescue and resolved it , I beleive it had to do with slight issues in the backend
+
+
+### Julian up2301253 - 01/03/2026
+**Description: Invitation Codes**
+- Added invitation codes feature allowing registered users to generate 12-character invite codes for guests
+- Added guest login via invitation code with automatic guest account creation (24hr expiry)
+- Restricted code generation to 5 per week per user
+
+**Files Created:**
+- backend/models/invitation_code.py
+- backend/schemas/InvitationCode.py
+- backend/routes/invitations.py
+
+**Files Modified:**
+- backend/main.py
+- backend/models/__init__.py
+
+--
+
+### Luke up2264308 - 01/03/2026
+**Summary** 
+Added pin filtering based on expiry date so that you can put a date in and then have it only show the pins that expire before or on that date 
+**Files Modified** 
+- frontend/lib/screens/map_screen.dart
+- frontend/services/api_service.dart
+
+### Josh up2255832 - 01/03/2026
+**Summary:** Fixed Theo's profile editing bug — changes to name/display name weren't saving. Fixed frontend API calls (wrong HTTP method, wrong endpoint, wrong field names), backend schema (missing field, truthy checks), and profile screen UI (duplicate save button, broken validation, state overwrite on rebuild). Restyled profile screen with collapsible edit form. Added backend and frontend tests to catch regressions.
+
+**Files Modified:**
+- frontend/lib/screens/profile_screen.dart (fixed all UI bugs, restyled with collapsible edit form)
+- frontend/lib/services/api_service.dart (fixed updateUserProfile to use PUT /users/ with correct field names, removed updateUserDisplayNamePreference)
+- backend/schemas/User.py (added user_use_displayname to UserUpdate)
+- backend/routes/users.py (fixed truthy checks, added user_use_displayname handling)
+- backend/requirements.txt (added hypothesis, httpx)
+- .gitignore (added .hypothesis/)
+
+**Files Created:**
+- backend/tests/test_profile_update_bugs.py (4 backend bug condition tests)
+- backend/tests/test_profile_preservation.py (4 backend preservation tests including property-based)
+- frontend/test/screens/profile_screen_bugs_test.dart (2 frontend widget tests)
+
+---
+
+### Mark up2306492 - 27/02/2026
+
+**Description:**
+- added pin_expire_at filter for `GET /pins` that filters pins based on pin_expire_at, where expire_at <= selected expire_at
+- refined Josh's `pin_author_name` property on `pin` model to show displayname only if user said so
+
+**Files modified:**
+- backend/models/pin.py
+- backend/routes/pins.py
+
+### Mark up2306492 - 26/02/2026
+
+**Description:**
+- explored how to do API testing in Python
+- installed pytest as a package
+- created a test demo for authentication endpoints which we can use as a "template" for later testing
+- added a test user that can be used for testing, making testing more easy
+
+**Files Created:**
+- backend/tests/base.py
+- backend/tests/test_auth.py
+- backend/tests/test_demo.py
+- backend/conftest.py
+
+### Josh up2255832 - 26/02/2026 (busy busy coding day for me today!)
+**Summary:** Added unit tests for friends feature — FriendRequest model, FriendProvider, and ApiService friend methods (25 tests). Refactored ApiService and FriendProvider to accept dependencies via constructor injection so mocked HTTP client and storage can be passed in tests. Removed singleton pattern from SecureStorageService to make it mockable — no functional impact since FlutterSecureStorage is stateless and all instances read/write the same OS keychain.
+
+**Files Created:**
+- frontend/test/models/friend_request_test.dart (6 tests: fromJson, toJson, round-trip, all statuses, missing field, bad date)
+- frontend/test/providers/friend_provider_test.dart (3 tests: initial state, clear resets state, clear notifies listeners)
+- frontend/test/services/api_service_friends_test.dart (16 tests: getFriends, searchUsers, getIncomingRequests, getSentRequests, sendFriendRequest with 201/204/403/422, updateFriendRequest with 200/403/404, deleteFriendRequest with 204/403/404)
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (constructor injection for http.Client and SecureStorageService, replaced top-level http calls with injected client)
+- frontend/lib/providers/friend_provider.dart (constructor injection for ApiService)
+- frontend/lib/services/secure_storage_service.dart (removed singleton pattern, plain constructor for mockability)
+- frontend/pubspec.yaml (added mockito and build_runner dev dependencies)
+
+---
+
+### Josh up2255832 - 26/02/2026
+**Summary:** Implemented friends feature frontend — FriendRequest model, ApiService friend methods, FriendProvider state management, FriendsScreen with tabs (friends list, incoming/outgoing requests), UserSearchDelegate with add friend flow and status code handling, profile screen integration. Also fixed backend UserLocation back_populates bug.
+
+**Files Created:**
+- frontend/lib/models/friend_request.dart
+- frontend/lib/providers/friend_provider.dart
+- frontend/lib/screens/friends_screen.dart
+
+**Files Modified:**
+- frontend/lib/services/api_service.dart (added 7 friend-related API methods)
+- frontend/lib/screens/profile_screen.dart (added Friends button, clear provider on logout)
+- frontend/lib/main.dart (switched to MultiProvider with FriendProvider)
+- backend/models/user_location.py (fixed back_populates from plural to singular)
+
+**Notes:** Backend friend endpoints were already built by Julian. Frontend wires up to all of them: friend list, search, send/accept/reject/block/cancel requests. UserSearchDelegate handles all response codes (201/204/403/422). FriendProvider resolves user names via parallel lookups with caching.
+
+---
+
+### Josh up2255832 - 25/02/2026
+**Summary:** Wrote installation documentation for ReadTheDocs
+
+**Files Modified/Created:**
+- docs/installation.md (full developer installation guide covering backend, frontend, all OS platforms, troubleshooting)
+- docs/conf.py (added sphinx_design extension and colon_fence for tabbed content)
+- docs/requirements.txt (added sphinx-design dependency)
+
+---
+
+### Mark up2306492 - 25/02/2026
+
+**Description:**
+- added user_locations and location_permissions tables to ERD (erd image updated)
+- created UserLocation and LocationPermission models in Python
+- created pydantic schemas for both new models
+
+**Files created**
+- backend/models/user_location.py
+- backend/models/location_permission.py
+- database/erd2.jpg
+- backend/schemas/UserLocation.py
+- backend/schemas/LocationPermission.py
+
+### Mark up2306492 - 24/02/2026
+
+**Description:** Fix pin filtering to work with or logic (minor bug)
+
+**Files modified:**
+- backend/routes/pins.py
+
+
+### Theodore up2282406 - 23/02/2026
+**Summary:** Added like and dislike buttons to the frontend pin display. Implemented interactive UI for users to react to pins, with status saved and reflected in the backend.
+
+**Files Modified/Created:**
+- frontend/lib/widgets/pin_card.dart
+- frontend/lib/screens/pins_screen.dart
+- frontend/lib/services/pin_service.dart
+- backend/routes/pins.py (if backend API was updated)
+
+**Notes:**
+- Created like/dislike buttons with visual feedback for selected state.
+- Connected buttons to API endpoints to save user reactions.
+- Updated pin UI to show current reaction status for each user.
+- Handled optimistic UI updates and error states.
+- Ensured backend saves and returns reaction status correctly.
+- when i had finished coding , there were still issues with the likes/dislikes not saving , Josh helped out to make sure this was resolved with Testing  multiple users and edge cases (e.g., toggling reactions, removing reaction).
+
+
+
+### Julian up2301253 - 23/02/2026
+**Description:** Added /sent and /blocked endpoints and updated code to match spec.
+
+**File(s) Modified:**
+- backend/routes/friends.py
+- backend/schemas/Friend.py
+
+---
+
+### Luke up2264308 - 23/02/2026
+**Summary** Added pin filtering on the frontend based on categories and category levels 
+
+**Files modified**
+- frontend/lib/screens/map_screen.dart
+- frontend/services/api_service.dart
+
 
 ### Josh up2255832 - 23/02/2026
 **Summary:** Code review and fix of Theo's pin reactions frontend implementation
@@ -101,6 +319,7 @@ Use this document to log your contributions. Add new entries at the top.
 - backend/routes/pins.py (added loading categories to fetch pin colors)
 - backend/database/seed.py (worked on category levels, categories, subcategories and pinseeder (refined what Luke already had there))
 
+
 ### Josh up2255832 - 18/02/2026
 **Summary:** Added profile page with bottom nav, pin count endpoint
 
@@ -125,6 +344,27 @@ Use this document to log your contributions. Add new entries at the top.
 - backend/routes/friends.py
 
 ---
+
+### Theodore up2282406 - 18/02/2026
+
+**Summary:** Implemented frontend and backend logic for displaying pins to users. Integrated API to fetch pins and render them in the UI. Added loading and error states for better user experience.
+
+**Files Modified/Created:**
+-  frontend/lib/screens/pins_screen.dart
+- frontend/lib/widgets/pin_card.dart
+- backend/routes/pins.py
+- backend/models/pin.py
+
+**Notes:** Used API endpoint to fetch pins and display them. Added error handling/loading state. 
+- Mapped backend pin model to frontend display format.
+- Added pagination and filtering for pins.
+- Ensured pins are only shown if not expired.
+- Improved UI with pin details, author info, and reaction buttons.
+-Verified pin display works on web and mobile platforms.
+- Tested with sample data and handled edge cases, Added error message for failed pin fetches. (e.g., no pins available).
+
+
+
 
 ### Josh up2255832 - 18/02/2026
 **Summary:** Code reviewed and fixed pin display on map, improved pin detail sheet
@@ -266,6 +506,13 @@ Once endpoints exist, I can wire up the API calls and remove hardcoded data.
 **Notes:** Read the erd, frontend models are aligned with backend DB schema and ready for API integration. Added defensive casting for latitude/longitude to handle int/double JSON inconsistencies.(this issue was alerted from a code review by the flutter discord community) Map screen has UI scaffolding, just needs pin fetching and creation endpoints wired up.
 
 ---
+
+
+### Luke up2264308 - 06/02/2026
+**Summary** Added sample data in the database to allow for easier testing of things such as sample users, categories, pins, etc.
+
+**Files Modified/Created:**
+- backend/database/seed.py
 
 ### Josh up2255832 - 31/01/2026 
 **Summary:** Created test user flow branch with fake login system for UI testing

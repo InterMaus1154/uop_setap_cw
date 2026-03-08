@@ -3,6 +3,11 @@ import '../models/user.dart';
 import '../services/api_service.dart';
 
 class UserProvider extends ChangeNotifier {
+  void updateUser(User user) {
+    _currentUser = user;
+    notifyListeners();
+  }
+
   final ApiService _apiService = ApiService();
   User? _currentUser;
   bool _isLoading = false;

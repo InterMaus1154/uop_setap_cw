@@ -3,7 +3,6 @@ from sqlalchemy import Column, BigInteger, SmallInteger, ForeignKey, String, DOU
 from sqlalchemy.orm import relationship
 
 from database.db import Base
-from models.pin_reaction import PinReaction
 
 
 class Pin(Base):
@@ -32,9 +31,9 @@ class Pin(Base):
     @property
     def pin_author_name(self) -> str:
         """Return display name if set, otherwise first name only (privacy)"""
-        if self.user.user_displayname:
+        if self.user.user_use_displayname and self.user.user_displayname:
             return self.user.user_displayname
-        return self.user.user_fname
+        return f"{self.user.user_fname} {self.user.user_lname[0]}."
 
     @property
     def pin_color(self) -> str:

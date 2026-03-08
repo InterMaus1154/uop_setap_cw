@@ -4,7 +4,8 @@
 
 users
 installation
-api
+frontend/index
+api/index
 ```
 
 ## About

@@ -3,7 +3,6 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from models.location_sharing import LocationSharing
 from models.user_relationship import UserRelationship, UserRelationshipType
 from models.pin_report import PinReport, PinReportType
 from models.admin import Admin
@@ -24,16 +23,25 @@ def seed_users():
     print("Seeding users")
 
     users = [
-        User(user_fname="John", user_lname="Doe", user_email="johndoe@port.ac.uk", user_displayname="JDoe92", user_use_displayname=True),
-        User(user_fname="Jane", user_lname="Doe", user_email="janedoe@port.ac.uk", user_displayname="JaneDoe23", user_use_displayname=False),
-        User(user_fname="Carl", user_lname="Johnson", user_email="carljohnson@port.ac.uk", user_displayname="CJ_Da_Great", user_use_displayname=True),
-        User(user_fname="Alice", user_lname="Smith", user_email="alicesmith@port.ac.uk", user_displayname="AliceS", user_use_displayname=False),
-        User(user_fname="Michael", user_lname="Brown", user_email="michaelbrown@port.ac.uk", user_displayname="MikeBrown88", user_use_displayname=True),
+        User(user_fname="John", user_lname="Doe", user_email="johndoe@port.ac.uk", user_displayname="JDoe92",
+             user_use_displayname=True),
+        User(user_fname="Jane", user_lname="Doe", user_email="janedoe@port.ac.uk", user_displayname="JaneDoe23",
+             user_use_displayname=False),
+        User(user_fname="Carl", user_lname="Johnson", user_email="carljohnson@port.ac.uk",
+             user_displayname="CJ_Da_Great", user_use_displayname=True),
+        User(user_fname="Alice", user_lname="Smith", user_email="alicesmith@port.ac.uk", user_displayname="AliceS",
+             user_use_displayname=False),
+        User(user_fname="Michael", user_lname="Brown", user_email="michaelbrown@port.ac.uk",
+             user_displayname="MikeBrown88", user_use_displayname=True),
         User(user_fname="Sarah", user_lname="Wilson", user_email="sarahwilson@port.ac.uk"),
-        User(user_fname="James", user_lname="Davis", user_email="jamesdavis@port.ac.uk", user_displayname="JDavis_", user_use_displayname=True),
-        User(user_fname="Emma", user_lname="Miller", user_email="emmamiller@port.ac.uk", user_displayname="EmmaMiller", user_use_displayname=False),
-        User(user_fname="David", user_lname="Taylor", user_email="davidtaylor@port.ac.uk", user_displayname="Taylor_D", user_use_displayname=True),
+        User(user_fname="James", user_lname="Davis", user_email="jamesdavis@port.ac.uk", user_displayname="JDavis_",
+             user_use_displayname=True),
+        User(user_fname="Emma", user_lname="Miller", user_email="emmamiller@port.ac.uk", user_displayname="EmmaMiller",
+             user_use_displayname=False),
+        User(user_fname="David", user_lname="Taylor", user_email="davidtaylor@port.ac.uk", user_displayname="Taylor_D",
+             user_use_displayname=True),
         User(user_fname="Lisa", user_lname="Anderson", user_email="lisaanderson@port.ac.uk"),
+        User(user_fname="Test", user_lname="Test", user_email="test@test.app", user_token="fbde5c7f68cdd28e9105cdbafa6556eb")
 
     ]
     seed_template(users)
@@ -499,23 +507,6 @@ def seed_user_relationships():
     print("User relationships seeded")
 
 
-def seed_location_sharing():
-    print("Seeding location sharing")
-
-    # Example data for location sharing
-    location_sharing_data = [
-        LocationSharing(user_id=1, target_user_id=2, is_enabled=True),
-        LocationSharing(user_id=1, target_user_id=3, is_enabled=False),
-        LocationSharing(user_id=2, target_user_id=3, is_enabled=True),
-        LocationSharing(user_id=2, target_user_id=4, is_enabled=False),
-        LocationSharing(user_id=3, target_user_id=4, is_enabled=True),
-    ]
-
-    seed_template(location_sharing_data)
-
-    print("Location sharing seeded")
-
-
 def seed_template(data_to_seed):
     db = SessionLocal()
     db.add_all(data_to_seed)
@@ -536,7 +527,6 @@ def seed_all():
     seed_pin_reactions()
     seed_pin_reports()
     seed_user_relationships()
-    seed_location_sharing()
     print("Finished seeding")
 
 
