@@ -146,17 +146,3 @@ def login_with_code(
     db.refresh(guest)
 
     return UserLoginResponse(token=token, **guest.__dict__)
-        
-    
-
-
-
-
-
-
-
-
-
-
-
-
