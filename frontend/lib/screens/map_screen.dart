@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -664,16 +665,17 @@ class _MapScreenState extends State<MapScreen> {
                 backgroundColor: locationProvider.isSharingEnabled
                     ? Colors.teal
                     : Colors.white,
-                onPressed: () async {
-                  await locationProvider.toggleSharing();
-                  if (context.mounted && locationProvider.error != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(locationProvider.error!),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
+                onPressed: () {
+                  _showLocationFilterDialog();
+                  // await locationProvider.toggleSharing();
+                  // if (context.mounted && locationProvider.error != null) {
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     SnackBar(
+                  //       content: Text(locationProvider.error!),
+                  //       backgroundColor: Colors.red,
+                  //     ),
+                  //   );
+                  // }
                 },
                 tooltip: locationProvider.isSharingEnabled
                     ? 'Stop sharing location'
@@ -729,6 +731,120 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
     );
+  }
+
+  String? selectedOption;
+  final TextEditingController _customTimeController = TextEditingController();
+  void _showLocationFilterDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 400,
+                  maxHeight: 600,
+                ),
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: const Text(
+                    'Location filtering',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'How long do you want to share your location for',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        RadioGroup<String>(
+                          groupValue: selectedOption,
+                          onChanged: (String? newValue) {
+                            setDialogState(() => selectedOption = newValue);
+                          },
+                          child: Column(
+                            children: [
+                              RadioListTile(
+                                value: '1hour',
+                                title: const Text('1 hour'),
+                              ),
+                              RadioListTile(
+                                value: '2hour',
+                                title: const Text('2 hours'),
+                              ),
+                              RadioListTile(
+                                value: '3hour',
+                                title: const Text('3 hours'),
+                              ),
+                              ListTile(
+                                leading: Radio<String>(value: 'custom'),
+                                title: TextField(
+                                  controller: _customTimeController,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter custom time',
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedOption = 'custom';
+                                    });
+                                  },
+                                  onChanged: (_) {
+                                    if (selectedOption != 'custom') {
+                                      setState(() {
+                                        selectedOption = 'custom';
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        confirmButtonPlaceholderFunction(selectedOption);
+                      },
+                      child: const Text('Confirm'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void placeholderFunction() {}
+
+  void confirmButtonPlaceholderFunction(String? selectedOption) {
+    
   }
 
   void _showPinFilterDialog() {
