@@ -10,6 +10,7 @@ import '../models/user.dart';
 import '../models/user_location.dart';
 import '../models/location_permission.dart';
 import 'secure_storage_service.dart';
+import '../models/invitation_code.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -720,4 +721,47 @@ class ApiService {
   /// Get the list of friends you are currently sharing your location with.
   Future<List<LocationPermission>> getLocationPermissions() =>
       _getList('/location-permissions/', LocationPermission.fromJson);
+
+ /// Create a new invitation code for the current user
+  Future<InvitationCode> createInvitationCode() async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl/invitation-codes'),
+            headers: headers,
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 201) {
+        final jsonData = json.decode(response.body) as Map<String, dynamic>;
+        return InvitationCode.fromJson(jsonData);
+      } else if (response.statusCode == 429) {
+        throw ApiException(
+          "You've hit your weekly limit. You can create up to 5 codes per week.",
+          statusCode: 429,
+        );
+      } else {
+        throw ApiException(
+          'Failed to create invitation code: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  /// Get all active invitation codes for the current user
+  Future<List<InvitationCode>> getInvitationCodes() =>
+      _getList('/invitation-codes', InvitationCode.fromJson);
 }
