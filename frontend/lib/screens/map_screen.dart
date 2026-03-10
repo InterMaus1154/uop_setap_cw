@@ -735,6 +735,7 @@ class _MapScreenState extends State<MapScreen> {
 
   String? selectedOption;
   final TextEditingController _customTimeController = TextEditingController();
+  DateTime? _customDateTime;
   void _showLocationFilterDialog() {
     showDialog<void>(
       context: context,
@@ -795,22 +796,47 @@ class _MapScreenState extends State<MapScreen> {
                                 leading: Radio<String>(value: 'custom'),
                                 title: TextField(
                                   controller: _customTimeController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  readOnly: true,
                                   decoration: const InputDecoration(
-                                    hintText: 'Enter custom time',
+                                    hintText: 'Select date and time',
                                   ),
-                                  onTap: () {
-                                    setState(() {
-                                      selectedOption = 'custom';
+                                  onTap: () async {
+                                    final now = DateTime.now();
+                                    final initialDateTime =
+                                        _customDateTime ??
+                                        now.add(const Duration(hours: 1));
+
+                                    final pickedDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: initialDateTime,
+                                      firstDate: now,
+                                      lastDate: DateTime(now.year + 2),
+                                    );
+                                    if (pickedDate == null) return;
+
+                                    final pickedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.fromDateTime(
+                                        initialDateTime,
+                                      ),
+                                    );
+                                    if (pickedTime == null) return;
+
+                                    final selectedDateTime = DateTime(
+                                      pickedDate.year,
+                                      pickedDate.month,
+                                      pickedDate.day,
+                                      pickedTime.hour,
+                                      pickedTime.minute,
+                                    );
+
+                                    setDialogState(() {
+                                      _customDateTime = selectedDateTime;
+                                      _customTimeController.text =
+                                          '${selectedDateTime.year}-${selectedDateTime.month.toString().padLeft(2, '0')}-${selectedDateTime.day.toString().padLeft(2, '0')} '
+                                          '${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}';
+                                      selectedOption = selectedDateTime.toIso8601String();
                                     });
-                                  },
-                                  onChanged: (_) {
-                                    if (selectedOption != 'custom') {
-                                      setState(() {
-                                        selectedOption = 'custom';
-                                      });
-                                    }
                                   },
                                 ),
                               ),
@@ -844,7 +870,6 @@ class _MapScreenState extends State<MapScreen> {
   void placeholderFunction() {}
 
   void confirmButtonPlaceholderFunction(String? selectedOption) {
-    
   }
 
   void _showPinFilterDialog() {
