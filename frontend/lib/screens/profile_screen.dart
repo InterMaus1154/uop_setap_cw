@@ -5,6 +5,7 @@ import '../providers/location_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import 'friends_screen.dart';
+import 'invitation_codes_screen.dart';
 import 'user_selection_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -182,6 +183,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   icon: const Icon(Icons.people),
                   label: const Text('Friends'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[400],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Invitation Codes button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const InvitationCodesScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.card_giftcard),
+                  label: const Text('Invitation Codes'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue[400],
                     foregroundColor: Colors.white,
