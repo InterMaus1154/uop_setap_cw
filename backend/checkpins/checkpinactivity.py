@@ -14,10 +14,18 @@ def check_pin_activity():
     try:
         pins = db.query(Pin).filter(Pin.pin_isactive == True).all()
         print(f"Found {len(pins)} active pins")
-        for i in range (len(pins)):
-            if datetime.now()> pins[i].pin_expire_at:
-                pins[i].pin_isactive = False
-            
+        changed = False
+        for pin in pins:
+            if datetime.now() > pin.pin_expire_at:
+                pin.pin_isactive = False
+                changed = True
+
+        try:
+            if changed:
+                db.commit()
+        except Exception as e:
+            print(f"Error committing changes: {e}")
+            db.rollback()
         
         pins = db.query(Pin).filter(Pin.pin_isactive == False).all()
         print(f"Found {len(pins)} inactive pins")
@@ -33,7 +41,7 @@ def check_pin_activity():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.add_job(cleanup, "cron", hour=2, minute=0, id="daily_cleanup")
-    scheduler.add_job(check_pin_activity, "interval", seconds=10, id="pin_activity_check")
+    scheduler.add_job(check_pin_activity, "interval", seconds=60, id="pin_activity_check")
     scheduler.start()
     yield
     scheduler.shutdown()

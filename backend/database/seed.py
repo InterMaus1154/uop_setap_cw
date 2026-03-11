@@ -239,6 +239,28 @@ def seed_pins():
             pin_description="University open day for prospective students",
             pin_latitude=50.7975, pin_longitude=-1.0998,
             pin_isactive=False, pin_expire_at="2026-01-15 17:00:00"),
+        
+        # === INFORMATION - Event (cat_id=1) - Expiring soon ===
+        Pin(cat_id=1, sub_cat_id=2, user_id=4, pin_title="Student Night - The Wedgewood Rooms",
+            pin_description="Student night with cheap drinks and live music",
+            pin_latitude=50.7950, pin_longitude=-1.0920,
+            pin_isactive=True, pin_expire_at="2026-03-11 00:00:00"),
+        Pin(cat_id=1, sub_cat_id=1, user_id=7, pin_title="Tech Conference - Guildhall",
+            pin_description="Annual tech conference with industry speakers",
+            pin_latitude=50.7985, pin_longitude=-1.0925,
+            pin_isactive=True, pin_expire_at="2026-03-11 00:01:00"),
+        Pin(cat_id=1, sub_cat_id=3, user_id=2, pin_title="Swimming Gala - University Pool",
+            pin_description="Inter-university swimming competition",
+            pin_latitude=50.7980, pin_longitude=-1.0935,
+            pin_isactive=True, pin_expire_at="2026-03-11 00:02:00"),
+        Pin(cat_id=1, sub_cat_id=2, user_id=9, pin_title="Comedy Night - The Playhouse",
+            pin_description="Student comedian showcase with free entry",
+            pin_latitude=50.7965, pin_longitude=-1.0910,
+            pin_isactive=True, pin_expire_at="2026-03-11 00:03:00"),
+        Pin(cat_id=1, sub_cat_id=1, user_id=10, pin_title="Career Fair - Student Union",
+            pin_description="Meet employers and explore graduate opportunities",
+            pin_latitude=50.7975, pin_longitude=-1.0998,
+            pin_isactive=True, pin_expire_at="2026-03-11 00:04:00"),
 
         # === INFORMATION - Free Items (cat_id=11) ===
         Pin(cat_id=11, sub_cat_id=5, user_id=2, pin_title="Free Pizza - Student Union",
