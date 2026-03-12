@@ -31,6 +31,68 @@ class LoginResponse {
 }
 
 class ApiService {
+  Future<void> deletePin(int pinId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .delete(Uri.parse('$baseUrl/pins/$pinId'), headers: headers)
+          .timeout(_timeout);
+      if (response.statusCode != 204 && response.statusCode != 200) {
+        throw ApiException(
+          'Failed to delete pin: \\${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: \\${e}');
+    }
+  }
+
+  Future<void> editPin(
+    int pinId,
+    String title,
+    DateTime expireAt,
+    String description,
+  ) async {
+    try {
+      final headers = await _authHeaders();
+      final body = json.encode({
+        'pin_title': title,
+        'pin_expire_at': expireAt.toIso8601String(),
+        'pin_description': description,
+      });
+      final response = await _httpClient
+          .put(Uri.parse('$baseUrl/pins/$pinId'), headers: headers, body: body)
+          .timeout(_timeout);
+      if (response.statusCode != 200) {
+        throw ApiException(
+          'Failed to update pin: \\${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: \\${e}');
+    }
+  }
+
   Future<void> updateUserProfile({
     required String fname,
     required String lname,
@@ -722,15 +784,12 @@ class ApiService {
   Future<List<LocationPermission>> getLocationPermissions() =>
       _getList('/location-permissions/', LocationPermission.fromJson);
 
- /// Create a new invitation code for the current user
+  /// Create a new invitation code for the current user
   Future<InvitationCode> createInvitationCode() async {
     try {
       final headers = await _authHeaders();
       final response = await _httpClient
-          .post(
-            Uri.parse('$baseUrl/invitation-codes'),
-            headers: headers,
-          )
+          .post(Uri.parse('$baseUrl/invitation-codes'), headers: headers)
           .timeout(_timeout);
 
       if (response.statusCode == 201) {

@@ -9,6 +9,7 @@ import '../providers/friend_provider.dart';
 import '../providers/location_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
+import '../providers/user_provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -18,6 +19,110 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  Future<void> _showEditPinDialog(Pin pin) async {
+    final titleController = TextEditingController(text: pin.pinTitle);
+    final descController = TextEditingController(
+      text: pin.pinDescription ?? '',
+    );
+    DateTime expireAt = pin.pinExpireAt;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Pin'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Text('Expire At:'),
+                    const SizedBox(width: 8),
+                    TextButton(
+                      onPressed: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: expireAt,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        );
+                        if (picked != null) {
+                          expireAt = DateTime(
+                            picked.year,
+                            picked.month,
+                            picked.day,
+                            expireAt.hour,
+                            expireAt.minute,
+                          );
+                          (context as Element).markNeedsBuild();
+                        }
+                      },
+                      child: Text(
+                        '${expireAt.year}-${expireAt.month.toString().padLeft(2, '0')}-${expireAt.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+    if (result == true) {
+      try {
+        await _apiService.editPin(
+          pin.pinId,
+          titleController.text,
+          expireAt,
+          descController.text,
+        );
+        await _loadPins();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Pin updated'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update pin: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   final MapController _mapController = MapController();
   final ApiService _apiService = ApiService();
 
@@ -92,6 +197,8 @@ class _MapScreenState extends State<MapScreen> {
     int likes = pin.pinLikes;
     int dislikes = pin.pinDislikes;
 
+    final userProvider = context.read<UserProvider>();
+    final isOwner = userProvider.currentUser?.userId == pin.userId;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -272,6 +379,82 @@ class _MapScreenState extends State<MapScreen> {
                     Text('$dislikes'),
                   ],
                 ),
+                if (isOwner) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Edit'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () async {
+                          Navigator.pop(context); // Close details
+                          await _showEditPinDialog(pin);
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.delete),
+                        label: const Text('Delete'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Delete Pin'),
+                              content: const Text(
+                                'Are you sure you want to delete this pin? This action cannot be undone.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                  ),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            try {
+                              await _apiService.deletePin(pin.pinId);
+                              await _loadPins();
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Pin deleted'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Failed to delete pin: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           );
