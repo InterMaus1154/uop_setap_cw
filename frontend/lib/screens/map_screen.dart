@@ -377,31 +377,37 @@ class _MapScreenState extends State<MapScreen> {
                       onPressed: () => handleReaction(-1),
                     ),
                     Text('$dislikes'),
-                  ],
-                ),
-                if (isOwner) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
+                    if (isOwner) ...[
+                      const SizedBox(width: 24),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.edit),
                         label: const Text('Edit'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
                           foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          textStyle: const TextStyle(fontSize: 14),
                         ),
                         onPressed: () async {
                           Navigator.pop(context); // Close details
                           await _showEditPinDialog(pin);
                         },
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.delete),
                         label: const Text('Delete'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          textStyle: const TextStyle(fontSize: 14),
                         ),
                         onPressed: () async {
                           final confirm = await showDialog<bool>(
@@ -453,8 +459,8 @@ class _MapScreenState extends State<MapScreen> {
                         },
                       ),
                     ],
-                  ),
-                ],
+                  ],
+                ),
               ],
             ),
           );
