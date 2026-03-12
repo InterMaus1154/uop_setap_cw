@@ -136,7 +136,7 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
 
 @router.put("/{pin_id}", response_model=PinResponse)
 def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
-               authenticated: User | Admin = Depends(require_auth)):
+               user: User = Depends(require_auth)):
     """Update pin details"""
     pin: Pin = (db.query(Pin)
                 .options(joinedload(Pin.category).joinedload(Category.category_level))
@@ -146,8 +146,7 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
 
-    # check if user is updating who created or it is an admin
-    if isinstance(authenticated, User) and pin.user_id != authenticated.user_id or not isinstance(authenticated, Admin):
+    if user.user_id != pin.user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # update only provided fields
@@ -155,31 +154,34 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
         pin.pin_title = pin_data.pin_title
     if pin_data.pin_description is not None:
         pin.pin_description = pin_data.pin_description
-    if pin_data.pin_latitude is not None:
-        pin.pin_latitude = pin_data.pin_latitude
-    if pin_data.pin_longitude is not None:
-        pin.pin_longitude = pin_data.pin_longitude
     if pin_data.pin_expire_at is not None:
         pin.pin_expire_at = pin_data.pin_expire_at
 
     pin.user_reaction = None
 
-    if isinstance(authenticated, User):
-        user = authenticated
-        # if user is logged in
-        # set the status for the pins based on how the user already interacted with it
-        # 1 = like, -1 = dislike, None = no reaction yet
-        # value is set in user_reaction field
-        if user:
-            for reaction in pin.reactions:
-                if reaction.user_id == user.user_id:
-                    pin.user_reaction = reaction.reaction_value
-                    break
+    for reaction in pin.reactions:
+        if reaction.user_id == user.user_id:
+            pin.user_reaction = reaction.reaction_value
+            break
 
     db.commit()
     db.refresh(pin)
 
     return pin
+
+@router.delete("/{pin_id}", status_code=200)
+def delete_pin(pin_id: int, db: Session = Depends(get_db), user: User = Depends(require_auth)):
+    # check if pin exists
+    pin: Pin | None = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+
+    if pin is None:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    # check if pin belongs to user
+    if pin.user_id != user.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+
 
 
 @router.patch("/{pin_id}/react")

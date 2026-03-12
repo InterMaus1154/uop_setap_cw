@@ -37,15 +37,10 @@ class PinResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-
 class PinUpdate(BaseModel):
     """schema for updating pin details"""
-    pin_title: Optional[str] = Field(None, max_length=30)
+    pin_title: Optional[str] = Field(None, max_length=100)
     pin_description: Optional[str] = Field(None, max_length=300)
-    pin_latitude: Optional[float] = None
-    pin_longitude: Optional[float] = None
-    cat_id: Optional[int] = None
-    sub_cat_id: Optional[int] = None
     pin_expire_at: Optional[datetime] = None
 
 
