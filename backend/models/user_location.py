@@ -12,6 +12,7 @@ class UserLocation(Base):
     latitude = Column(DOUBLE_PRECISION, nullable=False)
     longitude = Column(DOUBLE_PRECISION, nullable=False)
     is_enabled = Column(Boolean, nullable=False, default=True, server_default="true")
+    stop_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=False, onupdate=func.now(), default=func.now(), server_default=func.now())
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
 

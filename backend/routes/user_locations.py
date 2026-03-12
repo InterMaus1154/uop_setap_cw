@@ -56,6 +56,14 @@ def update_user_location(
     if not location:
         raise HTTPException(status_code=404, detail="User location not found")
 
+    # Check if stop_at is set and if current time is past stop_at
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    if location.stop_at is not None and now > location.stop_at:
+        location.is_enabled = False
+        db.commit()
+        return {"detail": "location sharing has been automatically stopped"}
+
     # Update only provided fields
     if payload.latitude is not None:
         location.latitude = payload.latitude
@@ -63,6 +71,8 @@ def update_user_location(
         location.longitude = payload.longitude
     if payload.is_enabled is not None:
         location.is_enabled = payload.is_enabled
+    if payload.stop_at is not None:
+        location.stop_at = payload.stop_at
 
     db.commit()
     db.refresh(location)
