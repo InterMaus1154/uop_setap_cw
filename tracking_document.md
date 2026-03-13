@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 13/03/2026
+
+**Description:**
+- fixed the pin update backend endpoint - which I messed up previously, but it wasn't tested properly
+- added a pin delete andpoint that marks pin as inactive
+
+### Mark up2306492 - 05/03/2026
+
+**Description:**
+- started with API ReadTheDocs documentation
+- I did the full API documentation for Authentication part only, to use it as an example structure for further sections
+
+**Files created:**
+- docs/api/index.md
+- docs/api/auth.md
+
 ### Josh up2255832 - 03/03/2026
 **Summary:** Built friend location sharing frontend — friends can see each other's live location on the map with toggleable sharing. Created Dart models for UserLocation and LocationPermission, added ApiService methods for location and permission endpoints, built LocationProvider with GPS integration and 20s polling, registered provider in widget tree, added friend markers (teal avatars with initials and name tooltips) and share toggle FAB to map screen, added per-friend permission switches to friends screen. Fixed 404 handling for users without location records, build context lint warning, and setState-during-build crash.
 
