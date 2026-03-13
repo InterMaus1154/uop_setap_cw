@@ -50,7 +50,6 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
 
     query = query.filter(or_(*category_conditions))
 
-
     if pin_expire_at:
         end_of_day = pin_expire_at.replace(hour=23, minute=59, second=50)
         query = query.filter(Pin.pin_expire_at <= end_of_day)
@@ -169,6 +168,7 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
 
     return pin
 
+
 @router.delete("/{pin_id}", status_code=200)
 def delete_pin(pin_id: int, db: Session = Depends(get_db), user: User = Depends(require_auth)):
     # check if pin exists
@@ -181,7 +181,10 @@ def delete_pin(pin_id: int, db: Session = Depends(get_db), user: User = Depends(
     if pin.user_id != user.user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-
+    # deactivate pin instead of fully deleting, to preserve relationships (many tables depend on pin)
+    pin.pin_isactive = False
+    db.commit()
+    return {"message": "Pin deleted"}
 
 
 @router.patch("/{pin_id}/react")
@@ -245,7 +248,8 @@ def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Ses
             raise HTTPException(status_code=500, detail=f"Error at deleting reaction. Error: {e}")
     else:
         raise HTTPException(status_code=404, detail="Reaction not found")
-    
+
+
 @router.post("/{pin_id}/report", status_code=201)
 def report_pin(
         request: PinReportRequest,
@@ -290,13 +294,14 @@ def report_pin(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/report-types")
 def get_report_types():
-
     """Return all valid pin report types"""
-    
+
     return [report_type.value for report_type in PinReportType]
+
 
 @router.get("/{pin_id}/reports", response_model=list[PinReportResponse])
 def get_pin_reports(
