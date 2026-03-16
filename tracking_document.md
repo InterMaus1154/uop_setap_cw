@@ -27,6 +27,24 @@ Use this document to log your contributions. Add new entries at the top.
 - fixed the pin update backend endpoint - which I messed up previously, but it wasn't tested properly
 - added a pin delete andpoint that marks pin as inactive
 
+---
+
+### Julian up2301253 - 11/03/2026
+**Description:**
+- Added GET /invitation-codes endpoint to retrieve active codes for authenticated user, and POST /auth/login/code endpoint for guest login via invitation code with automatic guest account creation and expiry handling.
+- Added guest invitation UI to profile screen with code generation button, active codes list display, and success/error snackbars.
+
+**Files created/modified:**
+- backend\routes\invitations.py
+- frontend\lib\main.dart
+- frontend\lib\models\invitation_code.dart
+- frontend\lib\providers\invitation_code_provider.dart
+- frontend\lib\screens\invitation_codes_screen.dart
+- frontend\lib\screens\profile_screen.dart
+- frontend\lib\services\api_service.dart
+
+---
+
 ### Mark up2306492 - 05/03/2026
 
 **Description:**
