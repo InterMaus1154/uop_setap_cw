@@ -701,15 +701,34 @@ class _MapScreenState extends State<MapScreen> {
                 child: const Icon(Icons.filter_list, color: Colors.blue),
               ),
             ),
-            // Recenter button
+            // Recenter button — moves the map to the user's current GPS position
+            // at the default zoom level, so they can quickly find themselves on campus.
             Positioned(
               bottom: 100,
               right: 16,
               child: FloatingActionButton.small(
                 heroTag: 'recenter',
                 backgroundColor: Colors.white,
-                onPressed: () {
-                  _mapController.move(_campusCenter, _defaultZoom);
+                onPressed: () async {
+                  // Request the device's current GPS coordinates.
+                  // This also handles location permission prompts internally.
+                  final position = await locationProvider.getCurrentPosition();
+
+                  // Guard against the widget being disposed while awaiting GPS.
+                  if (!mounted) return;
+
+                  if (position != null) {
+                    // Pan and zoom the map to the user's live coordinates.
+                    _mapController.move(
+                      LatLng(position.latitude, position.longitude),
+                      _defaultZoom,
+                    );
+                  } else if (locationProvider.error != null) {
+                    // GPS unavailable or permission denied — surface the reason to the user.
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(locationProvider.error!)),
+                    );
+                  }
                 },
                 child: const Icon(Icons.my_location, color: Colors.blue),
               ),

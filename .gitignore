@@ -6,6 +6,8 @@ README~
 # macOS specific
 .DS_Store
 
+.claude/
+
 # Python
 backend/venv/
 venv/

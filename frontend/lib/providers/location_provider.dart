@@ -122,7 +122,7 @@ class LocationProvider extends ChangeNotifier {
         _myLocation = await _apiService.updateUserLocation(isEnabled: false);
       } else {
         // Currently off → turn on with fresh GPS coordinates
-        final position = await _getCurrentPosition();
+        final position = await getCurrentPosition();
         if (position == null) return; // GPS failed, error already set
 
         _myLocation = await _apiService.updateUserLocation(
@@ -141,7 +141,7 @@ class LocationProvider extends ChangeNotifier {
 
   /// Get the device's current GPS position.
   /// Returns null if location services are unavailable or permission denied.
-  Future<Position?> _getCurrentPosition() async {
+  Future<Position?> getCurrentPosition() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _error = 'Location services are disabled. Please enable them.';
@@ -169,7 +169,7 @@ class LocationProvider extends ChangeNotifier {
 
   /// Get the device's GPS position and create a location record on the backend.
   Future<void> _createLocationFromGPS() async {
-    final position = await _getCurrentPosition();
+    final position = await getCurrentPosition();
     if (position == null) return; // GPS failed, error already set
 
     _myLocation = await _apiService.createOrUpdateUserLocation(
