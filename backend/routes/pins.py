@@ -134,6 +134,7 @@ async def create_pin(
         extension = image.filename.split(".")[-1]
         filename = f"{uuid.uuid4()}.{extension}"
         image_path = f"{UPLOAD_DIR}/{filename}"
+        db_path = f"uploads/pins/{filename}" # in the db we only store relative path
         with open(image_path, "wb") as f:
             f.write(await image.read())
 
@@ -147,7 +148,7 @@ async def create_pin(
         sub_cat_id=sub_cat_id,
         pin_expire_at=pin_expire_at,
         pin_description=pin_description,
-        pin_picture_path=image_path
+        pin_picture_path=db_path
     )
 
     db.add(new_pin)

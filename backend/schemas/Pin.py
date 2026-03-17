@@ -22,7 +22,7 @@ class PinResponse(BaseModel):
     user_id: int
     pin_title: str
     pin_description: Optional[str]
-    pin_picture_path: Optional[str] = None
+    pin_picture_url: Optional[str] = None
     pin_latitude: float
     pin_longitude: float
     pin_isactive: bool

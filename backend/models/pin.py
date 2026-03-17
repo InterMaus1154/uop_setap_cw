@@ -3,6 +3,7 @@ from sqlalchemy import Column, BigInteger, SmallInteger, ForeignKey, String, DOU
 from sqlalchemy.orm import relationship
 
 from database.db import Base
+import os
 
 
 class Pin(Base):
@@ -62,3 +63,10 @@ class Pin(Base):
     @user_reaction.setter
     def user_reaction(self, value):
         self._user_reaction = value
+
+    @property
+    def pin_picture_url(self) -> str | None:
+        if self.pin_picture_path:
+            base_url = os.getenv("BASE_URL", "http://localhost:8000")
+            return f"{base_url}/{self.pin_picture_path}"
+        return None
