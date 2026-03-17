@@ -28,6 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads", "pins")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
              pin_expire_at: Optional[datetime] = Query(default=None),
@@ -101,33 +102,52 @@ def get_pin(pin_id: int, db: Session = Depends(get_db), user: User | None = Depe
 
 
 @router.post("/", response_model=PinResponse, status_code=201)
-def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
+async def create_pin(
+        pin_title: str = Form(..., max_length=100),
+        pin_latitude: float = Form(...),
+        pin_longitude: float = Form(...),
+        cat_id: int = Form(...),
+        sub_cat_id: Optional[int] = Form(None),
+        pin_expire_at: datetime = Form(...),
+        pin_description: Optional[str] = Form(None, max_length=300),
+        image: UploadFile = File(None),  # image is optional
+        db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Create a new pin"""
     # Ensures category exists
-    category = db.query(Category).filter(Category.cat_id == pin_data.cat_id).first()
+    category = db.query(Category).filter(Category.cat_id == cat_id).first()
     if not category:
         raise HTTPException(status_code=422, detail="Invalid category")
 
     # check if sub cat exists if provided
-    if pin_data.sub_cat_id:
+    if sub_cat_id:
         sub_category = (db.query(SubCategory)
-                        .filter(SubCategory.sub_cat_id == pin_data.sub_cat_id,
-                                SubCategory.cat_id == pin_data.cat_id)  # it will return null, if the provided sub_category doesnt belong to the provided category
+                        .filter(SubCategory.sub_cat_id == sub_cat_id,
+                                SubCategory.cat_id == cat_id)  # it will return null, if the provided sub_category doesnt belong to the provided category
                         .first())
 
         if not sub_category:
             raise HTTPException(status_code=422, detail="Invalid subcategory")
 
+    # save the image
+    image_path = None
+    if image:
+        extension = image.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}.{extension}"
+        image_path = f"{UPLOAD_DIR}/{filename}"
+        with open(image_path, "wb") as f:
+            f.write(await image.read())
+
     # Create new pin
     new_pin = Pin(
-        pin_title=pin_data.pin_title,
-        pin_latitude=pin_data.pin_latitude,
-        pin_longitude=pin_data.pin_longitude,
+        pin_title=pin_title,
+        pin_latitude=pin_latitude,
+        pin_longitude=pin_longitude,
         user_id=user.user_id,
-        cat_id=pin_data.cat_id,
-        sub_cat_id=pin_data.sub_cat_id,
-        pin_expire_at=pin_data.pin_expire_at,
-        pin_description=pin_data.pin_description
+        cat_id=cat_id,
+        sub_cat_id=sub_cat_id,
+        pin_expire_at=pin_expire_at,
+        pin_description=pin_description,
+        pin_picture_path=image_path
     )
 
     db.add(new_pin)
