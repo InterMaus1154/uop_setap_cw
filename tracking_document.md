@@ -21,6 +21,27 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492 - 17/03/2026
+
+**Description:**
+- added picture upload possibility for pin creation
+- stores relative path in the database
+- PinResponse includes pin_picture_url
+
+**Files modified:**
+- backend/schemas/Pin.py
+- backend/routes/pins.py
+- backend/main.py
+
+### Mark up2306492 - 16/03/2026
+
+**Description:**
+- changed frontend recenter button to show user's current location
+
+**Files modified:**
+- frontend/lib/providers/location_provider.dart
+- frontend/lib/screens/map_screen.dart
+
 ### Mark up2306492 - 13/03/2026
 
 **Description:**
