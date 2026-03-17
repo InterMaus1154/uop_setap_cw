@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, Path
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import checkpins.checkpinactivity as checkpin
 from routes.users import router as users_router
@@ -23,6 +24,8 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 app.include_router(auth_router)
 app.include_router(users_router)

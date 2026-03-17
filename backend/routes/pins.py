@@ -1,14 +1,15 @@
-from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import Response, JSONResponse
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from fastapi.params import Depends
 from sqlalchemy.orm import Session, Query as Q, joinedload
-from sqlalchemy import or_, func
+from sqlalchemy import or_
+import uuid
+import os
 
 from typing import Optional, Type
 
 from database.db import get_db
-from models import CategoryLevel, SubCategory
-from models.admin import Admin
+from models import SubCategory
 from models.pin import Pin
 from models.category import Category
 from models.pin_reaction import PinReaction
@@ -23,6 +24,9 @@ from datetime import datetime
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads", "pins")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
