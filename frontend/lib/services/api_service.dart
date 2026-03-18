@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart' show XFile;
 import '../models/category.dart';
 import '../models/pin.dart';
 import '../models/pin_form_data.dart';
@@ -262,18 +263,47 @@ class ApiService {
     }
   }
 
-  Future<Pin> createPin(PinFormData formData) async {
+  /// Create a new pin using multipart form data.
+  /// The backend expects Form fields + an optional image file upload.
+  /// Uses XFile bytes so it works on both web and mobile platforms.
+  Future<Pin> createPin(PinFormData formData, {XFile? imageFile}) async {
     try {
-      final body = formData.toJson();
+      final token = await _storage.getToken();
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/pins/'),
+      );
 
-      final headers = await _authHeaders();
-      final response = await _httpClient
-          .post(
-            Uri.parse('$baseUrl/pins/'),
-            headers: headers,
-            body: json.encode(body),
-          )
-          .timeout(_timeout);
+      // Auth header
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+
+      // Form fields — backend uses Form(...) so all values must be strings
+      request.fields['pin_title'] = formData.title;
+      request.fields['pin_latitude'] = formData.latitude.toString();
+      request.fields['pin_longitude'] = formData.longitude.toString();
+      request.fields['cat_id'] = formData.catId.toString();
+      request.fields['pin_expire_at'] = formData.expiresAt.toIso8601String();
+      if (formData.subCatId != null) {
+        request.fields['sub_cat_id'] = formData.subCatId.toString();
+      }
+      if (formData.description != null) {
+        request.fields['pin_description'] = formData.description!;
+      }
+
+      // Attach image if one was selected.
+      // Uses readAsBytes + fromBytes so it works on web and mobile.
+      if (imageFile != null) {
+        final bytes = await imageFile.readAsBytes();
+        final filename = imageFile.name;
+        request.files.add(
+          http.MultipartFile.fromBytes('image', bytes, filename: filename),
+        );
+      }
+
+      final streamed = await request.send().timeout(_timeout);
+      final response = await http.Response.fromStream(streamed);
 
       if (response.statusCode == 201) {
         return Pin.fromJson(json.decode(response.body));
@@ -722,15 +752,12 @@ class ApiService {
   Future<List<LocationPermission>> getLocationPermissions() =>
       _getList('/location-permissions/', LocationPermission.fromJson);
 
- /// Create a new invitation code for the current user
+  /// Create a new invitation code for the current user
   Future<InvitationCode> createInvitationCode() async {
     try {
       final headers = await _authHeaders();
       final response = await _httpClient
-          .post(
-            Uri.parse('$baseUrl/invitation-codes'),
-            headers: headers,
-          )
+          .post(Uri.parse('$baseUrl/invitation-codes'), headers: headers)
           .timeout(_timeout);
 
       if (response.statusCode == 201) {

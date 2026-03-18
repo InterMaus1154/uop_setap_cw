@@ -128,8 +128,9 @@ async def create_pin(
         if not sub_category:
             raise HTTPException(status_code=422, detail="Invalid subcategory")
 
-    # save the image
+    # save the image (optional — db_path stays None if no image provided)
     image_path = None
+    db_path = None
     if image:
         extension = image.filename.split(".")[-1]
         filename = f"{uuid.uuid4()}.{extension}"

@@ -21,6 +21,20 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 18/03/2026
+**Summary:** Added pin image upload — users can optionally attach a photo from gallery or camera when creating a pin. Images are uploaded via multipart form data, stored on the backend, and displayed in the pin detail sheet with tap-to-fullscreen and pinch-to-zoom. Also fixed a backend bug where creating a pin without an image would crash (undefined db_path variable).
+
+**Files Modified:**
+- backend/routes/pins.py (fixed db_path undefined bug when no image uploaded)
+- frontend/lib/models/pin.dart (replaced pinPicturePath with pinPictureUrl to match backend response)
+- frontend/lib/models/pin_form_data.dart (no net change — imagePath added then removed in favour of passing XFile separately)
+- frontend/lib/services/api_service.dart (rewrote createPin to use MultipartRequest with XFile bytes for cross-platform support)
+- frontend/lib/widgets/pin_creation_sheet.dart (added image picker UI — gallery/camera source picker, preview thumbnail, remove button)
+- frontend/lib/screens/map_screen.dart (pin detail sheet shows image with tap-to-fullscreen viewer, added ScrollView to prevent overflow on mobile)
+- frontend/pubspec.yaml (added image_picker dependency)
+
+**Notes:** Backend image upload endpoints were built by Mark. Frontend wires up to POST /pins/ which now expects multipart/form-data instead of JSON. Images are served from /uploads/pins/ as static files. Used XFile.readAsBytes() + MultipartFile.fromBytes() instead of fromPath() so it works on both web and mobile. Camera option is hidden on web since it's not supported.
+
 ### Mark up2306492 - 17/03/2026
 
 **Description:**

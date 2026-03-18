@@ -7,7 +7,7 @@ class Pin {
   final int userId;
   final String pinTitle;
   final String? pinDescription;
-  final String? pinPicturePath;
+  final String? pinPictureUrl;
   final double pinLatitude;
   final double pinLongitude;
   final bool pinIsActive;
@@ -27,7 +27,7 @@ class Pin {
     required this.userId,
     required this.pinTitle,
     this.pinDescription,
-    this.pinPicturePath,
+    this.pinPictureUrl,
     required this.pinLatitude,
     required this.pinLongitude,
     required this.pinIsActive,
@@ -59,7 +59,7 @@ class Pin {
       userId: json['user_id'] as int,
       pinTitle: json['pin_title'] as String,
       pinDescription: json['pin_description'] as String?,
-      pinPicturePath: json['pin_picture_path'] as String?,
+      pinPictureUrl: json['pin_picture_url'] as String?,
       pinLatitude: (json['pin_latitude'] as num).toDouble(),
       pinLongitude: (json['pin_longitude'] as num).toDouble(),
       pinIsActive: json['pin_isactive'] as bool,
@@ -81,7 +81,7 @@ class Pin {
       'user_id': userId,
       'pin_title': pinTitle,
       'pin_description': pinDescription,
-      'pin_picture_path': pinPicturePath,
+      'pin_picture_url': pinPictureUrl,
       'pin_latitude': pinLatitude,
       'pin_longitude': pinLongitude,
       'pin_isactive': pinIsActive,

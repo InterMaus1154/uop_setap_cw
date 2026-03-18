@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import '../models/category.dart';
@@ -127,7 +128,7 @@ class _MapScreenState extends State<MapScreen> {
                     userId: pin.userId,
                     pinTitle: pin.pinTitle,
                     pinDescription: pin.pinDescription,
-                    pinPicturePath: pin.pinPicturePath,
+                    pinPictureUrl: pin.pinPictureUrl,
                     pinLatitude: pin.pinLatitude,
                     pinLongitude: pin.pinLongitude,
                     pinIsActive: pin.pinIsActive,
@@ -158,121 +159,174 @@ class _MapScreenState extends State<MapScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
+            // Constrain height so the sheet doesn't overflow on small screens
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.75,
+            ),
             padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  pin.pinTitle,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                  Text(
+                    pin.pinTitle,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                if (catName != null)
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      Chip(
-                        label: Text(
-                          catName,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        backgroundColor: pin.pinColor.withAlpha(30),
-                        side: BorderSide(color: pin.pinColor.withAlpha(80)),
-                        visualDensity: VisualDensity.compact,
-                      ),
-                      if (subCatName != null)
+                  const SizedBox(height: 8),
+                  if (catName != null)
+                    Wrap(
+                      spacing: 8,
+                      children: [
                         Chip(
                           label: Text(
-                            subCatName,
+                            catName,
                             style: const TextStyle(fontSize: 12),
                           ),
-                          backgroundColor: Colors.grey[100],
+                          backgroundColor: pin.pinColor.withAlpha(30),
+                          side: BorderSide(color: pin.pinColor.withAlpha(80)),
                           visualDensity: VisualDensity.compact,
                         ),
+                        if (subCatName != null)
+                          Chip(
+                            label: Text(
+                              subCatName,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            backgroundColor: Colors.grey[100],
+                            visualDensity: VisualDensity.compact,
+                          ),
+                      ],
+                    ),
+                  if (catName != null) const SizedBox(height: 8),
+                  if (pin.pinDescription != null &&
+                      pin.pinDescription!.isNotEmpty)
+                    Text(
+                      pin.pinDescription!,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  // Show pin image if one was attached — tap to view fullscreen
+                  if (pin.pinPictureUrl != null) ...[
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () =>
+                          _showFullscreenImage(context, pin.pinPictureUrl!),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          pin.pinPictureUrl!,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              height: 180,
+                              alignment: Alignment.center,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stack) {
+                            return Container(
+                              height: 100,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text(
+                                'Image could not be loaded',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Posted by ${pin.pinAuthorName ?? 'Unknown'}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
-                if (catName != null) const SizedBox(height: 8),
-                if (pin.pinDescription != null &&
-                    pin.pinDescription!.isNotEmpty)
-                  Text(
-                    pin.pinDescription!,
-                    style: const TextStyle(fontSize: 14),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _formatExpiry(pin.pinExpireAt),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        'Posted by ${pin.pinAuthorName ?? 'Unknown'}',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                        overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 16),
+                  // Like/Dislike stats and buttons
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.thumb_up,
+                          color: reaction == 1 ? Colors.blue : Colors.grey,
+                        ),
+                        onPressed: () => handleReaction(1),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.timer_outlined,
-                      size: 16,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _formatExpiry(pin.pinExpireAt),
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                        overflow: TextOverflow.ellipsis,
+                      Text('$likes'),
+                      const SizedBox(width: 16),
+                      IconButton(
+                        icon: Icon(
+                          Icons.thumb_down,
+                          color: reaction == -1 ? Colors.red : Colors.grey,
+                        ),
+                        onPressed: () => handleReaction(-1),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // Like/Dislike stats and buttons
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.thumb_up,
-                        color: reaction == 1 ? Colors.blue : Colors.grey,
-                      ),
-                      onPressed: () => handleReaction(1),
-                    ),
-                    Text('$likes'),
-                    const SizedBox(width: 16),
-                    IconButton(
-                      icon: Icon(
-                        Icons.thumb_down,
-                        color: reaction == -1 ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () => handleReaction(-1),
-                    ),
-                    Text('$dislikes'),
-                  ],
-                ),
-              ],
+                      Text('$dislikes'),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -291,6 +345,47 @@ class _MapScreenState extends State<MapScreen> {
       return 'Expires in ${diff.inHours} hr $mins min';
     }
     return 'Expires in ${diff.inDays} day${diff.inDays > 1 ? 's' : ''}';
+  }
+
+  /// Opens a fullscreen dialog to view a pin image with pinch-to-zoom
+  void _showFullscreenImage(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  );
+                },
+                errorBuilder: (context, error, stack) {
+                  return const Center(
+                    child: Text(
+                      'Image could not be loaded',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   // University of Portsmouth campus coordinates
@@ -397,12 +492,12 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Future<void> _handlePinSubmit(PinFormData formData) async {
+  Future<void> _handlePinSubmit(PinFormData formData, XFile? imageFile) async {
     // Close the bottom sheet
     Navigator.pop(context);
 
     try {
-      await _apiService.createPin(formData);
+      await _apiService.createPin(formData, imageFile: imageFile);
       await _loadPins();
 
       if (mounted) {
