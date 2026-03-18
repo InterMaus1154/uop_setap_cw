@@ -26,3 +26,4 @@ uvicorn==0.40.0
 pytest~=9.0.2
 hypothesis~=6.151.9
 httpx~=0.28.1
+python-multipart
