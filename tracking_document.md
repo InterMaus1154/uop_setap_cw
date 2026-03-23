@@ -79,6 +79,16 @@ Use this document to log your contributions. Add new entries at the top.
 - frontend\lib\services\api_service.dart
 
 ---
+### Luke up2264308 10/03/2026
+**Description:**
+- Added functionality for making pins that have gone past their expiry date become inactive 
+**Files created/modified:**
+- \backend\checkpins\checkpinactivity.py
+- \backend\main.py
+- \backend\requirements.txt
+- \backend\database\seed.py
+
+
 
 ### Mark up2306492 - 05/03/2026
 
