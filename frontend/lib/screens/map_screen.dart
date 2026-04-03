@@ -397,6 +397,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _isPlacingPin = false;
   LatLng? _selectedLocation;
   bool _selectedLocationTouchesExistingPin = false;
+  double _currentZoom = _defaultZoom;
 
   // Category data from API
   List<Category> _categories = [];
@@ -517,23 +518,99 @@ class _MapScreenState extends State<MapScreen> {
     LatLng location, {
     double thresholdPixels = 32,
   }) {
-    double zoom = _defaultZoom;
-    try {
-      zoom = _mapController.camera.zoom;
-    } catch (_) {
-    }
-
-    final pointPx = _latLngToWorldPixels(location, zoom);
+    final pointPx = _latLngToWorldPixels(location, _currentZoom);
     for (final pin in _pins.where(
       (p) => p.pinExpireAt.isAfter(DateTime.now()),
     )) {
       final pinPx = _latLngToWorldPixels(
         LatLng(pin.pinLatitude, pin.pinLongitude),
-        zoom,
+        _currentZoom,
       );
       if ((pointPx - pinPx).distance <= thresholdPixels) return true;
     }
     return false;
+  }
+
+  List<_PinCluster> _buildScreenDistanceClusters(
+    List<Pin> pins, {
+    double thresholdPixels = 40,
+  }) {
+    final clusters = <_PinCluster>[];
+    for (final pin in pins) {
+      final pinLatLng = LatLng(pin.pinLatitude, pin.pinLongitude);
+      final pinPx = _latLngToWorldPixels(pinLatLng, _currentZoom);
+
+      _PinCluster? target;
+      for (final cluster in clusters) {
+        final clusterPx = _latLngToWorldPixels(cluster.center, _currentZoom);
+        if ((pinPx - clusterPx).distance <= thresholdPixels) {
+          target = cluster;
+          break;
+        }
+      }
+
+      if (target == null) {
+        clusters.add(_PinCluster(center: pinLatLng, pins: [pin]));
+      } else {
+        target.pins.add(pin);
+        final avgLat =
+            target.pins.map((p) => p.pinLatitude).reduce((a, b) => a + b) /
+            target.pins.length;
+        final avgLng =
+            target.pins.map((p) => p.pinLongitude).reduce((a, b) => a + b) /
+            target.pins.length;
+        target.center = LatLng(avgLat, avgLng);
+      }
+    }
+
+    return clusters;
+  }
+
+  void _showClusterPins(List<Pin> pins) {
+    if (_isPlacingPin) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Text(
+              '${pins.length} pins at this location',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: pins.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final pin = pins[index];
+                  return ListTile(
+                    leading: Icon(Icons.location_on, color: pin.pinColor),
+                    title: Text(pin.pinTitle),
+                    subtitle: Text(
+                      pin.pinAuthorName == null
+                          ? 'Unknown author'
+                          : 'Posted by ${pin.pinAuthorName}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      _showPinDetails(pin);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _confirmLocationAndShowForm() async {
@@ -591,6 +668,72 @@ class _MapScreenState extends State<MapScreen> {
     // Watch location provider so the map rebuilds when friend positions update
     final locationProvider = context.watch<LocationProvider>();
     final friendProvider = context.read<FriendProvider>();
+
+    final activePins = _pins
+        .where((p) => p.pinExpireAt.isAfter(DateTime.now()))
+        .toList();
+    final pinClusters = _buildScreenDistanceClusters(activePins);
+
+    final clusteredPinMarkers = <Marker>[
+      for (final cluster in pinClusters)
+        if (cluster.pins.length == 1)
+          Marker(
+            point: cluster.center,
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              onTap: () => _showPinDetails(cluster.pins.first),
+              child: Icon(
+                Icons.location_on,
+                color: cluster.pins.first.pinColor,
+                size: 36,
+              ),
+            ),
+          )
+        else
+          Marker(
+            point: cluster.center,
+            width: 52,
+            height: 52,
+            child: GestureDetector(
+              onTap: () => _showClusterPins(cluster.pins),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Center(
+                    child: Icon(
+                      Icons.location_on,
+                      color: Colors.indigo,
+                      size: 42,
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 2,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${cluster.pins.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    ];
 
     // Build friend markers from the polled locations
     final friendMarkers = <Marker>[];
@@ -684,6 +827,15 @@ class _MapScreenState extends State<MapScreen> {
               minZoom: 10,
               maxZoom: 18,
               onTap: _onMapTap,
+              onPositionChanged: (position, hasGesture) {
+                final zoom = position.zoom;
+                if (zoom == null) return;
+
+                // Trigger immediate re-clustering while zooming.
+                if ((zoom - _currentZoom).abs() > 0.1) {
+                  setState(() => _currentZoom = zoom);
+                }
+              },
             ),
             children: [
               TileLayer(
@@ -693,22 +845,7 @@ class _MapScreenState extends State<MapScreen> {
               // Show API pins and selected location during placement
               MarkerLayer(
                 markers: [
-                  for (final pin in _pins.where(
-                    (p) => p.pinExpireAt.isAfter(DateTime.now()),
-                  ))
-                    Marker(
-                      point: LatLng(pin.pinLatitude, pin.pinLongitude),
-                      width: 40,
-                      height: 40,
-                      child: GestureDetector(
-                        onTap: () => _showPinDetails(pin),
-                        child: Icon(
-                          Icons.location_on,
-                          color: pin.pinColor, // implemented colour by cat
-                          size: 36,
-                        ),
-                      ),
-                    ),
+                  ...clusteredPinMarkers,
                   if (_selectedLocation != null)
                     Marker(
                       point: _selectedLocation!,
@@ -1155,4 +1292,11 @@ class _MapScreenState extends State<MapScreen> {
       pinExpireAt: expiryDate,
     );
   }
+}
+
+class _PinCluster {
+  _PinCluster({required this.center, required this.pins});
+
+  LatLng center;
+  List<Pin> pins;
 }
