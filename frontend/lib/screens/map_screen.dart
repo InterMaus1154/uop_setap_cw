@@ -447,7 +447,25 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  String? placePinText;
+  void _placePinWithCurrentLocation() async {
+    placePinText = 'Tap on confirm to place your pin at your current location or click on a new location on the map to move the pin there';
+    final position = await _locationProvider.getCurrentPosition();
+    
+    if (position != null) {
+      _mapController.move(
+        LatLng(position.latitude, position.longitude),
+        _defaultZoom,
+      );
+      setState(() {
+        _selectedLocation = LatLng(position.latitude, position.longitude);
+        _isPlacingPin = true;
+      });
+    }
+  }
+
   void _enterPinPlacementMode() {
+    placePinText = 'Tap on the map to place your pin';
     setState(() {
       _isPlacingPin = true;
       _selectedLocation = null;
@@ -696,13 +714,13 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(Icons.touch_app, color: Colors.white),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Tap on the map to place your pin',
+                        placePinText!,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -835,7 +853,9 @@ class _MapScreenState extends State<MapScreen> {
               child: FloatingActionButton(
                 heroTag: 'addPin',
                 backgroundColor: Colors.blue,
-                onPressed: _enterPinPlacementMode,
+                onPressed: locationProvider.isSharingEnabled
+                    ? _placePinWithCurrentLocation
+                    : _enterPinPlacementMode,
                 child: const Icon(Icons.add_location_alt, color: Colors.white),
               ),
             ),
