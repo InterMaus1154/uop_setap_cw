@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
@@ -394,6 +396,7 @@ class _MapScreenState extends State<MapScreen> {
 
   bool _isPlacingPin = false;
   LatLng? _selectedLocation;
+  bool _selectedLocationTouchesExistingPin = false;
 
   // Category data from API
   List<Category> _categories = [];
@@ -449,16 +452,18 @@ class _MapScreenState extends State<MapScreen> {
 
   String? placePinText;
   void _placePinWithCurrentLocation() async {
-    placePinText = 'Tap on confirm to place your pin at your current location or click on a new location on the map to move the pin there';
+    placePinText =
+        'Tap on confirm to place your pin at your current location or click on a new location on the map to move the pin there';
     final position = await _locationProvider.getCurrentPosition();
-    
+
     if (position != null) {
-      _mapController.move(
-        LatLng(position.latitude, position.longitude),
-        _defaultZoom,
-      );
+      final newLocation = LatLng(position.latitude, position.longitude);
+      _mapController.move(newLocation, _defaultZoom);
       setState(() {
-        _selectedLocation = LatLng(position.latitude, position.longitude);
+        _selectedLocation = newLocation;
+        _selectedLocationTouchesExistingPin = _isLocationTouchingExistingPin(
+          newLocation,
+        );
         _isPlacingPin = true;
       });
     }
@@ -469,6 +474,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _isPlacingPin = true;
       _selectedLocation = null;
+      _selectedLocationTouchesExistingPin = false;
     });
   }
 
@@ -476,6 +482,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _isPlacingPin = false;
       _selectedLocation = null;
+      _selectedLocationTouchesExistingPin = false;
     });
   }
 
@@ -485,8 +492,48 @@ class _MapScreenState extends State<MapScreen> {
       setState(() => _selectedFriendUserId = null);
     }
     if (_isPlacingPin) {
-      setState(() => _selectedLocation = location);
+      setState(() {
+        _selectedLocation = location;
+        _selectedLocationTouchesExistingPin = _isLocationTouchingExistingPin(
+          location,
+        );
+      });
     }
+  }
+
+  Offset _latLngToWorldPixels(LatLng latLng, double zoom) {
+    const maxMercatorLat = 85.05112878;
+    final clampedLat = latLng.latitude.clamp(-maxMercatorLat, maxMercatorLat);
+    final latRad = clampedLat * math.pi / 180.0;
+    final scale = 256.0 * math.pow(2.0, zoom).toDouble();
+
+    final x = ((latLng.longitude + 180.0) / 360.0) * scale;
+    final mercatorY = math.log(math.tan((math.pi / 4.0) + (latRad / 2.0)));
+    final y = ((1.0 - (mercatorY / math.pi)) / 2.0) * scale;
+    return Offset(x, y);
+  }
+
+  bool _isLocationTouchingExistingPin(
+    LatLng location, {
+    double thresholdPixels = 32,
+  }) {
+    double zoom = _defaultZoom;
+    try {
+      zoom = _mapController.camera.zoom;
+    } catch (_) {
+    }
+
+    final pointPx = _latLngToWorldPixels(location, zoom);
+    for (final pin in _pins.where(
+      (p) => p.pinExpireAt.isAfter(DateTime.now()),
+    )) {
+      final pinPx = _latLngToWorldPixels(
+        LatLng(pin.pinLatitude, pin.pinLongitude),
+        zoom,
+      );
+      if ((pointPx - pinPx).distance <= thresholdPixels) return true;
+    }
+    return false;
   }
 
   Future<void> _confirmLocationAndShowForm() async {
@@ -667,9 +714,11 @@ class _MapScreenState extends State<MapScreen> {
                       point: _selectedLocation!,
                       width: 40,
                       height: 40,
-                      child: const Icon(
+                      child: Icon(
                         Icons.location_pin,
-                        color: Colors.purple,
+                        color: _selectedLocationTouchesExistingPin
+                            ? Colors.deepOrange
+                            : Colors.purple,
                         size: 40,
                       ),
                     ),
