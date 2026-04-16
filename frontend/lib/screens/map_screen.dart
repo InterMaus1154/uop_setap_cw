@@ -171,6 +171,14 @@ class _MapScreenState extends State<MapScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      onPressed: _reportPin,
+                      icon: Icon(Icons.report),
+                      color: Colors.grey[600],
+                    ),
+                  ),
                   Center(
                     child: Container(
                       width: 40,
@@ -390,6 +398,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  void _reportPin() {}
   // University of Portsmouth campus coordinates
   static const LatLng _campusCenter = LatLng(50.797864, -1.098353);
   static const double _defaultZoom = 16.0;
