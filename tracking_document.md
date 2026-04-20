@@ -259,6 +259,15 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 - docs/requirements.txt (added sphinx-design dependency)
 
 ---
+### Theodore up2282406 - 25/02/2026
+**Summary:**  Implemented user location sharing feature, including backend endpoints and frontend integration for sharing and viewing live locations with friends.
+**Files created/modified**
+-user_location.py
+-location_permission.py
+-user_location.dart
+-location_permission.dart
+-map_screen.dart
+
 
 ### Mark up2306492 - 25/02/2026
 
