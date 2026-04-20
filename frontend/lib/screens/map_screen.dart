@@ -1,3 +1,53 @@
+  // Helper to format last seen from updated_at
+  String _formatLastSeen(DateTime updatedAt) {
+    final now = DateTime.now();
+    final diff = now.difference(updatedAt);
+    if (diff.inSeconds < 60) return 'last seen ${diff.inSeconds} seconds ago';
+    if (diff.inMinutes < 60) return 'last seen ${diff.inMinutes} minutes ago';
+    if (diff.inHours < 24) return 'last seen ${diff.inHours} hours ago';
+    return 'last seen ${diff.inDays} days ago';
+  }
+
+  // Show friend info pop-up as a modal bottom sheet
+  void _showFriendInfo({
+    required String name,
+    required LatLng latLng,
+    required DateTime updatedAt,
+    String? locationName,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(locationName ?? 'Lat: ${latLng.latitude.toStringAsFixed(5)}, Lng: ${latLng.longitude.toStringAsFixed(5)}',
+                style: const TextStyle(fontSize: 14)),
+            const SizedBox(height: 8),
+            Text(_formatLastSeen(updatedAt), style: const TextStyle(fontSize: 13, color: Colors.grey)),
+          ],
+        ),
+      ),
+    );
+  }
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -763,53 +813,46 @@ class _MapScreenState extends State<MapScreen> {
           height: 40,
           child: GestureDetector(
             onTap: () {
-              setState(() {
-                // Toggle tooltip: tap again to dismiss
-                _selectedFriendUserId = _selectedFriendUserId == loc.userId
-                    ? null
-                    : loc.userId;
-              });
+              _showFriendInfo(
+                name: displayName,
+                latLng: LatLng(loc.latitude, loc.longitude),
+                updatedAt: loc.updatedAt,
+                // locationName: ... // Optionally add reverse geocoded name here
+              );
             },
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Friend avatar circle with their initial
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: Colors.teal,
-                  child: Text(
-                    initial,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.teal,
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-                // Tooltip popup showing the friend's name
-                if (_selectedFriendUserId == loc.userId)
-                  Positioned(
-                    bottom: 40,
-                    left: -30,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        displayName,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    // Show current user marker, update every 5s
+    final myLocation = locationProvider.myLocation;
+    if (myLocation != null && myLocation.isEnabled) {
+      friendMarkers.add(
+        Marker(
+          point: LatLng(myLocation.latitude, myLocation.longitude),
+          width: 44,
+          height: 44,
+          child: Tooltip(
+            message: 'You',
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blue,
+                border: Border.all(color: Colors.white, width: 3),
+              ),
+              child: const Icon(Icons.person_pin_circle, color: Colors.white, size: 28),
             ),
           ),
         ),
