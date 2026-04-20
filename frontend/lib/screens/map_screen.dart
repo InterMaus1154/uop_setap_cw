@@ -1,3 +1,26 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
+import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import '../models/category.dart';
+import '../models/pin_form_data.dart';
+import '../models/pin.dart';
+import '../providers/friend_provider.dart';
+import '../providers/location_provider.dart';
+import '../services/api_service.dart';
+import '../widgets/pin_creation_sheet.dart';
+
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
+
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
   // Helper to format last seen from updated_at
   String _formatLastSeen(DateTime updatedAt) {
     final now = DateTime.now();
@@ -37,40 +60,27 @@
                 ),
               ),
             ),
-            Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              name,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text(locationName ?? 'Lat: ${latLng.latitude.toStringAsFixed(5)}, Lng: ${latLng.longitude.toStringAsFixed(5)}',
-                style: const TextStyle(fontSize: 14)),
+            Text(
+              locationName ??
+                  'Lat: ${latLng.latitude.toStringAsFixed(5)}, Lng: ${latLng.longitude.toStringAsFixed(5)}',
+              style: const TextStyle(fontSize: 14),
+            ),
             const SizedBox(height: 8),
-            Text(_formatLastSeen(updatedAt), style: const TextStyle(fontSize: 13, color: Colors.grey)),
+            Text(
+              _formatLastSeen(updatedAt),
+              style: const TextStyle(fontSize: 13, color: Colors.grey),
+            ),
           ],
         ),
       ),
     );
   }
-import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:image_picker/image_picker.dart' show XFile;
-import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
-import '../models/category.dart';
-import '../models/pin_form_data.dart';
-import '../models/pin.dart';
-import '../providers/friend_provider.dart';
-import '../providers/location_provider.dart';
-import '../services/api_service.dart';
-import '../widgets/pin_creation_sheet.dart';
-
-class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
-
-  @override
-  State<MapScreen> createState() => _MapScreenState();
-}
-
-class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
   final ApiService _apiService = ApiService();
 
@@ -852,7 +862,11 @@ class _MapScreenState extends State<MapScreen> {
                 color: Colors.blue,
                 border: Border.all(color: Colors.white, width: 3),
               ),
-              child: const Icon(Icons.person_pin_circle, color: Colors.white, size: 28),
+              child: const Icon(
+                Icons.person_pin_circle,
+                color: Colors.white,
+                size: 28,
+              ),
             ),
           ),
         ),
