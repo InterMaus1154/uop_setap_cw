@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from database.db import get_db
+from database.redis import redis_client
 from middleware.auth import require_auth
 from models.user import User
 from models.user_location import UserLocation
@@ -29,6 +30,13 @@ def create_or_update_user_location(
         existing.is_enabled = True
         db.commit()
         db.refresh(existing)
+        # Write-through to Redis
+        redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+            "lat": existing.latitude,
+            "lng": existing.longitude,
+            "is_enabled": int(existing.is_enabled)
+        })
+        redis_client.expire(f"user_location:{current_user.user_id}", 30)
         return existing
 
     # if no record exists - creates one
@@ -41,6 +49,13 @@ def create_or_update_user_location(
     db.add(location)
     db.commit()
     db.refresh(location)
+    # Write-through to Redis
+    redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+        "lat": location.latitude,
+        "lng": location.longitude,
+        "is_enabled": int(location.is_enabled)
+    })
+    redis_client.expire(f"user_location:{current_user.user_id}", 30)
     return location
 
 
@@ -66,6 +81,13 @@ def update_user_location(
 
     db.commit()
     db.refresh(location)
+    # Write-through to Redis
+    redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+        "lat": location.latitude,
+        "lng": location.longitude,
+        "is_enabled": int(location.is_enabled)
+    })
+    redis_client.expire(f"user_location:{current_user.user_id}", 30)
     return location
 
 
@@ -106,17 +128,51 @@ def get_friends_locations(
     current_user: User = Depends(require_auth)
 ):
     """Return UserLocation records for friends who are sharing with the logged-in user."""
-    shared_locations = (
+    # Get all friends with permission
+    friends_query = (
         db.query(UserLocation)
         .join(LocationPermission, LocationPermission.user_loc_id == UserLocation.user_loc_id)
         .filter(
             LocationPermission.user_id == current_user.user_id,
             UserLocation.is_enabled == True
         )
-        .all()
     )
+    friends = friends_query.all()
 
-    return shared_locations
+    # Try to get each friend's location from Redis
+    results = []
+    for friend in friends:
+        cache = redis_client.hgetall(f"user_location:{friend.user_id}")
+        if cache and "lat" in cache and "lng" in cache and "is_enabled" in cache:
+            # Compose a UserLocationResponse from cache
+            results.append(UserLocationResponse(
+                user_loc_id=friend.user_loc_id,
+                user_id=friend.user_id,
+                latitude=float(cache["lat"]),
+                longitude=float(cache["lng"]),
+                is_enabled=bool(int(cache["is_enabled"])),
+                created_at=friend.created_at,
+                updated_at=friend.updated_at
+            ))
+        else:
+            # Fallback to DB, and update Redis for next time
+            results.append(UserLocationResponse(
+                user_loc_id=friend.user_loc_id,
+                user_id=friend.user_id,
+                latitude=friend.latitude,
+                longitude=friend.longitude,
+                is_enabled=friend.is_enabled,
+                created_at=friend.created_at,
+                updated_at=friend.updated_at
+            ))
+            redis_client.hset(f"user_location:{friend.user_id}", mapping={
+                "lat": friend.latitude,
+                "lng": friend.longitude,
+                "is_enabled": int(friend.is_enabled)
+            })
+            redis_client.expire(f"user_location:{friend.user_id}", 30)
+
+    return results
 
 
 @location_permissions_router.post("/", status_code=201, response_model=LocationPermissionResponse)
