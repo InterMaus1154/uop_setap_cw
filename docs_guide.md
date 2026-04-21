@@ -10,6 +10,13 @@ Whenever you push changes to `master` branch on GitHub, it will rebuild the docs
 
 We use Markdown - you may find this basic md syntax useful [https://www.markdownguide.org/basic-syntax/](https://www.markdownguide.org/basic-syntax/)
 
+## What parts of documentation do we need?
+
+- User Manual - an easily understandable guide for users, how to use the app, what are different elements (so explain to the user what is a `pin` before talkign about it)
+- Frontend documentation - frontend code structure, different components, services, etc...
+- Backend documentation - same as frontend, but for backend
+- API documentation - different endpoints in detail, what data it requests, what response it gives back (see example about auth)
+
 ## How to live preview the documentation locally - like it would be on live page
 
 (Do these steps once for initial setup)
