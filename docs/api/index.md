@@ -75,7 +75,8 @@ individual endpoint and will take you to the corresponding page.
 
 ### Pin Endpoints
 
-| Method | Endpoint                  | Description                  | Auth Required |
-|--------|---------------------------|------------------------------|---------------|
-| GET    | [/pins](pins.md#get-pins) | Return a list of active pins | Partially     |
+| Method | Endpoint                                | Description                  | Auth Required |
+|--------|-----------------------------------------|------------------------------|---------------|
+| GET    | [/pins](pins.md#get-pins)               | Return a list of active pins | Partially     |
+| GET    | [/pins/{pin_id}](pins.md#get-pinpin_id) | Return a single pin object   | Partially     |
 
