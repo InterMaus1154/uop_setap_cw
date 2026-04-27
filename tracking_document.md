@@ -39,6 +39,27 @@ Use this document to log your contributions. Add new entries at the top.
 **Notes:** Covers main valid and invalid scenarios for reacting to a pin, including like, dislike, duplicate, change, invalid value, non-existent pin, and invalid user.
 
 
+
+### [Theodore up2282406 ] - 20/04/2026
+**Summary:** Implemented auto stop/control flow for location sharing so updates only run while sharing is enabled, with safe start/stop lifecycle handling from the map screen.
+
+**Files Modified/Created:**
+- frontend/lib/providers/location_provider.dart
+- frontend/lib/screens/map_screen.dart
+- frontend/lib/services/api_service.dart
+
+**Notes:** Added polling-based refresh and guarded GPS push logic so location updates are not sent when sharing is disabled. Wired sharing toggle behavior through existing `/user-locations` endpoints and ensured cleanup via provider lifecycle methods.
+
+### [Theodore up2282406 ] - 20/04/2026
+**Summary:** Added Redis-backed caching for friend location sharing reads/writes to reduce repeated database lookups and keep location responses fast.
+
+**Files Modified/Created:**
+- backend/database/redis.py
+- backend/routes/user_locations.py
+
+**Notes:** Implemented write-through caching on location create/update and cache-assisted reads for friend locations, with DB fallback when cache is missing. Added short TTL expiry to keep cached coordinates fresh while limiting stale data.
+
+
 ### Josh up2255832 - 18/03/2026
 **Summary:** Added pin image upload — users can optionally attach a photo from gallery or camera when creating a pin. Images are uploaded via multipart form data, stored on the backend, and displayed in the pin detail sheet with tap-to-fullscreen and pinch-to-zoom. Also fixed a backend bug where creating a pin without an image would crash (undefined db_path variable).
 
