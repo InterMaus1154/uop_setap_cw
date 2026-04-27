@@ -21,6 +21,24 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+
+## [Theodore up2282406] - 27/04/2026  
+**Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike).
+
+**Files Modified/Created:**
+- backend/tests/test_delete_pin_reaction.py
+
+**Notes:** Covers deleting existing and non-existent reactions, as well as error cases for invalid pin/user.
+
+## [Theodore up2282406] - 27/04/2026  
+**Summary:** Implemented backend tests for reacting to a pin (like/dislike/change/invalid cases).
+
+**Files Modified/Created:**
+- backend/tests/test_pin_reaction.py
+
+**Notes:** Covers main valid and invalid scenarios for reacting to a pin, including like, dislike, duplicate, change, invalid value, non-existent pin, and invalid user.
+
+
 ### Josh up2255832 - 18/03/2026
 **Summary:** Added pin image upload — users can optionally attach a photo from gallery or camera when creating a pin. Images are uploaded via multipart form data, stored on the backend, and displayed in the pin detail sheet with tap-to-fullscreen and pinch-to-zoom. Also fixed a backend bug where creating a pin without an image would crash (undefined db_path variable).
 
