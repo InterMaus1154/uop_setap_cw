@@ -140,9 +140,9 @@ def login_with_code(
         if not guest:
             raise HTTPException(status_code=404, detail ="Guest user not found")
         
-    token =_create_token(guest.user_email)
+    token = _create_token(guest.user_email)
     guest.user_token = token
     db.commit()
     db.refresh(guest)
 
-    return UserLoginResponse(token=token, **guest.__dict__)
+    return UserLoginResponse(token=token, expires_at=invitation.expires_at, **guest.__dict__)
