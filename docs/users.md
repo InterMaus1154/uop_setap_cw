@@ -49,6 +49,40 @@ If there are multiple pins close enough to be touching on the map, then the prog
 ![Multi Pin](multi_pin.png)
 If you click on any of the items listed in this menu, then it will behave akin to clicking on a single pin of another type
 
+## Friends and sending friend requests
+If you navigate to the profile section of the app, you will notice that there is a button that says Friends. In this section, you can see your friends list, see your incoming and outgoing friend requests and add new friends
+
+### Friends
+
+![Friend list](friend_list.png)
+
+In the picture above, you will see a picture of a user's friends list. In this section, you can view the friends you've made on the app and using the toggle switch to the right, toggle whether you want to share location with them or not
+
+### Incoming
+
+![incoming friend request](incoming_friend.png)
+
+In the picture above, you can see the incoming section. In this section, you can see all of your incoming friend requests, if any. If you want to accept a friend request, press the tick button, if you want to decline a friend request, press the cross button and if you want to block the user, press the block button (the final one)
+
+### Outgoing
+
+![Outgoing friend request](outgoing_friend.png)
+
+In the picture above, you can see the outgoing friend requests of a user, if you want to cancel a friend request for whatever reason, you can press the cancel button and the friend request will disappear from the other user's incoming friend requests 
+
+### Adding a friend
+
+By tapping on the button that says Add Friend, you will open up the screen seen below
+
+![Add a friend](add_friend.png)
+
+In this screen, in order to add a friend, type in at least 3 consecutive letters of the name of the user you want to add and then the search feature should come up with suggestions based on what letters you've typed in so far, an example of this is below
+
+![Add a friend with a name typed in](add_friend_with_name.png)
+
+By then clicking Add Friend, a friend request will be sent to the given user unless you are already friends with them in which case it will say "You are already friends"
+
+
 
 
 
