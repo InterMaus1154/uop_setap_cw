@@ -21,6 +21,23 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 27/04/2026
+**Description:**
+- Added automatic guest account deactivation after 24 hours through a background task in main.py.
+- Wired invitation code login endpoint to api_service_dart.
+- Added join via invitation code option to selection_screen_dart.
+- Updated the profile screen to show a deactivation countdown timer for guest accounts.
+
+**Files created/modified:**
+- backend/main.py
+- backend/routes/invitations.py
+- backend/schemas/User.py
+- frontend/lib/services/api_service.dart
+- frontend/lib/models/user.dart
+- frontend/lib/screens/user_selection_screen.dart
+- frontend/lib/screens/profile_screen.dart
+
+---
 
 ## [Theodore up2282406] - 27/04/2026  
 **Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike).
