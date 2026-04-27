@@ -30,6 +30,20 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Login as a guest using a shared invitation code
+  Future<void> loginWithCode(String code) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.loginWithCode(code);
+      _currentUser = response.user;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Logout: call backend, clear token, clear user
   Future<void> logout() async {
     await _apiService.logout();

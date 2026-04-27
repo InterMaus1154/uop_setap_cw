@@ -1,9 +1,11 @@
 import os
+
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import checkpins.checkpinactivity as checkpin
+
 from routes.users import router as users_router
 from routes.pins import router as pins_router
 from routes.categories import router as categories_router
@@ -16,7 +18,7 @@ load_dotenv()
 
 app = FastAPI(lifespan=checkpin.lifespan)
 
-# Allow any localhost port for development 
+# Allow any localhost port for development
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"http://localhost(:\d+)?",
