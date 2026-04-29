@@ -29,5 +29,7 @@ class UserLocationResponse(BaseModel):
     is_enabled: bool
     created_at: datetime
     updated_at: datetime
+    city: Optional[str] = None
+    street: Optional[str] = None
 
     model_config = {"from_attributes": True}
