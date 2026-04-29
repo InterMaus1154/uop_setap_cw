@@ -21,6 +21,20 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 29/04/2026
+**Description:**
+- added geopy, reverse geocoding package, to convert user coordinates into street and city names in the backend and updated the frontend to show these changes.
+- added optional city and street fields to response schema.
+
+**Files created/modified:**
+- backend/requirements.txt 
+- backend/schemas/UserLocation.py 
+- backend/routes/user_locations.py 
+- frontend/lib/models/user_location.dart 
+- frontend/lib/screens/map_screen.dart 
+
+---
+
 ### Julian up2301253 - 27/04/2026
 **Description:**
 - Added automatic guest account deactivation after 24 hours through a background task in main.py.
