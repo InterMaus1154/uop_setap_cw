@@ -431,7 +431,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 
 
 ### Mark up2306492 - 21/02/2026
-**Summary:** Implemented reacting with pins
+**Summary:** Implemented reacting with pins and connected readthedocs
 
 **Details:**
 - added PATCH /pins/{pin_id}/react endpoint to create or update an interaction
@@ -439,6 +439,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 - added pin_likes and pin_dislikes properties on Pin model and on PinResponse
 - added user_reaction property on Pin model and on PinResponse to show how a user interacted (or not) with a pin
 - more details in issue [#13](https://github.com/InterMaus1154/uop_setap_cw/issues/13)
+- made a basic setup of readthedocs, and connected it to our repo
 
 **Files modified:**
 - backend/routes/pins.py (added endpoints)
