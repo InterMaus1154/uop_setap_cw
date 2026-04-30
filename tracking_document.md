@@ -25,6 +25,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 **Description:**
 - added API endpoint descriptions about `GET /pins` and `GET /pins/{id}` to our documentation
+- written and created tests for creating pin (backend)
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
