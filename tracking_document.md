@@ -21,6 +21,11 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Mark up2306492
+
+**Description:**
+- added API endpoint descriptions about `GET /pins` and `GET /pins/{id}` to our documentation
+
 ### Julian up2301253 - 29/04/2026
 **Description:**
 - added geopy, reverse geocoding package, to convert user coordinates into street and city names in the backend and updated the frontend to show these changes.
