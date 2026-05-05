@@ -21,6 +21,16 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 29/04/2026
+**Description:**
+- created backend tests for adding friends 
+
+**Files created/modified:**
+- backend\tests\test_add_friend.py
+
+---
+
+### Mark up2306492
 ### Mark up2306492 - no date, I will input here whatever will be done for the last two weeks
 
 **Description:**
