@@ -36,7 +36,8 @@ Use this document to log your contributions. Add new entries at the top.
 **Description:**
 - added API endpoint descriptions about `GET /pins` and `GET /pins/{id}` to our documentation
 - written and created tests for creating pin (backend)
-- added more endpoints to the API documentation (POST pin, PUT pin, DELETE pin, PATCH pin react, DELETE pin react, GET pin report types, GET pin reports, POST pin report)
+- added pin endpoints to the API documentation (POST pin, PUT pin, DELETE pin, PATCH pin react, DELETE pin react, GET pin report types, GET pin reports, POST pin report)
+- added category endpoints to API docs (GET categories, GET category levels, GET sub categories,  GET category sub categories)
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
