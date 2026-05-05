@@ -132,10 +132,20 @@ async def create_pin(
     image_path = None
     db_path = None
     if image:
+
+        # check if an image
+        if not image.content_type.startswith("image/"):
+            raise HTTPException(status_code=422, detail="File must be an image")
+
+        # file size is max 5mb
+        contents = await image.read()
+        if len(contents) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=422, detail="Image must be less than 5mb")
+
         extension = image.filename.split(".")[-1]
         filename = f"{uuid.uuid4()}.{extension}"
         image_path = f"{UPLOAD_DIR}/{filename}"
-        db_path = f"uploads/pins/{filename}" # in the db we only store relative path
+        db_path = f"uploads/pins/{filename}"  # in the db we only store relative path
         with open(image_path, "wb") as f:
             f.write(await image.read())
 

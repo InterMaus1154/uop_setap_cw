@@ -189,3 +189,27 @@ A single object.
 |------------|----------------------------------|
 | 200        | Pin found.                       |
 | 404        | Id is invalid or pin is inactive |
+
+## POST /pins
+
+### Description
+
+Creates a new pin record, and returns the newly created pin.
+
+### Request
+
+### Body
+
+| Field              | Type       | Required | Constraints                                       | Description            |
+|--------------------|------------|----------|---------------------------------------------------|------------------------|
+| `pin_title`        | `string`   | Yes      | Max length 100                                    |                        |
+| `pin_latitude`     | `float`    | Yes      |                                                   |                        |
+| `pin_longitude`    | `float`    | Yes      |                                                   |                        |
+| `cat_id`           | `int`      | Yes      | Must exist in categories                          | A main category id     |
+| `sub_cat_id`       | `int`      | No       | Must exist in sub_categories and belong to cat_id | A sub main category id |
+| `pin_expire_at`    | `datetime` | Yes      |                                                   |                        | 
+| `pin_desscription` | `string`   | No       |                                                   |                        |
+| `image`            | `file`     | No       |                                                   |                        |
+
+
+

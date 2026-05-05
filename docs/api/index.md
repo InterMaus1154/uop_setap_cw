@@ -79,4 +79,5 @@ individual endpoint and will take you to the corresponding page.
 |--------|-----------------------------------------|------------------------------|---------------|
 | GET    | [/pins](pins.md#get-pins)               | Return a list of active pins | Partially     |
 | GET    | [/pins/{pin_id}](pins.md#get-pinpin_id) | Return a single pin object   | Partially     |
+| POST   | [/pins](pins.md#post-pins)              | Create a new pin             | Yes           |
 
