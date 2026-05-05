@@ -6,6 +6,7 @@ class CategoryLevelResponse(BaseModel):
     cat_level_id: int
     cat_level_name: str
     cat_level_ttl_mins: int
+    cat_level_color : str
 
     model_config = ConfigDict(from_attributes=True)
 

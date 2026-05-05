@@ -87,3 +87,12 @@ individual endpoint and will take you to the corresponding page.
 | GET    | [/pins/report-types](pins.md#get-pinsreport-types)  | Return report types          | No            |
 | GET    | [/pins/{pin_id}/reports](pins.md#get-pinsidreports) | Return pin reports           | No            |
 | POST   | [/pins/{pin_id}/report](pins.md#post-pinsidreport)  | Create a new pin report      | Yes           |
+
+### Category endpoints
+
+| Method | Endpoint                                                                        | Description                              | Auth Required |
+|--------|---------------------------------------------------------------------------------|------------------------------------------|---------------|
+| Get    | [/categories](categories.md#get-categories)                                     | List of main categories                  | No            |
+| Get    | [/categories/{id}/sub-categories](categories.md#get-categoriesidsub-categories) | List of sub categories within a category | No            |
+| Get    | [/categories/sub-categories](categories.md#get-categoriesidsub-categories)      | List of all sub categories               | No            |
+| Get    | [/categories/levels](categories.md#get-categorieslevels)                        | List of category levels                  | No            |
