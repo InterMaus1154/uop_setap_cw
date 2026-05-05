@@ -21,11 +21,12 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
-### Mark up2306492
+### Mark up2306492 - no date, I will input here whatever will be done for the last two weeks
 
 **Description:**
 - added API endpoint descriptions about `GET /pins` and `GET /pins/{id}` to our documentation
 - written and created tests for creating pin (backend)
+- added more endpoints to the API documentation (POST pin, PUT pin, DELETE pin, PATCH pin react, DELETE pin react, GET pin report types, GET pin reports, POST pin report)
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
