@@ -75,9 +75,15 @@ individual endpoint and will take you to the corresponding page.
 
 ### Pin Endpoints
 
-| Method | Endpoint                                | Description                  | Auth Required |
-|--------|-----------------------------------------|------------------------------|---------------|
-| GET    | [/pins](pins.md#get-pins)               | Return a list of active pins | Partially     |
-| GET    | [/pins/{pin_id}](pins.md#get-pinpin_id) | Return a single pin object   | Partially     |
-| POST   | [/pins](pins.md#post-pins)              | Create a new pin             | Yes           |
-
+| Method | Endpoint                                            | Description                  | Auth Required |
+|--------|-----------------------------------------------------|------------------------------|---------------|
+| GET    | [/pins](pins.md#get-pins)                           | Return a list of active pins | Partially     |
+| GET    | [/pins/{pin_id}](pins.md#get-pinpin_id)             | Return a single pin object   | Partially     |
+| POST   | [/pins](pins.md#post-pins)                          | Create a new pin             | Yes           |
+| PUT    | [/pins/{pin_id}](pins.md#put-pinsid)                | Update a pin                 | Yes           |
+| DELETE | [/pins/{pin_id}](pins.md#delete-pinsid)             | Delete a pin                 | Yes           |
+| PATCH  | [/pins/{pin_id}/react](pins.md#patch-pinsidreact)   | React to a pin               | Yes           |
+| DELETE | [/pins/{pin_id}/react](pins.md#delete-pinsidreact)  | Delete a pin reaction        | Yes           |
+| GET    | [/pins/report-types](pins.md#get-pinsreport-types)  | Return report types          | No            |
+| GET    | [/pins/{pin_id}/reports](pins.md#get-pinsidreports) | Return pin reports           | No            |
+| POST   | [/pins/{pin_id}/report](pins.md#post-pinsidreport)  | Create a new pin report      | Yes           |
