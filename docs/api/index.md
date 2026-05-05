@@ -92,7 +92,18 @@ individual endpoint and will take you to the corresponding page.
 
 | Method | Endpoint                                                                        | Description                              | Auth Required |
 |--------|---------------------------------------------------------------------------------|------------------------------------------|---------------|
-| Get    | [/categories](categories.md#get-categories)                                     | List of main categories                  | No            |
-| Get    | [/categories/{id}/sub-categories](categories.md#get-categoriesidsub-categories) | List of sub categories within a category | No            |
-| Get    | [/categories/sub-categories](categories.md#get-categoriesidsub-categories)      | List of all sub categories               | No            |
-| Get    | [/categories/levels](categories.md#get-categorieslevels)                        | List of category levels                  | No            |
+| GET    | [/categories](categories.md#get-categories)                                     | List of main categories                  | No            |
+| GET    | [/categories/{id}/sub-categories](categories.md#get-categoriesidsub-categories) | List of sub categories within a category | No            |
+| GET    | [/categories/sub-categories](categories.md#get-categoriesidsub-categories)      | List of all sub categories               | No            |
+| GET    | [/categories/levels](categories.md#get-categorieslevels)                        | List of category levels                  | No            |
+
+### User endpoints
+
+| Method | Endpoint                                               | Description                            | Auth Required |
+|--------|--------------------------------------------------------|----------------------------------------|---------------|
+| GET    | [/users/me](users.md#get-usersme)                      | Return logged-in user's details        | Yes           |
+| GET    | [/users/me/pin-count](users.md#get-usersmepin-count)   | Return logged-in user's number of pins | Yes           |
+| PUT    | [/users/me](users.md#put-usersme)                      | Update details of logged-in user       | Yes           |                                      
+| PATCH  | [/users/deactivate](users.md#patch-usersdeactivate)    | Deactivate the current logged-in user  | Yes           |                                      
+| GET    | [/users/search/{email}](users.md#get-userssearchemail) | Deactivate the current logged-in user  | No            |                                      
+
