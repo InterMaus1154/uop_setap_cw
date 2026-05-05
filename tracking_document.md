@@ -21,6 +21,16 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 05/05/2026
+**Summary:** Fixed test compatibility issue after git pull, added missing loginWithCode method to FakeUserProvider in profile screen tests. Also completed all frontend documentation.
+
+**Files Modified:**
+- frontend/test/screens/profile_screen_bugs_test.dart (added loginWithCode override to FakeUserProvider)
+
+**Notes:** After pulling changes that added invitation code login to UserProvider, the test fake class was missing the new method, causing a compilation error. Added empty stub implementation since tests don't exercise that code path.
+
+---
+
 ### Julian up2301253 - 29/04/2026
 **Description:**
 - created backend tests for adding friends 
