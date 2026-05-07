@@ -7,5 +7,7 @@ class TestReportTypes:
         assert response.status_code == 200
         data = response.json()
 
+        assert len(data) > 1
+        assert {"inaccurate", "resolved", "duplicate"}.issubset(set(data))
 
 
