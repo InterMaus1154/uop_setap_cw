@@ -29,6 +29,11 @@ UPLOAD_DIR = os.path.join(BASE_DIR, "uploads", "pins")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+@router.get("/report-types")
+def get_report_types():
+    """Return all valid pin report types"""
+    return [report_type.value for report_type in PinReportType]
+
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
              pin_expire_at: Optional[datetime] = Query(default=None),
@@ -332,11 +337,7 @@ def report_pin(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/report-types")
-def get_report_types():
-    """Return all valid pin report types"""
 
-    return [report_type.value for report_type in PinReportType]
 
 
 @router.get("/{pin_id}/reports", response_model=list[PinReportResponse])
