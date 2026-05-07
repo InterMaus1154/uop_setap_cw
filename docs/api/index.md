@@ -107,6 +107,8 @@ individual endpoint and will take you to the corresponding page.
 | PATCH  | [/users/deactivate](users.md#patch-usersdeactivate)    | Deactivate the current logged-in user  | Yes           |                                      
 | GET    | [/users/search/{email}](users.md#get-userssearchemail) | Deactivate the current logged-in user  | No            |                                      
 
+### 
+
 ## Location sharing endpoints
 | Method | Endpoint                             | Description                            | Auth Required |
 |--------|--------------------------------------|----------------------------------------|---------------|
