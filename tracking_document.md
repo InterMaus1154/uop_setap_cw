@@ -21,6 +21,15 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 07/04/2026
+**Description:**
+- Added the models.md file to backend documentation.
+
+**Files created/modified:**
+- backend\models.md
+
+---
+
 ### Josh up2255832 - 05/05/2026
 **Summary:** Fixed test compatibility issue after git pull, added missing loginWithCode method to FakeUserProvider in profile screen tests. Also completed all frontend documentation.
 
@@ -31,7 +40,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 ---
 
-### Julian up2301253 - 29/04/2026
+### Julian up2301253 - 05/04/2026
 **Description:**
 - created backend tests for adding friends 
 
