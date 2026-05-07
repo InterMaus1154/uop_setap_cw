@@ -87,8 +87,7 @@ def get_active_invitation_codes(
         db.query(InvitationCode)
         .filter(
             InvitationCode.creator_id == current_user.user_id,
-            InvitationCode.expires_at > now,
-            InvitationCode.is_used == False
+            InvitationCode.expires_at > now
         )
         .all()
     )

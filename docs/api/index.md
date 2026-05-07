@@ -10,6 +10,7 @@ pins
 users
 friends
 locshare
+invcodes
 ```
 
 ## Page Content
@@ -135,3 +136,11 @@ individual endpoint and will take you to the corresponding page.
 | PATCH  | [/location-permissions](locshare.md#get-location-permissions)                     | Location record of list of friends who are sharing with the user | Yes           |
 | POST   | [/location-permissions](locshare.md#post-location-permissions)                    | Share location with a friend                                     | Yes           |
 | DELETE | [/location-permissions/{user_id}](locshare.md#delete-location-permissionsuser_id) | Delete location sharing with a friend                            | Yes           |
+
+## Invitation codes endpoints
+
+| Method | Endpoint                                                | Description                                           | Auth Required |
+|--------|---------------------------------------------------------|-------------------------------------------------------|---------------|
+| GET    | [/invitation-codes/](invcodes.md#get-invitation-codes)  | List of activate invitation codes created by the user | Yes           |
+| POST   | [/invitation-codes/](invcodes.md#post-invitation-codes) | Create a new invitation code                          | Yes           |
+
