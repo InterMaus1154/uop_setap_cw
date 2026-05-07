@@ -7,6 +7,8 @@ from models.category_level import CategoryLevel
 
 
 class TestPinColour:
+    """Test plan reference: PCT1"""
+
     PIN_BASE = {
         "pin_title": "Test Pin",
         "pin_latitude": 50.7934840843502,

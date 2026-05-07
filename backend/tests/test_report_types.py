@@ -1,6 +1,8 @@
 
 
 class TestReportTypes:
+    """Test plan reference: RTT1"""
+
     def test_get_report_types(self, client):
         """Test getting the report types"""
         response = client.get("/pins/report-types")
