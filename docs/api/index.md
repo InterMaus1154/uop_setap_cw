@@ -126,3 +126,12 @@ individual endpoint and will take you to the corresponding page.
 
 ## Location sharing endpoints
 
+| Method | Endpoint                                                                          | Description                                                      | Auth Required |
+|--------|-----------------------------------------------------------------------------------|------------------------------------------------------------------|---------------|
+| GET    | [/user-locations/](locshare.md#get-user-locations)                                | Location record of logged-in user                                | Yes           |
+| POST   | [/user-locations/](locshare.md#post-user-locations)                               | Create or update location record for user                        | Yes           |
+| PATCH  | [/user-locations/](locshare.md#patch-user-locations)                              | Update location record for user                                  | Yes           |
+| PATCH  | [/user-locations/friends](locshare.md#get-user-locationsfriends)                  | Location record of friends who are sharing with the user         | Yes           |
+| PATCH  | [/location-permissions](locshare.md#get-location-permissions)                     | Location record of list of friends who are sharing with the user | Yes           |
+| POST   | [/location-permissions](locshare.md#post-location-permissions)                    | Share location with a friend                                     | Yes           |
+| DELETE | [/location-permissions/{user_id}](locshare.md#delete-location-permissionsuser_id) | Delete location sharing with a friend                            | Yes           |
