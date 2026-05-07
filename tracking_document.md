@@ -61,6 +61,7 @@ Use this document to log your contributions. Add new entries at the top.
 - added all 7 friends endpoints to API docs
 - added all 2 invitation code endpoints to API docs
 - finished API documentation
+- added python tests for a new created pin getting the valid colour when it is returned
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
