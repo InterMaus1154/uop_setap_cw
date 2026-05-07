@@ -198,7 +198,7 @@ Creates a new pin record, and returns the newly created pin. Only authenticated 
 
 ### Request
 
-### Body
+#### Body
 
 | Field             | Type       | Required | Constraints                                       | Description            |
 |-------------------|------------|----------|---------------------------------------------------|------------------------|

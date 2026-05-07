@@ -5,6 +5,11 @@
 :caption Endpoints specification
 
 auth
+categories
+pins
+users
+friends
+locshare
 ```
 
 ## Page Content
@@ -73,6 +78,15 @@ individual endpoint and will take you to the corresponding page.
 | POST   | [/auth/logout](auth.md#post-authlogout)        | Logout                     | Yes           |
 | POST   | [/auth/login/code](auth.md#post-authlogincode) | Login with invitation code | No            | 
 
+### Category endpoints
+
+| Method | Endpoint                                                                        | Description                              | Auth Required |
+|--------|---------------------------------------------------------------------------------|------------------------------------------|---------------|
+| GET    | [/categories](categories.md#get-categories)                                     | List of main categories                  | No            |
+| GET    | [/categories/{id}/sub-categories](categories.md#get-categoriesidsub-categories) | List of sub categories within a category | No            |
+| GET    | [/categories/sub-categories](categories.md#get-categoriesidsub-categories)      | List of all sub categories               | No            |
+| GET    | [/categories/levels](categories.md#get-categorieslevels)                        | List of category levels                  | No            |
+
 ### Pin Endpoints
 
 | Method | Endpoint                                            | Description                  | Auth Required |
@@ -88,15 +102,6 @@ individual endpoint and will take you to the corresponding page.
 | GET    | [/pins/{pin_id}/reports](pins.md#get-pinsidreports) | Return pin reports           | No            |
 | POST   | [/pins/{pin_id}/report](pins.md#post-pinsidreport)  | Create a new pin report      | Yes           |
 
-### Category endpoints
-
-| Method | Endpoint                                                                        | Description                              | Auth Required |
-|--------|---------------------------------------------------------------------------------|------------------------------------------|---------------|
-| GET    | [/categories](categories.md#get-categories)                                     | List of main categories                  | No            |
-| GET    | [/categories/{id}/sub-categories](categories.md#get-categoriesidsub-categories) | List of sub categories within a category | No            |
-| GET    | [/categories/sub-categories](categories.md#get-categoriesidsub-categories)      | List of all sub categories               | No            |
-| GET    | [/categories/levels](categories.md#get-categorieslevels)                        | List of category levels                  | No            |
-
 ### User endpoints
 
 | Method | Endpoint                                               | Description                            | Auth Required |
@@ -107,9 +112,17 @@ individual endpoint and will take you to the corresponding page.
 | PATCH  | [/users/deactivate](users.md#patch-usersdeactivate)    | Deactivate the current logged-in user  | Yes           |                                      
 | GET    | [/users/search/{email}](users.md#get-userssearchemail) | Deactivate the current logged-in user  | No            |                                      
 
-### 
+### Friend endpoints
+
+| Method | Endpoint                                             | Description                       | Auth Required |
+|--------|------------------------------------------------------|-----------------------------------|---------------|
+| GET    | [/friends/](friends.md#get-friends)                  | List of logged-in user's friend   | Yes           |
+| POST   | [/friends/](friends.md#post-friends)                 | Send a new friend request         | Yes           |
+| GET    | [/friends/requests](friends.md#get-friendsrequests)  | List of incoming requests         | Yes           |
+| GET    | [/friends/sent](friends.md#get-friendssent)          | List of sent (outgoing) requests  | Yes           |
+| GET    | [/friends/blocked](friends.md#get-friendsblocked)    | List of blocked users             | Yes           |
+| PATCH  | [/friends/{rel_id}](friends.md#patch-friendsrel_id)  | Update relationship status        | Yes           |
+| DELETE | [/friends/{rel_id}](friends.md#delete-friendsrel_id) | Delete relationship between users | Yes           |
 
 ## Location sharing endpoints
-| Method | Endpoint                             | Description                            | Auth Required |
-|--------|--------------------------------------|----------------------------------------|---------------|
-| POST   | [/users/me](locshare.md#get-usersme) | Return logged-in user's details        | Yes           |
+
