@@ -791,4 +791,41 @@ class ApiService {
   /// Get all active invitation codes for the current user
   Future<List<InvitationCode>> getInvitationCodes() =>
       _getList('/invitation-codes', InvitationCode.fromJson);
+
+  /// Log in (or rejoin) as a guest using a valid invitation code
+  Future<LoginResponse> loginWithCode(String code) async {
+    try {
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl/auth/login/code'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'code': code}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final token = data['token'] as String;
+        await _storage.saveToken(token);
+        return LoginResponse(user: User.fromJson(data), token: token);
+      } else if (response.statusCode == 401) {
+        final detail = json.decode(response.body)['detail'] ?? 'Invalid or expired invitation code.';
+        throw ApiException(detail, statusCode: 401);
+      } else {
+        throw ApiException(
+          'Login failed: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException('Could not connect to server. Is the backend running?');
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
 }

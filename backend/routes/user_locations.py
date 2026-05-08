@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from geopy.geocoders import Nominatim
 
 from database.db import get_db
 from database.redis import redis_client
@@ -9,6 +10,22 @@ from models.user_location import UserLocation
 from models.location_permission import LocationPermission
 from schemas.UserLocation import CreateUserLocation, UpdateUserLocation, UserLocationResponse
 from schemas.LocationPermission import CreateLocationPermission, LocationPermissionResponse
+
+_geolocator = Nominatim(user_agent="campus_connect")
+
+
+def _reverse_geocode(lat: float, lng: float) -> dict:
+    """Return city and street for a coordinate pair, or None if lookup fails."""
+    try:
+        result = _geolocator.reverse((lat, lng), timeout=5)
+        if result and result.raw.get("address"):
+            addr = result.raw["address"]
+            city = addr.get("city") or addr.get("town") or addr.get("village") or addr.get("county")
+            street = addr.get("road") or addr.get("pedestrian") or addr.get("footway")
+            return {"city": city, "street": street}
+    except Exception:
+        pass
+    return {"city": None, "street": None}
 
 router = APIRouter(prefix="/user-locations", tags=["user-locations"])
 location_permissions_router = APIRouter(prefix="/location-permissions", tags=["location-permissions"])
@@ -37,7 +54,8 @@ def create_or_update_user_location(
             "is_enabled": int(existing.is_enabled)
         })
         redis_client.expire(f"user_location:{current_user.user_id}", 30)
-        return existing
+        geo = _reverse_geocode(existing.latitude, existing.longitude)
+        return UserLocationResponse(**existing.__dict__, city=geo["city"], street=geo["street"])
 
     # if no record exists - creates one
     location = UserLocation(
@@ -56,7 +74,8 @@ def create_or_update_user_location(
         "is_enabled": int(location.is_enabled)
     })
     redis_client.expire(f"user_location:{current_user.user_id}", 30)
-    return location
+    geo = _reverse_geocode(location.latitude, location.longitude)
+    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
 
 
 @router.patch("/", status_code=200, response_model=UserLocationResponse)
@@ -88,7 +107,8 @@ def update_user_location(
         "is_enabled": int(location.is_enabled)
     })
     redis_client.expire(f"user_location:{current_user.user_id}", 30)
-    return location
+    geo = _reverse_geocode(location.latitude, location.longitude)
+    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
 
 
 @router.delete("/", status_code=204)
@@ -119,7 +139,8 @@ def get_user_location(
     if not location:
         raise HTTPException(status_code=404, detail="User location not found")
 
-    return location
+    geo = _reverse_geocode(location.latitude, location.longitude)
+    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
 
 
 @router.get("/friends", status_code=200, response_model=list[UserLocationResponse])
@@ -144,18 +165,22 @@ def get_friends_locations(
     for friend in friends:
         cache = redis_client.hgetall(f"user_location:{friend.user_id}")
         if cache and "lat" in cache and "lng" in cache and "is_enabled" in cache:
-            # Compose a UserLocationResponse from cache
+            lat, lng = float(cache["lat"]), float(cache["lng"])
+            geo = _reverse_geocode(lat, lng)
             results.append(UserLocationResponse(
                 user_loc_id=friend.user_loc_id,
                 user_id=friend.user_id,
-                latitude=float(cache["lat"]),
-                longitude=float(cache["lng"]),
+                latitude=lat,
+                longitude=lng,
                 is_enabled=bool(int(cache["is_enabled"])),
                 created_at=friend.created_at,
-                updated_at=friend.updated_at
+                updated_at=friend.updated_at,
+                city=geo["city"],
+                street=geo["street"]
             ))
         else:
             # Fallback to DB, and update Redis for next time
+            geo = _reverse_geocode(friend.latitude, friend.longitude)
             results.append(UserLocationResponse(
                 user_loc_id=friend.user_loc_id,
                 user_id=friend.user_id,
@@ -163,7 +188,9 @@ def get_friends_locations(
                 longitude=friend.longitude,
                 is_enabled=friend.is_enabled,
                 created_at=friend.created_at,
-                updated_at=friend.updated_at
+                updated_at=friend.updated_at,
+                city=geo["city"],
+                street=geo["street"]
             ))
             redis_client.hset(f"user_location:{friend.user_id}", mapping={
                 "lat": friend.latitude,

@@ -15,11 +15,62 @@ class UserSelectionScreen extends StatefulWidget {
 class _UserSelectionScreenState extends State<UserSelectionScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<User>> _usersFuture;
+  final TextEditingController _codeController = TextEditingController();
+  bool _isCodeLoading = false;
 
   @override
   void initState() {
     super.initState();
     _usersFuture = _apiService.getUsers();
+  }
+
+  @override
+  void dispose() {
+    _codeController.dispose();
+    super.dispose();
+  }
+
+  void _loginWithCode() async {
+    final code = _codeController.text.trim();
+    if (code.isEmpty) return;
+
+    setState(() => _isCodeLoading = true);
+    try {
+      await context.read<UserProvider>().loginWithCode(code);
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const HomeScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0.05, 0),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                      ),
+                      child: child,
+                    ),
+                  );
+                },
+            transitionDuration: const Duration(milliseconds: 300),
+          ),
+        );
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCodeLoading = false);
+    }
   }
 
   void _selectUser(User user) async {
@@ -87,6 +138,7 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
               _buildHeader(),
               const SizedBox(height: 30),
               Expanded(child: _buildUserList()),
+              _buildCodeSection(),
               _buildWaveDecoration(),
             ],
           ),
@@ -202,6 +254,68 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildCodeSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Or enter an invitation code',
+            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _codeController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'e.g. aB3dEf7hIjKl',
+                    hintStyle: TextStyle(color: Colors.grey[600]),
+                    prefixIcon: Icon(Icons.vpn_key_outlined, color: Colors.blue[300]),
+                    filled: true,
+                    fillColor: const Color(0xFF1E2A45),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onSubmitted: (_) => _loginWithCode(),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isCodeLoading ? null : _loginWithCode,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[400],
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isCodeLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text('Join'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

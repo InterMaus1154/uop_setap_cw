@@ -53,5 +53,6 @@ class UserLoginResponse(BaseModel):
     user_isactive: bool
     last_login: Optional[datetime] = None
     created_at: datetime
+    expires_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)

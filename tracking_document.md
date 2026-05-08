@@ -21,6 +21,82 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 07/04/2026
+**Description:**
+- Added the models.md file to backend documentation.
+
+**Files created/modified:**
+- backend\models.md
+
+---
+
+### Josh up2255832 - 05/05/2026
+**Summary:** Fixed test compatibility issue after git pull, added missing loginWithCode method to FakeUserProvider in profile screen tests. Also completed all frontend documentation.
+
+**Files Modified:**
+- frontend/test/screens/profile_screen_bugs_test.dart (added loginWithCode override to FakeUserProvider)
+
+**Notes:** After pulling changes that added invitation code login to UserProvider, the test fake class was missing the new method, causing a compilation error. Added empty stub implementation since tests don't exercise that code path.
+
+---
+
+### Julian up2301253 - 05/04/2026
+**Description:**
+- created backend tests for adding friends 
+
+**Files created/modified:**
+- backend\tests\test_add_friend.py
+
+---
+
+### Mark up2306492
+### Mark up2306492 - no date, I will input here whatever will be done for the last two weeks
+
+**Description:**
+- added API endpoint descriptions about `GET /pins` and `GET /pins/{id}` to our documentation
+- written and created tests for creating pin (backend)
+- added pin endpoints to the API documentation (POST pin, PUT pin, DELETE pin, PATCH pin react, DELETE pin react, GET pin report types, GET pin reports, POST pin report)
+- added category endpoints to API docs (GET categories, GET category levels, GET sub categories,  GET category sub categories)
+- added user endpoints to API docs (GET users me, GET users me pin count, PUT users me, PATCH users deactivate, GET users search email)
+- added all 7 friends endpoints to API docs
+- added all 2 invitation code endpoints to API docs
+- finished API documentation
+- added python tests for a new created pin getting the valid colour when it is returned (test plan + actual tests)
+- added python test for getting pin report types (test plan + actual tests)
+- fixed bug with getting pin report types route
+- started adding user location tests (location sharing, plan + tests)
+
+### Julian up2301253 - 29/04/2026
+**Description:**
+- added geopy, reverse geocoding package, to convert user coordinates into street and city names in the backend and updated the frontend to show these changes.
+- added optional city and street fields to response schema.
+
+**Files created/modified:**
+- backend/requirements.txt 
+- backend/schemas/UserLocation.py 
+- backend/routes/user_locations.py 
+- frontend/lib/models/user_location.dart 
+- frontend/lib/screens/map_screen.dart 
+
+---
+
+### Julian up2301253 - 27/04/2026
+**Description:**
+- Added automatic guest account deactivation after 24 hours through a background task in main.py.
+- Wired invitation code login endpoint to api_service_dart.
+- Added join via invitation code option to selection_screen_dart.
+- Updated the profile screen to show a deactivation countdown timer for guest accounts.
+
+**Files created/modified:**
+- backend/main.py
+- backend/routes/invitations.py
+- backend/schemas/User.py
+- frontend/lib/services/api_service.dart
+- frontend/lib/models/user.dart
+- frontend/lib/screens/user_selection_screen.dart
+- frontend/lib/screens/profile_screen.dart
+
+---
 
 ## Theodore up2282406 - 27/04/2026  
 **Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike).
@@ -395,7 +471,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 
 
 ### Mark up2306492 - 21/02/2026
-**Summary:** Implemented reacting with pins
+**Summary:** Implemented reacting with pins and connected readthedocs
 
 **Details:**
 - added PATCH /pins/{pin_id}/react endpoint to create or update an interaction
@@ -403,6 +479,7 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 - added pin_likes and pin_dislikes properties on Pin model and on PinResponse
 - added user_reaction property on Pin model and on PinResponse to show how a user interacted (or not) with a pin
 - more details in issue [#13](https://github.com/InterMaus1154/uop_setap_cw/issues/13)
+- made a basic setup of readthedocs, and connected it to our repo
 
 **Files modified:**
 - backend/routes/pins.py (added endpoints)

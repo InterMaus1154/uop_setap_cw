@@ -827,7 +827,12 @@ class _MapScreenState extends State<MapScreen> {
                 name: displayName,
                 latLng: LatLng(loc.latitude, loc.longitude),
                 updatedAt: loc.updatedAt,
-                // locationName: ... // Optionally add reverse geocoded name here
+                locationName: () {
+                    final s = [loc.street, loc.city]
+                        .where((s) => s != null && s.isNotEmpty)
+                        .join(', ');
+                    return s.isEmpty ? null : s;
+                  }(),
               );
             },
             child: CircleAvatar(

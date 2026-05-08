@@ -29,6 +29,11 @@ UPLOAD_DIR = os.path.join(BASE_DIR, "uploads", "pins")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+@router.get("/report-types")
+def get_report_types():
+    """Return all valid pin report types"""
+    return [report_type.value for report_type in PinReportType]
+
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
              pin_expire_at: Optional[datetime] = Query(default=None),
@@ -132,10 +137,20 @@ async def create_pin(
     image_path = None
     db_path = None
     if image:
+
+        # check if an image
+        if not image.content_type.startswith("image/"):
+            raise HTTPException(status_code=422, detail="File must be an image")
+
+        # file size is max 5mb
+        contents = await image.read()
+        if len(contents) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=422, detail="Image must be less than 5mb")
+
         extension = image.filename.split(".")[-1]
         filename = f"{uuid.uuid4()}.{extension}"
         image_path = f"{UPLOAD_DIR}/{filename}"
-        db_path = f"uploads/pins/{filename}" # in the db we only store relative path
+        db_path = f"uploads/pins/{filename}"  # in the db we only store relative path
         with open(image_path, "wb") as f:
             f.write(await image.read())
 
@@ -322,11 +337,7 @@ def report_pin(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/report-types")
-def get_report_types():
-    """Return all valid pin report types"""
 
-    return [report_type.value for report_type in PinReportType]
 
 
 @router.get("/{pin_id}/reports", response_model=list[PinReportResponse])

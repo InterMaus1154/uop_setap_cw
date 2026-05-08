@@ -58,8 +58,8 @@ class _FriendsScreenState extends State<FriendsScreen>
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
+          TextButton(
+            child: const Text('Add Friend', style: TextStyle(color: Colors.blue)),
             onPressed: () {
               final currentUserId =
                   context.read<UserProvider>().currentUser?.userId ?? 0;

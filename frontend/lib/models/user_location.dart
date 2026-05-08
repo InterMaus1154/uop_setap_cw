@@ -6,6 +6,8 @@ class UserLocation {
   final bool isEnabled;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? city;
+  final String? street;
 
   UserLocation({
     required this.userLocId,
@@ -15,6 +17,8 @@ class UserLocation {
     required this.isEnabled,
     required this.createdAt,
     required this.updatedAt,
+    this.city,
+    this.street,
   });
 
   factory UserLocation.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class UserLocation {
       isEnabled: json['is_enabled'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+      city: json['city'] as String?,
+      street: json['street'] as String?,
     );
   }
 
