@@ -22,7 +22,7 @@ Use this document to log your contributions. Add new entries at the top.
 ## Entries
 
 
-## [Theodore up2282406] - 27/04/2026  
+## Theodore up2282406 - 27/04/2026  
 **Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike).
 
 **Files Modified/Created:**
@@ -30,7 +30,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 **Notes:** Covers deleting existing and non-existent reactions, as well as error cases for invalid pin/user.
 
-## [Theodore up2282406] - 27/04/2026  
+## Theodore up2282406 - 27/04/2026  
 **Summary:** Implemented backend tests for reacting to a pin (like/dislike/change/invalid cases).
 
 **Files Modified/Created:**
@@ -40,7 +40,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 
 
-### [Theodore up2282406 ] - 20/04/2026
+### Theodore up2282406  - 20/04/2026
 **Summary:** Implemented auto stop/control flow for location sharing so updates only run while sharing is enabled, with safe start/stop lifecycle handling from the map screen.
 
 **Files Modified/Created:**
