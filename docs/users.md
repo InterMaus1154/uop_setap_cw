@@ -1,9 +1,23 @@
 # User Manual
 
+## Introduction
+SafeMap is a safety-focused mapping application designed primarily for university students. The application allows users to report hazards, incidents, and unsafe areas around campus using interactive map pins.
+
 ## What this app is for 
 This is an app made for uni students to allow them to keep track of where their friends are and to place pins alerting them of dangers and information 
 
 ## Getting started 
+
+## Creating an Account
+Open the application.
+ Select "Sign In".
+ Choose either Microsoft or Google authentication.
+ Sign in using your university email account.
+ Once authentication is complete, the map screen will load automatically.
+
+Note:
+- Some features require location permissions to be enabled.
+- Guest users can view the map but cannot create or modify pins.
 
 ## Main screens in this app 
 There are 3 main screens in this app
@@ -83,6 +97,23 @@ In this screen, in order to add a friend, type in at least 3 consecutive letters
 By then clicking Add Friend, a friend request will be sent to the given user unless you are already friends with them in which case it will say "You are already friends"
 
 ### Invitation codes
+
+## Accessibility Features
+
+The application includes several accessibility options to improve usability.
+
+Available features include:
+- Dark mode
+- Colour-blind mode
+- Large text support
+- Speech-to-text support
+
+### Changing Accessibility Settings
+
+ Open Settings.
+ Select "Accessibility".
+ Enable or disable the required features.
+
 
 
 
