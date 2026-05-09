@@ -61,10 +61,10 @@ Use this document to log your contributions. Add new entries at the top.
 - added all 7 friends endpoints to API docs
 - added all 2 invitation code endpoints to API docs
 - finished API documentation
-- added python tests for a new created pin getting the valid colour when it is returned (test plan + actual tests)
-- added python test for getting pin report types (test plan + actual tests)
+- added python tests for a new created pin getting the valid colour when it is returned (test plan + actual tests) (PC1)
+- added python test for getting pin report types (test plan + actual tests) (RT1)
 - fixed bug with getting pin report types route
-- started adding user location tests (location sharing, plan + tests)
+- added user location tests (UL1, UL2, UL3) (test plan + actual tests)
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
