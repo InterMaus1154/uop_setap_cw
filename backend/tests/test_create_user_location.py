@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 
 
 class TestCreateUserLocation:
-    """Test reference in the plan: ULT1"""
+    """Test reference in the plan: UL1"""
 
     TEST_COORDINATES = {"latitude": 50.801412, "longitude": -1.088995}
 
@@ -78,6 +78,14 @@ class TestCreateUserLocation:
         assert data is not None
         assert data["latitude"] == 52.0
         assert data["longitude"] == self.TEST_COORDINATES["longitude"]
+
+    def test_location_when_no_location_expect_404(self, client, auth_headers):
+        """Update user location if not exists, expect 404"""
+        client.post("/user-locations", json=self.TEST_COORDINATES, headers=auth_headers)
+        client.delete("/user-locations", headers=auth_headers)
+
+        response = client.patch("/user-locations", json={"latitude": 52.0}, headers=auth_headers)
+        assert response.status_code == 404
 
 
 

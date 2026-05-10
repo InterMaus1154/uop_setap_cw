@@ -1,7 +1,7 @@
 
 
 class TestReportTypes:
-    """Test plan reference: RTT1"""
+    """Test plan reference: RT1"""
 
     def test_get_report_types(self, client):
         """Test getting the report types"""

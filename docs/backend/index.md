@@ -1,5 +1,13 @@
 # Backend Documentation
 
+```{toctree}
+:maxdepth: 1
+:caption: Reference
+
+models
+schemas
+```
+
 This document covers the CampusConnect backend — its structure and how the pieces fit together. It is aimed at developers working on or reviewing the backend codebase.
 
 ## Overview
