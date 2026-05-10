@@ -96,6 +96,9 @@ screen using the location sharing button shown in the map screen section of
 this guide. Turning this off will stop sharing your location with all friends 
 at once regardless of the individual toggles set in your friends list.
 
+![Map Location Sharing](images/location_sharing_on_map.png)
+
+
 ### Incoming
 
 ![incoming friend request](images/friend_request/incoming_friend.png)
