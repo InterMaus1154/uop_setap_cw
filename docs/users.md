@@ -151,6 +151,89 @@ To edit your name or display name, navigate to the profile screen and click on "
 
 
 
+## Common messages
+
+**You are already friends** - This appears in the add friend screen when you 
+try to send a friend request to a user you are already friends with.
+
+**Friend request already sent** - This appears if you try to send a friend 
+request to someone you have already sent one to but they have not yet accepted 
+or declined it.
+
+**Please select a category** - This appears on the create pin screen in red 
+below the category field when you try to create a pin without selecting a 
+category. To fix this, tap the category dropdown and select a category before 
+pressing Create Pin.
+
+**Please enter a title** - This appears on the create pin screen in red below 
+the title field when you try to create a pin without entering a title. To fix 
+this, type a title into the title field before pressing Create Pin.
+
+**No users found** - This appears on the add friend screen when the name you 
+have searched for does not match any registered users. Check that you have 
+spelled the name correctly and that you have typed at least 3 consecutive 
+letters.
+
+
+
+
+## Frequently Asked Questions (FAQ's)
+
+**Why can I see the map but not create a pin?**
+
+You need to be logged in to create a pin. If you are on the Select User 
+screen, select your user first and then you will be able to use the add pin 
+button on the map screen.
+
+**Why is my pin not appearing on the map after I created it?**
+
+Make sure you have filled in all the required fields when creating a pin. The 
+title and category are both required, without these the pin will not be 
+created. If you have filled these in and the pin is still not appearing, try 
+refreshing the map by navigating away and back to the map screen.
+
+**Why can I not see my friend on the map?**
+
+There are two reasons this might happen. First, check that you and your friend 
+are both on each other's friends list and that the friend request has been 
+accepted. Second, check that you have toggled location sharing on for that 
+friend in your friends list, as the toggle needs to be enabled for their 
+location to appear on the map.
+
+**Why is my friend request not showing up for the other user?**
+
+Make sure you have searched for at least 3 consecutive letters of their name 
+and selected the correct user from the suggestions before pressing Add Friend. 
+The other user will see the request in their Incoming tab on the friends screen.
+
+**How do I stop my location being shared?**
+
+You can either toggle off the individual friend switches in your friends list, 
+or use the location sharing button on the map screen to stop sharing with all 
+friends at once.
+
+**Why are some pins not visible on the map?**
+
+You may have filters applied. Open the filter menu and deselect any active 
+filters then press apply filters to return to viewing all pins.
+
+**What do the different pin colours mean?**
+
+Red pins are danger level, yellow pins are warning level and light blue pins 
+are information level. These correspond to the category level of the incident 
+that was reported.
+
+**What happens if I accidentally send a friend request to the wrong person?**
+
+Navigate to the Outgoing tab in the friends section of your profile and press 
+the cancel button next to the request to withdraw it before the other user 
+accepts it.
+
+
+
+
+
+
 
 
 
