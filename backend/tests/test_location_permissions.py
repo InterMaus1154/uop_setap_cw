@@ -52,7 +52,18 @@ class TestLocationPermissions:
         response = client.get("/location-permissions/", headers=auth_headers)
         assert response.status_code == 200
         assert isinstance(response.json(), list)
-
+    
+    def _non_friend(self, db_session):
+        non_friend = User(
+            user_fname="NonFriend",
+            user_lname="User",
+            user_email="nonfriend@test.com",
+            user_token="nonfriendtoken"
+        )
+        db_session.add(non_friend)
+        db_session.flush()
+        return non_friend
+    
     def test_location_permissions_invalid_auth(self, client):
         response = client.get("/location-permissions/")
         assert response.status_code == 401
@@ -116,3 +127,56 @@ class TestLocationPermissions:
 
         permission = db_session.query(LocationPermission).filter_by(loc_perm_id=permission_id).first()
         assert permission is None
+    def test_delete_location_permissions_invalid_user(self, client, auth_headers):
+        response = client.delete(
+            "/location-permissions/999999",
+            headers=auth_headers,
+        )
+        assert response.status_code == 404
+
+        response = client.delete(
+            "/location-permissions/invalid",
+            headers=auth_headers,
+        )
+        assert response.status_code == 422
+    def test_delete_location_permissions_no_permission(self, db_session, client, auth_headers, main_user):
+        friend = self._create_friend(db_session, main_user)
+
+        response = client.delete(
+            f"/location-permissions/{friend.user_id}",
+            headers=auth_headers,
+        )
+        assert response.status_code == 404
+    
+    
+
+    def test_delete_location_permissions_not_friend(self, db_session, client, auth_headers, main_user):
+        # create a non-friend user
+        non_friend = self._non_friend(db_session)
+        response = client.delete(
+            f"/location-permissions/{non_friend.user_id}",
+            headers=auth_headers,
+        )
+        assert response.status_code == 404
+    def test_post_location_permissions_not_friend(self, db_session, client, auth_headers, main_user):
+        # create a non-friend user
+        non_friend = self._non_friend(db_session)
+        response = client.post(
+            "/location-permissions/",
+            json={"user_id": non_friend.user_id},
+            headers=auth_headers,
+        )
+        assert response.status_code == 404
+
+    def test_get_friends_location_no_permissions_200(self, client, auth_headers):
+        """Get friends location, expect 200 and empty array if no permissions"""
+        response = client.get("/user-locations/friends", headers=auth_headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data is not None
+        assert isinstance(data, list)
+        assert len(data) == 0
+    
+    
+    
+    
