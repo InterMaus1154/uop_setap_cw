@@ -50,7 +50,8 @@ When you click on the button shown above, you will see a menu pop up, shown belo
 ![CategoriesContinued](images/map_related/category_level_and_expiry.png)
 
 As you can see from the 2 pictures above, you can filter the pins that are visible by category, expiry date (Maximum expiry date refers to pins that expire before or on the specified date) or also by the category level (what kind of category it is, e.g. Free Items! comes under information)
-Once you have selected the filters you want, press apply filters and then all the pins that come under one or more of the filters you have selected will appear
+Once you have selected the filters you want, press apply filters and then all the pins that come under one or more of the filters you have selected will appear. To clear your filters and return to viewing all pins, open the filter menu again and deselect any active filters before pressing apply
+filters.
 ## Pin interaction
 When looking at pins on a map, there are 3 types of pins, each signified by a different colour. Red pins signify the danger category level, yellow pins signify the warning category level and light blue pins represent information. When clicking on any of these types of pins, a menu will appear from the bottom as shown below
 ![Click pin](images/map_related/example_click_pin.png)
