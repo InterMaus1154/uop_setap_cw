@@ -91,7 +91,8 @@ In this screen, in order to add a friend, type in at least 3 consecutive letters
 
 ![Add a friend with a name typed in](images/friend_request/add_friend_with_name.png)
 
-By then clicking Add Friend, a friend request will be sent to the given user unless you are already friends with them in which case it will say "You are already friends"
+By then clicking Add Friend, a friend request will be sent to the given user unless you are already friends with them in which case it will say "You are already friends". The user you sent the request to will see it appear in their Incoming tab, 
+where they can choose to accept or decline it.
 
 ### Invitation codes
 On the profile screen, you can view your invitation code. You can share this code with another user so that they can add you as a friend directly using the code instead of searching by name.Thes invitation codes last for 24 hours.
