@@ -51,7 +51,7 @@ Once you click on one of these, the menu will look as it does below
 
 ![Sub categories when creating pin](images/map_related/create_pin_subcategory.png)
 
-From here, you can choose an optional subcategory if you want to give more information for easier identification of what the pin is about, give the pin a title which is required to create a pin and explains to a user when clicking on the pin what it is about and an optional description for if you want to go into more detail about the event that the pin correlates to. Once you select a category, the form will show you how long the pin will remain on the map before it expires. By default pins expire in 24 hours.
+From here, you can choose an optional subcategory if you want to give more information for easier identification of what the pin is about, give the pin a title which is required to create a pin and explains to a user when clicking on the pin what it is about and an optional description for if you want to go into more detail about the event that the pin correlates to.The title has a limit of 30 characters and the description has a limit of 300 characters. A counter in the bottom right of each field shows how many characters you have used so far out of the maximum allowed. Once you do this, the form will show you how long the pin will remain on the map before it expires. By default pins expire in 24 hours.
 
 ## Viewing and filtering pins 
 ![Filter Pin](images/map_related/filter_pin_icon.png)
@@ -119,7 +119,7 @@ By tapping on the button that says Add Friend, you will open up the screen seen 
 
 ![Add a friend](images/friend_request/add_friend.png)
 
-In this screen, in order to add a friend, type in at least 3 consecutive letters of the name of the user you want to add and then the search feature should come up with suggestions based on what letters you've typed in so far, an example of this is below
+In this screen, you can search for a user either by typing at least 3 consecutive letters of their name or by typing their university email address. Searching by email is more reliable if you are unsure of their display name. The search feature will show suggestions based on what you have typed so far, an example of this is below.
 
 ![Add a friend with a name typed in](images/friend_request/add_friend_with_name.png)
 
