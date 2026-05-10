@@ -91,6 +91,8 @@ Once on the map screen you can interact with the map in the following ways:
 
 **Tap a cluster** - if multiple pins are grouped together into a dark blue cluster, tap it to see a list of the individual pins inside it
 
+![Centre Location](images/centre_location.png)
+
 ![Pin Cluster](images/map_related/Pin_Cluster.png)
 
 ## Friends and sending friend requests
