@@ -1,9 +1,8 @@
 # User Manual
 
 
-
 ## What this app is for 
-This is an app made for uni students to allow them to keep track of where their friends are and to place pins alerting them of dangers and information 
+This is an app made for uni students to allow them to keep track of where their friends are and to place pins alerting them of dangers and information. A pin is a marker that can be placed on the map to highlight a safety-related  incident or hazard at a specific location, such as a road closure or a suspicious incident. Pins are created by users and are visible to everyone using the app.
 
 ## Getting started 
 To get started, open the app and you will be taken to the Select User screen. Select your user from the list to access the app. Once selected, you will be taken to the Map screen where you can begin using the app.
