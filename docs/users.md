@@ -69,6 +69,20 @@ If you navigate to the profile section of the app, you will notice that there is
 
 In the picture above, you will see a picture of a user's friends list. In this section, you can view the friends you've made on the app and using the toggle switch to the right, toggle whether you want to share location with them or not
 
+## Location sharing
+
+Location sharing allows your friends to see where you are on the map in real 
+time. To enable location sharing with a friend, navigate to the friends list 
+on the profile screen. Next to each friend in your list there is a toggle 
+switch, switching this on means that friend will be able to see your location 
+on the map. To stop sharing your location with a friend, simply toggle the 
+switch back off and your pin will no longer be visible to them.
+
+You can also toggle all location sharing on and off directly from the map 
+screen using the location sharing button shown in the map screen section of 
+this guide. Turning this off will stop sharing your location with all friends 
+at once regardless of the individual toggles set in your friends list.
+
 ### Incoming
 
 ![incoming friend request](images/friend_request/incoming_friend.png)
@@ -108,6 +122,8 @@ On the profile screen, you can view your invitation code. You can share this cod
 ## Editing your profile
 
 To edit your name or display name, navigate to the profile screen and click on "Edit Profile" . You will see your current name and display name displayed on the screen. Tap on the edit button next to the field you want to change, type in your new name and then press save to confirm the change. You can also edit the name you want displayed , as well as if you want your Full Name or Display Name to be shown under the pin.
+
+![Editing Your Profile](images/profile/Edit_Profile.png)
 
 
 
