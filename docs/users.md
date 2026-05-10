@@ -17,6 +17,7 @@ This screen allows you to select a user, if this app were to exist as a real app
 This screen contains 4 buttons, one to filter pins, one to toggle whether you want to share your location with the website, one to centre your location and one to add a pin. A picture shows where each of these 4 buttons are located 
 
 ![Ui Explanation](images/map_related/ui_explanation.PNG)
+
 The filter button opens a menu that lets you control which pins are visible 
 on the map based on category, category level and expiry date. The location 
 sharing toggle turns your live location sharing on or off for the friends you 
@@ -26,18 +27,30 @@ pin button starts the pin creation process, which is explained in more detail
 further on in this guide.
 ### Profile Screen
 This screen allows you to view your profile, see how many pins you've made, edit your name and display name and view your friend codes
+
 ![Profile Screen](images/profile/profile.png)
+
 Details on what each of these buttons do will be explained further on in the document 
 ## Creating a pin 
+
 ![Creating a pin](images/map_related/pin_with_circle_around_it.PNG "Picture")
+
 In order to create a pin, you need to press the button circled in the picture above. Once you do that, you will be prompted to click on where you want the pin to be placed. If you have location enabled, it will default to placing the pin at your current location however you may still move it if the incident occurred in a different location to where you are. A picture of how this looks is below 
+
 ![image](images/map_related/place_pin.png)
+
 Once you confirm the location you want the pin to be placed in, you will be shown the menu seen in the picture below
+
 ![image](images/map_related/place_pin_menu.png)
+
 By clicking on the categories, you will get the drop down shown in the picture below
+
 ![image](images/map_related/categories_menu.png)
+
 Once you click on one of these, the menu will look as it does below
+
 ![Sub categories when creating pin](images/map_related/create_pin_subcategory.png)
+
 From here, you can choose an optional subcategory if you want to give more information for easier identification of what the pin is about, give the pin a title which is required to create a pin and explains to a user when clicking on the pin what it is about and an optional description for if you want to go into more detail about the event that the pin correlates to
 
 ## Viewing and filtering pins 
