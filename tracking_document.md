@@ -21,6 +21,16 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 10/05/2026
+**Description:**
+- Added the schemas.md file to the backend documentation and updated toctree.
+
+**Files created/modified:**
+- backend\index.md
+- backend\schemas.md
+
+---
+
 ### Julian up2301253 - 07/05/2026
 **Description:**
 - Added the models.md file to backend documentation.
