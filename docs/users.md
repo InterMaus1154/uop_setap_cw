@@ -24,7 +24,7 @@ have enabled it for in your friends list. The centre location button moves the
 map back to your current position if you have scrolled away from it. The add 
 pin button starts the pin creation process, which is explained in more detail 
 further on in this guide.
-## Profile Screen
+### Profile Screen
 This screen allows you to view your profile, see how many pins you've made, edit your name and display name and view your friend codes
 ![Profile Screen](images/profile/profile.png)
 Details on what each of these buttons do will be explained further on in the document 
