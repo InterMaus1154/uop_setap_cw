@@ -17,7 +17,13 @@ This screen allows you to select a user, if this app were to exist as a real app
 This screen contains 4 buttons, one to filter pins, one to toggle whether you want to share your location with the website, one to centre your location and one to add a pin. A picture shows where each of these 4 buttons are located 
 
 ![Ui Explanation](images/map_related/ui_explanation.PNG)
-Further explanation of what each of these buttons do will be shown later in this user guide
+The filter button opens a menu that lets you control which pins are visible 
+on the map based on category, category level and expiry date. The location 
+sharing toggle turns your live location sharing on or off for the friends you 
+have enabled it for in your friends list. The centre location button moves the 
+map back to your current position if you have scrolled away from it. The add 
+pin button starts the pin creation process, which is explained in more detail 
+further on in this guide.
 ## Profile Screen
 This screen allows you to view your profile, see how many pins you've made, edit your name and display name and view your friend codes
 ![Profile Screen](images/profile/profile.png)
