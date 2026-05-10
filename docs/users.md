@@ -93,6 +93,10 @@ On the profile screen, you can view your invitation code. You can share this cod
 
 ![Empty Invitation Code](images/invitiation_codes/empty_invitation_code.png)
 
+![Invitation Code](images/invitiation_codes/invitation_code.png)
+
+
+
 
 
 
