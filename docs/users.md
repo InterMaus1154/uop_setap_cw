@@ -89,6 +89,8 @@ By then clicking Add Friend, a friend request will be sent to the given user unl
 
 ### Invitation codes
 On the profile screen, you can view your invitation code. You can share this code with another user so that they can add you as a friend directly using the code instead of searching by name.Thes invitation codes last for 24 hours.
+
+
 ![Empty Invitation Code](images/invitiation_codes/empty_invitation_code.png)
 
 
