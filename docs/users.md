@@ -95,6 +95,7 @@ On the profile screen, you can view your invitation code. You can share this cod
 
 ![Invitation Code](images/invitiation_codes/invitation_code.png)
 
+![select_User Screen](images/invitiation_codes/select_a_user_screen.png)
 
 
 
