@@ -5,15 +5,17 @@ import pytest
 from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
-
 sys.path.insert(0, os.path.dirname(__file__))
 
 from database.db import engine, get_db
 from main import app
+from models.user import User
+
 
 @pytest.fixture
 def auth_headers():
     return {"Authorization": "Bearer fbde5c7f68cdd28e9105cdbafa6556eb"}
+
 
 @pytest.fixture
 def db_session():
@@ -25,6 +27,7 @@ def db_session():
     transaction.rollback()
     connection.close()
 
+
 @pytest.fixture
 def client(db_session):
     def override_get_db():
@@ -33,3 +36,8 @@ def client(db_session):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def main_user(db_session):
+    return db_session.query(User).filter(User.user_token == "fbde5c7f68cdd28e9105cdbafa6556eb").first()
