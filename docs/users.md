@@ -67,11 +67,31 @@ Once you have selected the filters you want, press apply filters and then all th
 filters.
 ## Pin interaction
 When looking at pins on a map, there are 3 types of pins, each signified by a different colour. Red pins signify the danger category level, yellow pins signify the warning category level and light blue pins represent information. When clicking on any of these types of pins, a menu will appear from the bottom as shown below
+
 ![Click pin](images/map_related/example_click_pin.png)
+
 As you can see in the picture above, there is a title, then under it is the category and subcategory of the pin, then any further description regarding what the pin is about. 
 If there are multiple pins close enough to be touching on the map, then the program will aggregate them into a dark blue pin with a number signifying how many pins are present at that location. When that type of pin is clicked, a menu will appear like the one below
+
 ![Multi Pin](images/map_related/multi_pin.png)
+
 If you click on any of the items listed in this menu, then it will behave akin to clicking on a single pin of another type
+
+
+## Navigating the map
+
+Once on the map screen you can interact with the map in the following ways:
+
+**Zoom in and out** - use a pinch gesture with two fingers to zoom in and out on the map, or use the scroll wheel if you are using the app in a browser
+
+**Pan around** - tap and drag the map in any direction to explore different areas
+
+**Centre your location** - if you have scrolled away from your current position, press the centre location button to snap the map back to where you are. This button is shown in the map screen section of this guide
+**Tap a pin** - tap on any pin on the map to open its details at the bottom of the screen
+
+**Tap a cluster** - if multiple pins are grouped together into a dark blue cluster, tap it to see a list of the individual pins inside it
+
+![Pin Cluster](images/map_related/Pin_Cluster.png)
 
 ## Friends and sending friend requests
 If you navigate to the profile section of the app, you will notice that there is a button that says Friends. In this section, you can see your friends list, see your incoming and outgoing friend requests and add new friends
