@@ -6,6 +6,9 @@
 This is an app made for uni students to allow them to keep track of where their friends are and to place pins alerting them of dangers and information 
 
 ## Getting started 
+To get started, open the app and you will be taken to the Select User screen. Select your user from the list to access the app. Once selected, you will be taken to the Map screen where you can begin using the app.
+
+![Select User Screen](images/profile/select_user_screen.png)
 
 ## Main screens in this app 
 There are 3 main screens in this app
