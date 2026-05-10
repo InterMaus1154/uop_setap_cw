@@ -51,7 +51,7 @@ Once you click on one of these, the menu will look as it does below
 
 ![Sub categories when creating pin](images/map_related/create_pin_subcategory.png)
 
-From here, you can choose an optional subcategory if you want to give more information for easier identification of what the pin is about, give the pin a title which is required to create a pin and explains to a user when clicking on the pin what it is about and an optional description for if you want to go into more detail about the event that the pin correlates to
+From here, you can choose an optional subcategory if you want to give more information for easier identification of what the pin is about, give the pin a title which is required to create a pin and explains to a user when clicking on the pin what it is about and an optional description for if you want to go into more detail about the event that the pin correlates to. Once you select a category, the form will show you how long the pin will remain on the map before it expires. By default pins expire in 24 hours.
 
 ## Viewing and filtering pins 
 ![Filter Pin](images/map_related/filter_pin_icon.png)
