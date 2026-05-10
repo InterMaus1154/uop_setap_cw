@@ -21,7 +21,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
-### Julian up2301253 - 07/04/2026
+### Julian up2301253 - 07/05/2026
 **Description:**
 - Added the models.md file to backend documentation.
 
@@ -40,7 +40,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 ---
 
-### Julian up2301253 - 05/04/2026
+### Julian up2301253 - 05/05/2026
 **Description:**
 - created backend tests for adding friends 
 
@@ -64,7 +64,7 @@ Use this document to log your contributions. Add new entries at the top.
 - added python tests for a new created pin getting the valid colour when it is returned (test plan + actual tests) (PC1)
 - added python test for getting pin report types (test plan + actual tests) (RT1)
 - fixed bug with getting pin report types route
-- added user location tests (UL1, UL2, UL3) (test plan + actual tests)
+- added user location tests (UL1, UL2, UL3, UL4) (test plan + actual tests)
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
