@@ -105,6 +105,12 @@ On the profile screen, you can view your invitation code. You can share this cod
 ![select_User Screen](images/invitiation_codes/select_a_user_screen.png)
 
 
+## Editing your profile
+
+To edit your name or display name, navigate to the profile screen and click on "Edit Profile" . You will see your current name and display name displayed on the screen. Tap on the edit button next to the field you want to change, type in your new name and then press save to confirm the change. You can also edit the name you want displayed , as well as if you want your Full Name or Display Name to be shown under the pin.
+
+
+
 
 
 
