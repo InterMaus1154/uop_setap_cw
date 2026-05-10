@@ -16,7 +16,7 @@ There are 3 main screens in this app
 This screen allows you to select a user, if this app were to exist as a real application, this would be a login screen with proper usernames, passwords and authentication
 ### Map Screen
 This screen contains 4 buttons, one to filter pins, one to toggle whether you want to share your location with the website, one to centre your location and one to add a pin. A picture shows where each of these 4 buttons are located 
-(replace the picture below later)
+
 ![Ui Explanation](images/map_related/ui_explanation.PNG)
 Further explanation of what each of these buttons do will be shown later in this user guide
 ## Profile Screen
@@ -88,6 +88,7 @@ In this screen, in order to add a friend, type in at least 3 consecutive letters
 By then clicking Add Friend, a friend request will be sent to the given user unless you are already friends with them in which case it will say "You are already friends"
 
 ### Invitation codes
+On the profile screen, you can view your invitation code. You can share this code with another user so that they can add you as a friend directly using the code instead of searching by name.Thes invitation codes last for 24 hours.
 
 
 
