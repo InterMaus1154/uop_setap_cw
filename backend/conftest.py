@@ -17,6 +17,12 @@ def auth_headers():
     return {"Authorization": "Bearer fbde5c7f68cdd28e9105cdbafa6556eb"}
 
 
+# Fixture for an alternate user (replace token with a real one if needed)
+@pytest.fixture
+def alt_auth_headers():
+    return {"Authorization": "Bearer 2nd-user-token-placeholder"}
+
+
 @pytest.fixture
 def db_session():
     connection = engine.connect()
