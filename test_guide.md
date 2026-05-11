@@ -3,81 +3,467 @@
 In this guide I will explain how to test our API using `pytest`.
 
 Useful resources:
-- [https://docs.pytest.org/en/stable/how-to/assert.html](https://docs.pytest.org/en/stable/how-to/assert.html)
-- [https://www.w3schools.com/python/ref_keyword_assert.asp](https://www.w3schools.com/python/ref_keyword_assert.asp)
-- [https://fastapi.tiangolo.com/tutorial/testing/#extended-fastapi-app-file](https://fastapi.tiangolo.com/tutorial/testing/#extended-fastapi-app-file)
+
+* [Pytest Assertions Guide](https://docs.pytest.org/en/stable/how-to/assert.html?utm_source=chatgpt.com)
+* [Python assert keyword (W3Schools)](https://www.w3schools.com/python/ref_keyword_assert.asp?utm_source=chatgpt.com)
+* [FastAPI Testing Guide](https://fastapi.tiangolo.com/tutorial/testing/?utm_source=chatgpt.com#extended-fastapi-app-file)
+* [Pytest Fixtures Documentation](https://docs.pytest.org/en/stable/explanation/fixtures.html?utm_source=chatgpt.com)
 
 ## Where are the test files located?
 
-Tests are defined under `backend/tests`. Each test file starts with `test_*.py`, so pytest can discover them automatically.\
-Tests that are under the same category are better under a class.\
-The `base` is the base client we use to do HTTP requests to our own API.
+Tests are defined under `backend/tests`. Each test file starts with `test_*.py`, so pytest can discover them automatically.
 
-## How to run tests?
+Tests that are under the same category are better grouped under a class.
 
-In the backend folder (under the virtual environment) if you run `pytest` it will run all tests in the `tests/` folder. If you add the `-v` flag, it will give more details. Optionally, you can run an individual file, for example: `pytest -v tests/test_auth.py`.
+We use a shared `client` fixture to send HTTP requests to our API.
 
-## How to write tests
+---
 
-### How to write basic tests
-A test is simply a function (or method in a class) that:
-- sends a request to an endpoint
-- checks the response using the `assert` keyword
+# How to run tests?
 
+In the backend folder (under the virtual environment), running:
 
-Example (test_demo.py):
-```python
-import pytest
-from base import client
-
-class TestDemo:
-    def test_index(self):
-        response = client.get("/") # we call the {host}/ endpoint
-        data = response.json() # we get the json, as our api uses json to send data
-
-        assert response.status_code == 200 # we assert that status code is 200
-        assert "message" in data # we assert that the data object contains a message key
-        assert data["message"] == "test" # we assert that the message in data is equal to test
-        # if all of the above passes, the test_index test will pass as well, otherwise fail
-
+```bash
+pytest
 ```
 
-Basic example (using just functions without a class, `test_showcase.py`):
+will run all tests inside the `tests/` folder.
+
+Useful flags:
+
+```bash
+pytest -v
+```
+
+Verbose output.
+
+```bash
+pytest -s
+```
+
+Allows `print()` output even for passing tests.
+
+```bash
+pytest -v tests/test_auth.py
+```
+
+Runs a single file.
+
+```bash
+pytest -v tests/test_auth.py::TestAuth
+```
+
+Runs a single class.
+
+```bash
+pytest -v tests/test_auth.py::TestAuth::test_login
+```
+
+Runs a single test.
+
+---
+
+# How to write tests
+
+## How to write basic tests
+
+A test is simply a function (or a method inside a class) that:
+
+* sends a request to an endpoint
+* checks the response using `assert`
+
+Example (`test_demo.py`):
+
+```python
+class TestDemo:
+    def test_index(self, client):
+        response = client.get("/")
+        data = response.json()
+
+        assert response.status_code == 200
+        assert "message" in data
+        assert data["message"] == "test"
+```
+
+Basic example using just functions (`test_showcase.py`):
 
 ```python
 def test_greater():
     assert 4 > 3
 ```
 
-And to show what happens if a test fails:
-```python
+Example of a failing test:
 
+```python
 def test_fail_on_purpose():
     assert 3 > 4
 ```
 
-With assert, we basically say "this xzy should be abc", we assume something, and the test will return pass if that is true, and failed if that is false. We can assert basically everything.
+With `assert`, we basically say:
 
-For debugging, you can use print as usually, for example `print(response.status_code)`. It is useful if you think your test should've passed, but it did not. 
+> "this should equal/be something"
 
-**Note:** printing by default only works for failed tests, if you want to use it for passed tests for debugging, add the `-s` flag when running pytest.
+If the assertion is true, the test passes. Otherwise, it fails.
 
-### Tests with authentication
+You can assert almost anything:
 
-Some of our endpoints require authentication. For this, there is a `auth_headers` in `backend/conftest.py`, that uses a token of a test user (it lives in our database). Anything that lives in `conftest.py` can be passed as a parameter without manually importing it.
+* status codes
+* JSON fields
+* list lengths
+* database values
+* object types
+* boolean values
+
+Example:
 
 ```python
+assert isinstance(data, list)
+assert len(data) == 0
+assert user.email == "test@test.com"
+```
 
-from base import client
-def test_logout_with_valid_token(auth_headers): # pytest will resolve the headers from our conftest.py file
-    response = client.post("/auth/logout", headers=auth_headers) # we pass the headers to the request
+---
+
+# Using fixtures
+
+Fixtures are one of the most important concepts in pytest.
+
+A fixture is reusable setup code that pytest automatically provides to tests.
+
+Fixtures are defined in `conftest.py`.
+
+You do **not** import fixtures manually.
+Instead, you add them as parameters to your test function.
+
+Example:
+
+```python
+def test_example(client, auth_headers):
+    response = client.get("/users/me", headers=auth_headers)
 
     assert response.status_code == 200
 ```
 
-For more example for authentication, consult the `test_auth.py`.
+Pytest automatically detects:
 
-## Important notes for tests
+* `client`
+* `auth_headers`
 
-Each of our test should have an entry in the testplan (on onedrive). Always test with invalid data as well.\
-Each test should be independent, do not assume other test ran before it.
+and injects them into the test.
+
+---
+
+# Our current fixtures
+
+## `client`
+
+Creates a FastAPI `TestClient`.
+
+It also overrides the database dependency so tests use the test transaction/session.
+
+```python
+def test_index(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+```
+
+---
+
+## `db_session`
+
+Provides a database session for direct database operations inside tests.
+
+Each test gets its own transaction, and changes are rolled back afterwards.
+
+This means tests stay isolated from each other.
+
+Example:
+
+```python
+def test_create_user(db_session):
+    user = User(
+        user_fname="Test",
+        user_lname="User",
+        user_email="test@test.com",
+        user_token="token123"
+    )
+
+    db_session.add(user)
+    db_session.flush()
+
+    assert user.user_id is not None
+```
+
+---
+
+## `auth_headers`
+
+Provides authentication headers for the main test user.
+
+```python
+def test_protected_route(client, auth_headers):
+    response = client.get(
+        "/protected",
+        headers=auth_headers
+    )
+
+    assert response.status_code == 200
+```
+
+Internally, it returns:
+
+```python
+{
+    "Authorization": "Bearer <token>"
+}
+```
+
+---
+
+## `main_user`
+
+Returns the main test user object from the database.
+
+Useful if you need the user's ID or other fields.
+
+```python
+def test_user(main_user):
+    assert main_user.user_email is not None
+```
+
+---
+
+## `alt_user` and `alt_auth_headers`
+
+Used when tests require a second authenticated user.
+
+Example:
+
+```python
+def test_two_users(client, auth_headers, alt_auth_headers):
+    response1 = client.get("/users/me", headers=auth_headers)
+    response2 = client.get("/users/me", headers=alt_auth_headers)
+
+    assert response1.status_code == 200
+    assert response2.status_code == 200
+```
+
+---
+
+# Fixture scopes and cleanup
+
+Fixtures can also handle setup and cleanup automatically using `yield`.
+
+Example from our `db_session` fixture:
+
+```python
+@pytest.fixture
+def db_session():
+    connection = engine.connect()
+    transaction = connection.begin()
+
+    session = Session(bind=connection)
+
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()
+```
+
+Code before `yield`:
+
+* setup
+
+Code after `yield`:
+
+* cleanup
+
+This is extremely useful for:
+
+* database transactions
+* temporary files
+* mock servers
+* patching external services
+
+---
+
+# Autouse fixtures
+
+Some fixtures should run automatically without being passed into every test.
+
+Example:
+
+```python
+@pytest.fixture(autouse=True)
+def mock_externals():
+    yield
+```
+
+`autouse=True` means pytest runs it automatically for every test in that scope.
+
+Example from our project:
+
+```python
+@pytest.fixture(autouse=True)
+def mock_externals(self):
+    with patch(
+        "routes.user_locations._reverse_geocode",
+        return_value={"city": "Portsmouth", "street": "Commercial Road"},
+    ), patch("routes.user_locations.redis_client") as mock_redis:
+
+        mock_redis.hgetall.return_value = {}
+
+        yield mock_redis
+```
+
+This automatically:
+
+* mocks reverse geocoding
+* mocks Redis
+* prevents real external calls during tests
+
+without repeating the patching code in every test.
+
+---
+
+# Example: helper methods inside test classes
+
+You can create helper methods inside test classes to avoid duplicate code.
+
+Example:
+
+```python
+class TestLocationPermissions:
+    def _create_friend(self, db_session, main_user):
+        friend = User(
+            user_fname="Friend",
+            user_lname="User",
+            user_email="friend@test.com",
+            user_token="friendtoken"
+        )
+
+        db_session.add(friend)
+        db_session.flush()
+
+        return friend
+```
+
+This is useful for:
+
+* creating test users
+* creating relationships
+* creating reusable test data
+
+---
+
+# Example: authenticated endpoint test
+
+```python
+class TestLocationPermissions:
+    def test_location_permissions(self, client, auth_headers):
+        response = client.get(
+            "/location-permissions/",
+            headers=auth_headers
+        )
+
+        assert response.status_code == 200
+        assert isinstance(response.json(), list)
+```
+
+---
+
+# Example: testing invalid authentication
+
+Always test invalid and unauthorized access as well.
+
+```python
+def test_invalid_auth(client):
+    response = client.get("/location-permissions/")
+    assert response.status_code == 401
+
+    response = client.get(
+        "/location-permissions/",
+        headers={"Authorization": "Bearer invalid"}
+    )
+
+    assert response.status_code == 401
+```
+
+---
+
+# Example: validating returned JSON
+
+```python
+data = response.json()
+
+assert "user_id" in data
+assert "created_at" in data
+assert isinstance(data["user_id"], int)
+```
+
+---
+
+# Database validation after requests
+
+Sometimes we should verify the database state directly.
+
+Example:
+
+```python
+permission = db_session.query(LocationPermission)\
+    .filter_by(loc_perm_id=permission_id)\
+    .first()
+
+assert permission is None
+```
+
+This verifies that the API actually deleted the database record.
+
+---
+
+# Mocking external services
+
+We often mock:
+
+* Redis
+* geocoding
+* external APIs
+* email sending
+
+This keeps tests:
+
+* fast
+* deterministic
+* independent of internet/services
+
+Example:
+
+```python
+with patch("routes.user_locations.redis_client") as mock_redis:
+    mock_redis.hgetall.return_value = {}
+```
+
+---
+
+# Important notes for tests
+
+Each test should:
+
+* have a matching entry in the test plan
+* test both valid and invalid data
+* be independent from other tests
+
+Do not assume:
+
+* another test already ran
+* database state exists
+* records already exist unless your test creates them
+
+Good tests are:
+
+* isolated
+* repeatable
+* deterministic
+* easy to understand

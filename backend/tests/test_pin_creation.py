@@ -57,8 +57,6 @@ class TestCreatePins:
         self.pin_valid_test_data["pin_title"] = "a" * 101
         response = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data)
 
-        print(response.json())
-
         assert response.status_code == 422
 
         self.pin_valid_test_data["pin_title"] = "Test Pin"
@@ -83,4 +81,3 @@ class TestCreatePins:
         response = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data)
 
         assert response.status_code == 422
-
