@@ -17,10 +17,25 @@ def auth_headers():
     return {"Authorization": "Bearer fbde5c7f68cdd28e9105cdbafa6556eb"}
 
 
-# Fixture for an alternate user (replace token with a real one if needed)
+
+# Fixture to create a second user and provide a valid token for alt_auth_headers
 @pytest.fixture
-def alt_auth_headers():
-    return {"Authorization": "Bearer 2nd-user-token-placeholder"}
+def alt_user(db_session):
+    user = db_session.query(User).filter(User.user_email == "altuser@test.com").first()
+    if not user:
+        user = User(
+            user_fname="Alt",
+            user_lname="User",
+            user_email="altuser@test.com",
+            user_token="altusertoken123"
+        )
+        db_session.add(user)
+        db_session.flush()
+    return user
+
+@pytest.fixture
+def alt_auth_headers(alt_user):
+    return {"Authorization": f"Bearer {alt_user.user_token}"}
 
 
 @pytest.fixture
