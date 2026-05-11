@@ -21,6 +21,16 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Theodore up2282406 - 11/05/2026
+**Summary:** Implemented and validated backend tests for deleting pins, including owner and non-owner scenarios, double-delete, and pin count checks. Added fixture for alternate user to ensure proper authorization testing.
+
+**Files Modified/Created:**
+- backend/tests/test_delete_pin.py
+- backend/conftest.py
+
+**Notes:** All delete pin tests now pass using a real alternate user token. The alt_auth_headers fixture programmatically creates a second user for robust authorization testing.
+
+
 ### Julian up2301253 - 10/05/2026
 **Description:**
 - Added the schemas.md file to the backend documentation and updated toctree.
@@ -109,12 +119,17 @@ Use this document to log your contributions. Add new entries at the top.
 ---
 
 ## Theodore up2282406 - 27/04/2026  
-**Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike).
+**Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike). Added tests for all main scenarios: deleting an existing reaction, deleting a non-existent reaction, invalid pin/user cases, and unauthenticated access. Refactored fixtures for clarity and reliability.
 
 **Files Modified/Created:**
 - backend/tests/test_delete_pin_reaction.py
+- backend/conftest.py
 
-**Notes:** Covers deleting existing and non-existent reactions, as well as error cases for invalid pin/user.
+**Notes:**
+- Tests cover: successful deletion, double-delete, invalid pin/user, and 401/404 error handling.
+- Used programmatic user creation for alternate user tokens to ensure robust authorization testing.
+- Confirmed all delete pin reaction tests pass with correct endpoint usage and fixture setup.
+
 
 ## Theodore up2282406 - 27/04/2026  
 **Summary:** Implemented backend tests for reacting to a pin (like/dislike/change/invalid cases).
@@ -136,7 +151,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 **Notes:** Added polling-based refresh and guarded GPS push logic so location updates are not sent when sharing is disabled. Wired sharing toggle behavior through existing `/user-locations` endpoints and ensured cleanup via provider lifecycle methods.
 
-### [Theodore up2282406 ] - 20/04/2026
+### Theodore up2282406  - 20/04/2026
 **Summary:** Added Redis-backed caching for friend location sharing reads/writes to reduce repeated database lookups and keep location responses fast.
 
 **Files Modified/Created:**
