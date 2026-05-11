@@ -32,7 +32,7 @@ class TestCreatePins:
 
         data = response.json()
         assert data is not None
-        assert data["pin_title"] == self.pin_valid_test_data["pin_title"]
+        assert data["pin_title"] == payload["pin_title"]
 
     def test_create_pin_with_valid_title_as_max_length_201(self, auth_headers, client):
         """Test with a valid title, which is maximum length (100)"""
