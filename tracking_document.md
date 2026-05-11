@@ -21,6 +21,15 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 11/05/2026
+**Description:**
+- Added 5 tests for getting categories in backend tests, including: getting all categories, category levels, and sub categories + getting sub cats for valid and invalid category.
+
+**Files created/modified:**
+- backend\tests\test_get_categories.py
+
+--
+
 ### Theodore up2282406 - 11/05/2026
 **Summary:** Implemented and validated backend tests for deleting pins, including owner and non-owner scenarios, double-delete, and pin count checks. Added fixture for alternate user to ensure proper authorization testing.
 
