@@ -31,6 +31,25 @@ This screen allows you to view your profile, see how many pins you've made, edit
 ![Profile Screen](images/profile/profile.png)
 
 Details on what each of these buttons do will be explained further on in the document 
+
+## Navigating the map
+
+Once on the map screen you can interact with the map in the following ways:
+
+**Zoom in and out** - use a pinch gesture with two fingers to zoom in and out on the map, or use the scroll wheel if you are using the app in a browser
+
+**Pan around** - tap and drag the map in any direction to explore different areas
+
+**Centre your location** - if you have scrolled away from your current position, press the centre location button to snap the map back to where you are. This button is shown in the map screen section of this guide
+**Tap a pin** - tap on any pin on the map to open its details at the bottom of the screen
+
+**Tap a cluster** - if multiple pins are grouped together into a dark blue cluster, tap it to see a list of the individual pins inside it
+
+![Centre Location](images/centre_location.png)
+
+![Pin Cluster](images/map_related/Pin_Cluster.png)
+
+
 ## Creating a pin 
 
 ![Creating a pin](images/map_related/pin_with_circle_around_it.PNG "Picture")
@@ -78,22 +97,6 @@ If there are multiple pins close enough to be touching on the map, then the prog
 If you click on any of the items listed in this menu, then it will behave akin to clicking on a single pin of another type
 
 
-## Navigating the map
-
-Once on the map screen you can interact with the map in the following ways:
-
-**Zoom in and out** - use a pinch gesture with two fingers to zoom in and out on the map, or use the scroll wheel if you are using the app in a browser
-
-**Pan around** - tap and drag the map in any direction to explore different areas
-
-**Centre your location** - if you have scrolled away from your current position, press the centre location button to snap the map back to where you are. This button is shown in the map screen section of this guide
-**Tap a pin** - tap on any pin on the map to open its details at the bottom of the screen
-
-**Tap a cluster** - if multiple pins are grouped together into a dark blue cluster, tap it to see a list of the individual pins inside it
-
-![Centre Location](images/centre_location.png)
-
-![Pin Cluster](images/map_related/Pin_Cluster.png)
 
 ## Friends and sending friend requests
 If you navigate to the profile section of the app, you will notice that there is a button that says Friends. In this section, you can see your friends list, see your incoming and outgoing friend requests and add new friends
