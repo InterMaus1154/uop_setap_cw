@@ -23,7 +23,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 ### Julian up2301253 - 11/05/2026
 **Description:**
-- Added 5 tests for getting categories in backend tests.
+- Added 5 tests for getting categories in backend tests, including: getting all categories, category levels, and sub categories + getting sub cats for valid and invalid category.
 
 **Files created/modified:**
 - backend\tests\test_get_categories.py
