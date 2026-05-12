@@ -99,6 +99,22 @@ class TestGetPins:
 
         assert invalid_found == 0
 
+    def test_pin_filter_by_multiple_categories200(self, client):
+        """Pins should only return the given category ids"""
+        rg = client.get(f"/pins?cat_id=1&cat_id=2")
+        assert rg.status_code == 200
+
+        data = rg.json()
+        assert data is not None
+        invalid_found = 0  # keep track if any is invalid
+        for pin in data:
+            if pin["cat_id"] == 1 or pin["cat_id"] == 2:
+                continue
+            else:
+                invalid_found += 1
+
+        assert invalid_found == 0
+
     def test_pin_filter_by_expire_at_only_returns_less_than_or_equal_to_date_200(self, client):
         """Each pin's expire at should be less or equal to given date"""
         rg = client.get(f"/pins?pin_expire_at=2026-05-20")
