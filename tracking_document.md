@@ -95,6 +95,7 @@ Use this document to log your contributions. Add new entries at the top.
 - fixed bug with getting pin report types route
 - added user location tests (UL1, UL2, UL3, UL4) (test plan + actual tests)
 - added GET pins and GET pin by id tests (GP1, GP2) (Plan + tests)
+- added update profile tests UP1 plan + tests
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
