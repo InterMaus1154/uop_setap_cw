@@ -3,7 +3,7 @@ import pytest
 
 class TestAuth:
     def test_login_with_valid_credentials(self, client):
-        """AUTH"""
+        """Test plan reference: AUTH"""
 
         response = client.post("/auth/login", json={"email": "test@test.app"})
 

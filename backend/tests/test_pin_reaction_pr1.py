@@ -3,7 +3,7 @@ from models.pin import Pin
  
  
 class TestReactToPin:
-    """Test plan reference: React to pin"""
+    """Test plan reference: React to pin (PR1)"""
  
     TEST_PIN = {
         "cat_id": 1,
