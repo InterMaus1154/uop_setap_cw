@@ -6,6 +6,7 @@ from database.db import get_db
 from middleware.auth import require_auth
 from models.user import User
 from models.pin import Pin
+from models.invitation_code import InvitationCode
 from schemas.User import UserResponse, UserCreate, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -44,9 +45,15 @@ def update_user(user_data: UserUpdate, user: User = Depends(require_auth), db: S
 
 
 @router.get('/me', response_model=UserResponse)
-def get_me(user: User = Depends(require_auth)):
+def get_me(user: User = Depends(require_auth), db: Session = Depends(get_db)):
     """Return profile data for the logged-in user"""
-    return user
+    invitation = db.query(InvitationCode).filter(
+        InvitationCode.guest_user_id == user.user_id
+    ).first()
+    response = UserResponse.model_validate(user)
+    if invitation:
+        response.expires_at = invitation.expires_at
+    return response
 
 
 @router.get('/me/pin-count')
@@ -73,7 +80,13 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return user
+    invitation = db.query(InvitationCode).filter(
+        InvitationCode.guest_user_id == user_id
+    ).first()
+    response = UserResponse.model_validate(user)
+    if invitation:
+        response.expires_at = invitation.expires_at
+    return response
 
 
 @router.get('/search/{email}', response_model=list[UserResponse])

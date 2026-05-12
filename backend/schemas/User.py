@@ -34,10 +34,11 @@ class UserResponse(UserBase):
     user_lname: str
     user_email: str
     user_displayname: Optional[str] = None
-    user_use_displayname: bool 
+    user_use_displayname: bool
     user_isactive: bool
     last_login: Optional[datetime] = None
     created_at: datetime
+    expires_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 

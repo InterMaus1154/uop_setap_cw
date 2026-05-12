@@ -59,6 +59,7 @@ User _testUser({bool useDisplayName = false}) => User(
   email: 'test@test.app',
   displayName: 'TestDisplay',
   useDisplayName: useDisplayName,
+  isActive: true,
 );
 
 Widget _buildTestWidget({

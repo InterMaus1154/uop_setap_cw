@@ -130,6 +130,7 @@ def login_with_code(
 
         invitation.guest_user_id = guest.user_id
         invitation.is_used = True
+        invitation.expires_at = datetime.now() + timedelta(hours=24)
         db.commit()
         db.refresh(guest)
 
