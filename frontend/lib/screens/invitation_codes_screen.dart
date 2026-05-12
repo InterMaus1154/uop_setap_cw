@@ -181,12 +181,34 @@ class _CodeCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              code.expirationText,
-              style: TextStyle(
-                color: code.isActive ? Colors.green[600] : Colors.red[600],
-                fontSize: 14,
-              ),
+            Row(
+              children: [
+                Text(
+                  code.expirationText,
+                  style: TextStyle(
+                    color: code.isActive ? Colors.green[600] : Colors.red[600],
+                    fontSize: 14,
+                  ),
+                ),
+                if (code.isUsed) ...[
+                  const SizedBox(width: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.green[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Active',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.green[800],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 12),
             Align(
