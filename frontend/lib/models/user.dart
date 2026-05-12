@@ -5,6 +5,7 @@ class User {
   final String email;
   final String? displayName;
   final bool useDisplayName;
+  final bool isActive;
   final DateTime? expiresAt;
 
   User({
@@ -14,6 +15,7 @@ class User {
     required this.email,
     this.displayName,
     required this.useDisplayName,
+    required this.isActive,
     this.expiresAt,
   });
 
@@ -25,6 +27,7 @@ class User {
       email: json['user_email'] as String,
       displayName: json['user_displayname'] as String?,
       useDisplayName: json['user_use_displayname'] as bool,
+      isActive: json['user_isactive'] as bool? ?? true,
       expiresAt: json['expires_at'] != null
           ? DateTime.parse(json['expires_at'] as String)
           : null,

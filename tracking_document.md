@@ -21,6 +21,24 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 11/05/2026
+**Description:**
+- Added 5 tests for getting categories in backend tests, including: getting all categories, category levels, and sub categories + getting sub cats for valid and invalid category.
+- Added pin_street and pin_city columns to the pins table, geocoded using geopy at pin creation time and stored in the database on the backend.
+- Pins now display street/city from the pin data instead of showing raw coordinates on the frontend UI.
+
+**Files created/modified:**
+- backend\tests\test_get_categories.py
+- backend/models/pin.py
+- backend/schemas/Pin.py
+- backend/routes/pins.py
+- backend/routes/user_locations.py
+- backend/alembic/versions/a1b2c3d4e5f6_add_street_city_to_pins.py 
+- frontend/lib/models/pin.dart
+- frontend/lib/screens/map_screen.dart 
+
+--
+
 ### Theodore up2282406 - 11/05/2026
 **Summary:** Implemented and validated backend tests for deleting pins, including owner and non-owner scenarios, double-delete, and pin count checks. Added fixture for alternate user to ensure proper authorization testing.
 

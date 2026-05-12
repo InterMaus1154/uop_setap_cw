@@ -112,6 +112,7 @@ class FriendProvider extends ChangeNotifier {
         lastName: '#$userId',
         email: '',
         useDisplayName: false,
+        isActive: true,
       );
       _userCache[userId] = fallback;
       return fallback;
