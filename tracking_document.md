@@ -97,6 +97,8 @@ Use this document to log your contributions. Add new entries at the top.
 - added GET pins and GET pin by id tests (GP1, GP2) (Plan + tests)
 - added update profile tests UP1 plan + tests
 - added deactivate profile tests UP2 plan + tests
+- throughout the coursework, created several github issues for both frontend backend, kept track of feature that are implemented and to implement, and also gave implementation details for some issues, which others implemented
+- did foundation setup for backend and database
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
