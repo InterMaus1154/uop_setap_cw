@@ -21,6 +21,20 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+
+
+### Theodore up2282406 - 12/05/2026
+**Summary:** Added AUTH section to the backend test plan spreadsheet. Wrote test plan 
+entries for all four authentication tests covering login with valid credentials, login 
+with invalid credentials, logout with valid token, and logout with invalid token, 
+matching the exact format of existing entries including inputs, expected outputs, 
+descriptions, and valid/invalid markers. 
+
+**Files Modified/Created:**
+- Test_Plan.xlsx
+
+**Notes:**  Mark had already implemented this test in the code , I just wrote the plan around it .
+
 ### Theodore up2282406 - 11/05/2026
 **Summary:** Implemented and validated backend tests for deleting pins, including owner and non-owner scenarios, double-delete, and pin count checks. Added fixture for alternate user to ensure proper authorization testing.
 
@@ -29,6 +43,23 @@ Use this document to log your contributions. Add new entries at the top.
 - backend/conftest.py
 
 **Notes:** All delete pin tests now pass using a real alternate user token. The alt_auth_headers fixture programmatically creates a second user for robust authorization testing.
+
+### Theodore up2282406 - 10/05/2026
+**Summary:** Contributed to writing the user manual documentation. Added and expanded multiple 
+sections including getting started, map screen button explanations, understanding pin 
+categories, pin expiry, map navigation, location sharing, profile editing, common 
+error messages, a FAQ section, and fixed structural inconsistencies such as the 
+Profile Screen heading level.
+
+**Files Modified/Created:**
+- docs/users.md
+
+**Notes:** Added explanations for previously undocumented buttons on the map screen, 
+defined key concepts (pin, category level) before they are used in the document as 
+per the docs guide requirement, and filled in missing sections that were either blank 
+or incomplete. Added screenshots references for new sections where applicable.
+
+---
 
 
 ### Julian up2301253 - 10/05/2026
@@ -119,7 +150,7 @@ Use this document to log your contributions. Add new entries at the top.
 ---
 
 ## Theodore up2282406 - 27/04/2026  
-**Summary:** Implemented backend tests for deleting pin reactions (removing like/dislike). Added tests for all main scenarios: deleting an existing reaction, deleting a non-existent reaction, invalid pin/user cases, and unauthenticated access. Refactored fixtures for clarity and reliability.
+**Summary:** Wrote backend test plans and implemented these tests for deleting pin reactions (removing like/dislike). Added tests for all main scenarios: deleting an existing reaction, deleting a non-existent reaction, invalid pin/user cases, and unauthenticated access. Refactored fixtures for clarity and reliability.
 
 **Files Modified/Created:**
 - backend/tests/test_delete_pin_reaction.py
@@ -132,7 +163,7 @@ Use this document to log your contributions. Add new entries at the top.
 
 
 ## Theodore up2282406 - 27/04/2026  
-**Summary:** Implemented backend tests for reacting to a pin (like/dislike/change/invalid cases).
+**Summary:** Wrote backend test plans and implemented these tests for reacting to a pin (like/dislike/change/invalid cases).
 
 **Files Modified/Created:**
 - backend/tests/test_pin_reaction.py
