@@ -21,6 +21,8 @@ class Pin(Base):
     pin_isactive = Column(Boolean, nullable=False, default=True, server_default="true")
     pin_expire_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
+    pin_street = Column(String(200), nullable=True)
+    pin_city = Column(String(100), nullable=True)
 
     # cat_id, user_id, pin_title, pin_latitude, pin_longitude, pin_expire_at
     category = relationship("Category", back_populates="pins")

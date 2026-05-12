@@ -1,5 +1,4 @@
 import pytest
-from database.db import SessionLocal
 
 from models.pin import Pin
 from models.category import Category

@@ -1,9 +1,6 @@
-from database.db import SessionLocal
-from models.pin import Pin
-
 
 class TestDeletePinReaction:
-    """Test plan reference: Delete Pin Reaction"""
+    """Test plan reference: DPR1"""
 
     TEST_PIN = {
         "cat_id": 1,

@@ -21,20 +21,6 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
-
-
-### Theodore up2282406 - 12/05/2026
-**Summary:** Added AUTH section to the backend test plan spreadsheet. Wrote test plan 
-entries for all four authentication tests covering login with valid credentials, login 
-with invalid credentials, logout with valid token, and logout with invalid token, 
-matching the exact format of existing entries including inputs, expected outputs, 
-descriptions, and valid/invalid markers. 
-
-**Files Modified/Created:**
-- Test_Plan.xlsx
-
-**Notes:**  Mark had already implemented this test in the code , I just wrote the plan around it .
-
 ### Theodore up2282406 - 11/05/2026
 **Summary:** Implemented and validated backend tests for deleting pins, including owner and non-owner scenarios, double-delete, and pin count checks. Added fixture for alternate user to ensure proper authorization testing.
 
@@ -116,6 +102,11 @@ or incomplete. Added screenshots references for new sections where applicable.
 - added python test for getting pin report types (test plan + actual tests) (RT1)
 - fixed bug with getting pin report types route
 - added user location tests (UL1, UL2, UL3, UL4) (test plan + actual tests)
+- added GET pins and GET pin by id tests (GP1, GP2) (Plan + tests)
+- added update profile tests UP1 plan + tests
+- added deactivate profile tests UP2 plan + tests
+- throughout the coursework, created several github issues for both frontend backend, kept track of feature that are implemented and to implement, and also gave implementation details for some issues, which others implemented
+- did foundation setup for backend and database
 
 ### Julian up2301253 - 29/04/2026
 **Description:**

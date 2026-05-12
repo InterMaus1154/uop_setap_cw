@@ -154,7 +154,6 @@ class _MapScreenState extends State<MapScreen> {
     int? reaction = pin.userReaction;
     int likes = pin.pinLikes;
     int dislikes = pin.pinDislikes;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -355,6 +354,35 @@ class _MapScreenState extends State<MapScreen> {
                       Expanded(
                         child: Text(
                           _formatExpiry(pin.pinExpireAt),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          () {
+                            final parts = [pin.pinStreet, pin.pinCity]
+                                .where((s) => s != null && s.isNotEmpty)
+                                .join(', ');
+                            return parts.isNotEmpty
+                                ? parts
+                                : 'Lat: ${pin.pinLatitude.toStringAsFixed(5)}, '
+                                    'Lng: ${pin.pinLongitude.toStringAsFixed(5)}';
+                          }(),
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey[600],

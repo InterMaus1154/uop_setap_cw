@@ -21,6 +21,7 @@ from models.pin_report import PinReportType
 from schemas.pin_reporting import PinReportRequest, PinReportResponse
 
 from datetime import datetime
+from routes.user_locations import _reverse_geocode
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
@@ -154,6 +155,8 @@ async def create_pin(
         with open(image_path, "wb") as f:
             f.write(await image.read())
 
+    geo = _reverse_geocode(pin_latitude, pin_longitude)
+
     # Create new pin
     new_pin = Pin(
         pin_title=pin_title,
@@ -164,7 +167,9 @@ async def create_pin(
         sub_cat_id=sub_cat_id,
         pin_expire_at=pin_expire_at,
         pin_description=pin_description,
-        pin_picture_path=db_path
+        pin_picture_path=db_path,
+        pin_street=geo["street"],
+        pin_city=geo["city"],
     )
 
     db.add(new_pin)

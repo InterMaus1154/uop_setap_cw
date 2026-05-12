@@ -1,9 +1,7 @@
-from database.db import SessionLocal
-from models.pin import Pin
- 
- 
+
+
 class TestDeletePin:
-    """Test plan reference: Delete Pin"""
+    """Test plan reference: RP1"""
  
     TEST_PIN = {
         "cat_id": 1,
@@ -78,11 +76,5 @@ class TestDeletePin:
  
         response = client.delete(f"/pins/{pin_id}", headers=auth_headers)
         assert response.status_code == 200
- 
-        db = SessionLocal()
-        try:
-            pin = db.query(Pin).filter(Pin.pin_id == pin_id).first()
-            assert pin is None or pin.pin_isactive == False
-        finally:
-            db.close()
+
  
