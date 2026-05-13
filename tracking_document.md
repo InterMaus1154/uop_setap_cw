@@ -151,6 +151,7 @@ or incomplete. Added screenshots references for new sections where applicable.
 - throughout the coursework, created several github issues for both frontend backend, kept track of feature that are implemented and to implement, and also gave implementation details for some issues, which others implemented
 - did foundation setup for backend and database, including creating ERD, database tables and models, schemas, and backend authentication logic
 - added some extra tests for image validation for test TP1
+- added tests for invitation codes (UI1)
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
