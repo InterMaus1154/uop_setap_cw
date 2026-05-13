@@ -405,6 +405,35 @@ docs/users.md
 
 ---
 
+### Toby up2282406 - 02/03/2026
+
+**Summary:** Added endpoint for returning valid pin report types.
+
+**Files Modified:**
+- backend/routes/pins.py
+
+**Details:**
+- Added 'GET /pins/report-types' endpoint.
+- Returned valid 'PinReportType' enum values for frontend integration.
+- Allowed frontend to dynamically retrieve valid reporting options.
+
+---
+
+### Toby up2282406 - 02/03/2026
+
+**Summary:** Added endpoint for retrieving reports linked to a specific pin.
+
+**Files Modified:**
+- backend/routes/pins.py
+- backend/schemas/pin_reporting.py
+
+**Details:**
+- Added 'GET /pins/{pin_id}/reports' endpoint.
+- Added validation checks to ensure the pin exists before returning reports.
+- Returned all reports associated with a specific pin.
+
+---
+
 ### Theodore up2282406 - 01/03/2026 
 **Summary:** Added toggle functionality for displaying pin author name. Users can choose whether their display name is shown on pins.
 
@@ -561,6 +590,23 @@ backend/models/user_location.py
 **Files modified:**
 - backend/routes/pins.py
 
+### Toby up2282406 - 23/02/2026
+
+**Summary:** Implemented backend pin reporting functionality.
+
+**Files Modified/Created:**
+- backend/routes/pins.py
+- backend/schemas/pin_reporting.py
+
+**Details:**
+- Created 'PinReportRequest' schema for validating pin report requests.
+- Created 'PinReportResponse' schema for returning report data.
+- Added 'POST /pins/{pin_id}/report' endpoint for authenticated users to report pins.
+- Added validation checks to ensure pins exist before reports are created.
+- Prevented duplicate reports from the same user on the same pin.
+- Added error handling and rollback handling for failed database operations.
+
+---
 
 ### Theodore up2282406 - 23/02/2026
 **Summary:** Added like and dislike buttons to the frontend pin display. Implemented interactive UI for users to react to pins, with status saved and reflected in the backend.
