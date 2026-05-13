@@ -154,7 +154,6 @@ class TestLocationPermissions:
     
 
     def test_delete_location_permissions_not_friend(self, db_session, client, auth_headers, main_user):
-        # create a non-friend user
         non_friend = self._non_friend(db_session)
         self._create_user_location(client, auth_headers)
         response = client.delete(
