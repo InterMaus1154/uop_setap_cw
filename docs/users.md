@@ -99,16 +99,10 @@ If you click on any of the items listed in this menu, then it will behave akin t
 
 
 
-## Friends and sending friend requests
-If you navigate to the profile section of the app, you will notice that there is a button that says Friends. In this section, you can see your friends list, see your incoming and outgoing friend requests and add new friends
+## Friends, sending friend requests and Location sharing
+If you navigate to the profile section of the app, you will notice that there is a button that says Friends. In this section, you can see your friends list, see your incoming and outgoing friend requests and add new friends. In this app, adding friends allows you to share your location with them if you so choose
 
-### Friends
-
-![Friend list](images/friend_request/friend_list.png)
-
-In the picture above, you will see a picture of a user's friends list. In this section, you can view the friends you've made on the app and using the toggle switch to the right, toggle whether you want to share location with them or not
-
-## Location sharing
+### Location sharing
 
 Location sharing allows your friends to see where you are on the map in real 
 time. To enable location sharing with a friend, navigate to the friends list 
@@ -127,13 +121,13 @@ at once regardless of the individual toggles set in your friends list.
 ![Friend Location Sharing](images/friend_location_sharing.png)
 
 
-### Incoming
+### Incoming friend requests
 
 ![incoming friend request](images/friend_request/incoming_friend.png)
 
 In the picture above, you can see the incoming section. In this section, you can see all of your incoming friend requests, if any. If you want to accept a friend request, press the tick button, if you want to decline a friend request, press the cross button and if you want to block the user, press the block button (the final one)
 
-### Outgoing
+### Outgoing friend requests 
 
 ![Outgoing friend request](images/friend_request/outgoing_friend.png)
 
