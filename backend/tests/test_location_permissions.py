@@ -93,6 +93,7 @@ class TestLocationPermissions:
         assert "updated_at" in data
 
     def test_post_location_permissions_invalid_user(self, client, auth_headers):
+        self._create_user_location(client, auth_headers)
         response = client.post(
             "/location-permissions/",
             json={"user_id": 999999},
@@ -128,6 +129,7 @@ class TestLocationPermissions:
         permission = db_session.query(LocationPermission).filter_by(loc_perm_id=permission_id).first()
         assert permission is None
     def test_delete_location_permissions_invalid_user(self, client, auth_headers):
+        self._create_user_location(client, auth_headers)
         response = client.delete(
             "/location-permissions/999999",
             headers=auth_headers,
@@ -141,6 +143,7 @@ class TestLocationPermissions:
         assert response.status_code == 422
     def test_delete_location_permissions_no_permission(self, db_session, client, auth_headers, main_user):
         friend = self._create_friend(db_session, main_user)
+        self._create_user_location(client, auth_headers)
 
         response = client.delete(
             f"/location-permissions/{friend.user_id}",
@@ -153,6 +156,7 @@ class TestLocationPermissions:
     def test_delete_location_permissions_not_friend(self, db_session, client, auth_headers, main_user):
         # create a non-friend user
         non_friend = self._non_friend(db_session)
+        self._create_user_location(client, auth_headers)
         response = client.delete(
             f"/location-permissions/{non_friend.user_id}",
             headers=auth_headers,
