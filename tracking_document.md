@@ -21,6 +21,49 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 12/05/2026
+**Description:**
+- Fixed guest account expiry showing 22h59m instead of 24h by replacing `datetime.utcnow()` with `datetime.now()`.
+- Filter out expired guest accounts appearing on login screen.
+- Fixed invitation codes option showing on guest profiles.
+- Invitation code expiry now resets to 24 hours from first activation rather than from creation.
+- Added green "Active" status to invitation codes screen when a guest has used a code.
+- Added Migrations and Testing sections to backend documentation.
+- Created schedular job using apschedular that runs every minute which removes pins with 15+ dislikes.
+
+**Files created/modified:**
+- backend/routes/invitations.py
+- backend/routes/auth.py
+- backend/routes/users.py
+- backend/schemas/User.py
+- frontend/lib/models/user.dart
+- frontend/lib/providers/friend_provider.dart
+- frontend/lib/screens/user_selection_screen.dart
+- frontend/lib/screens/invitation_codes_screen.dart
+- frontend/test/screens/profile_screen_bugs_test.dart
+- docs/backend/index.md
+- backend\checkpins\checkpinactivity.py
+
+---
+
+### Julian up2301253 - 11/05/2026
+**Description:**
+- Added 5 tests for getting categories in backend tests, including: getting all categories, category levels, and sub categories + getting sub cats for valid and invalid category.
+- Added pin_street and pin_city columns to the pins table, geocoded using geopy at pin creation time and stored in the database on the backend.
+- Pins now display street/city from the pin data instead of showing raw coordinates on the frontend UI.
+
+**Files created/modified:**
+- backend\tests\test_get_categories.py
+- backend/models/pin.py
+- backend/schemas/Pin.py
+- backend/routes/pins.py
+- backend/routes/user_locations.py
+- backend/alembic/versions/a1b2c3d4e5f6_add_street_city_to_pins.py 
+- frontend/lib/models/pin.dart
+- frontend/lib/screens/map_screen.dart 
+
+--
+
 ### Theodore up2282406 - 11/05/2026
 **Summary:** Implemented and validated backend tests for deleting pins, including owner and non-owner scenarios, double-delete, and pin count checks. Added fixture for alternate user to ensure proper authorization testing.
 
@@ -106,7 +149,8 @@ or incomplete. Added screenshots references for new sections where applicable.
 - added update profile tests UP1 plan + tests
 - added deactivate profile tests UP2 plan + tests
 - throughout the coursework, created several github issues for both frontend backend, kept track of feature that are implemented and to implement, and also gave implementation details for some issues, which others implemented
-- did foundation setup for backend and database
+- did foundation setup for backend and database, including creating ERD, database tables and models, schemas, and backend authentication logic
+- added some extra tests for image validation for test TP1
 
 ### Julian up2301253 - 29/04/2026
 **Description:**

@@ -239,7 +239,9 @@ class _UserSelectionScreenState extends State<UserSelectionScreen> {
                 ),
               );
             }
-            final users = snapshot.data ?? [];
+            final users = (snapshot.data ?? [])
+                .where((u) => u.isActive)
+                .toList();
             return ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: users.length,

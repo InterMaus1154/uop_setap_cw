@@ -47,6 +47,7 @@ Once on the map screen you can interact with the map in the following ways:
 
 ![Centre Location](images/centre_location.png)
 
+
 ![Pin Cluster](images/map_related/Pin_Cluster.png)
 
 

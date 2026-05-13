@@ -99,3 +99,28 @@ uvicorn main:app --reload --port=8000
 ```
 
 The API will be available at `http://localhost:8000` and the auto-generated docs at `http://localhost:8000/docs`.
+
+## Migrations
+
+Database schema changes are managed with [Alembic](https://alembic.sqlalchemy.org/). Migration files live in `alembic/versions/`.
+
+**Apply all pending migrations**
+```bash
+alembic upgrade head
+```
+
+**Check current migration state**
+```bash
+alembic current
+```
+
+**Create a new migration** (after changing a model)
+```bash
+alembic revision --autogenerate -m "describe your change"
+```
+
+Always run `alembic upgrade head` after pulling changes that include new migration files.
+
+## Testing
+
+See [test_guide.md](../../test_guide.md) at the project root for setup and instructions on running the test suite.

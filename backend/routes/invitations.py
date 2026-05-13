@@ -39,7 +39,7 @@ def create_invitation_code(
     current_user: User = Depends(require_auth)
 ):
     """generate a new invitation code for the authenticated user."""
-    one_week_ago = datetime.utcnow() - timedelta(weeks=1)
+    one_week_ago = datetime.now() - timedelta(weeks=1)
     recent_count = (
         db.query(InvitationCode)
         .filter(
@@ -62,7 +62,7 @@ def create_invitation_code(
 
     
     # save code to the database
-    now = datetime.utcnow()
+    now = datetime.now()
     invitation = InvitationCode(
         creator_id=current_user.user_id,
         code=code,
@@ -82,7 +82,7 @@ def get_active_invitation_codes(
 ):
     """Return all active invitation codes for the user"""
 
-    now = datetime.utcnow()
+    now = datetime.now()
     codes = (
         db.query(InvitationCode)
         .filter(
@@ -105,7 +105,7 @@ def login_with_code(
         raise HTTPException(status_code=401, detail="Invalid invitation code")
     
     # expired - deactive linked guest
-    if invitation.expires_at < datetime.utcnow():
+    if invitation.expires_at < datetime.now():
         if invitation.guest_user_id:
             guest = db.query(User).filter(User.user_id == invitation.guest_user_id).first()
             if guest:
@@ -130,6 +130,7 @@ def login_with_code(
 
         invitation.guest_user_id = guest.user_id
         invitation.is_used = True
+        invitation.expires_at = datetime.now() + timedelta(hours=24)
         db.commit()
         db.refresh(guest)
 

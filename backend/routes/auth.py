@@ -8,6 +8,7 @@ from middleware.auth import require_auth
 from schemas.Auth import LoginRequest
 
 from models.user import User
+from models.invitation_code import InvitationCode
 
 import hashlib
 
@@ -41,8 +42,13 @@ def login(credentials: LoginRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    invitation = db.query(InvitationCode).filter(
+        InvitationCode.guest_user_id == user.user_id
+    ).first()
+
     return UserLoginResponse(
         token=token,
+        expires_at=invitation.expires_at if invitation else None,
         **user.__dict__
     )
 
