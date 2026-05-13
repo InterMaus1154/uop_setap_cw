@@ -13,32 +13,6 @@ from models.user import User
 
 
 @pytest.fixture
-def auth_headers():
-    return {"Authorization": "Bearer fbde5c7f68cdd28e9105cdbafa6556eb"}
-
-
-
-# Fixture to create a second user and provide a valid token for alt_auth_headers
-@pytest.fixture
-def alt_user(db_session):
-    user = db_session.query(User).filter(User.user_email == "altuser@test.com").first()
-    if not user:
-        user = User(
-            user_fname="Alt",
-            user_lname="User",
-            user_email="altuser@test.com",
-            user_token="altusertoken123"
-        )
-        db_session.add(user)
-        db_session.flush()
-    return user
-
-@pytest.fixture
-def alt_auth_headers(alt_user):
-    return {"Authorization": f"Bearer {alt_user.user_token}"}
-
-
-@pytest.fixture
 def db_session():
     connection = engine.connect()
     transaction = connection.begin()
@@ -60,5 +34,24 @@ def client(db_session):
 
 
 @pytest.fixture
+def auth_headers():
+    return {"Authorization": "Bearer b841a343d433da77a23c662203d5e661"}
+
+
+@pytest.fixture
+def alt_auth_headers():
+    return {"Authorization": "Bearer 42639eef50c0187f5ed8f6f8f0f7cfbe"}
+
+
+@pytest.fixture
 def main_user(db_session):
-    return db_session.query(User).filter(User.user_token == "fbde5c7f68cdd28e9105cdbafa6556eb").first()
+    return db_session.query(User).filter(
+        User.user_token == "b841a343d433da77a23c662203d5e661"
+    ).first()
+
+
+@pytest.fixture
+def alt_user(db_session):
+    return db_session.query(User).filter(
+        User.user_token == "42639eef50c0187f5ed8f6f8f0f7cfbe"
+    ).first()

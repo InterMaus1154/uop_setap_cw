@@ -25,75 +25,74 @@ class TestReactToPin:
         """A valid like reaction on an existing pin should be created successfully"""
         pin_id = self._create_test_pin(client, auth_headers)
  
-        response = client.post(
-            f"/pins/{pin_id}/reactions",
+        response = client.patch(
+            f"/pins/{pin_id}/react",
             headers=auth_headers,
-            json={"reaction": "like"}
+            json={"value": 1}
         )
         assert response.status_code == 201
  
         # cleanup
-        client.delete(f"/pins/{pin_id}/reactions", headers=auth_headers)
+        client.delete(f"/pins/{pin_id}/react", headers=auth_headers)
         client.delete(f"/pins/{pin_id}", headers=auth_headers)
  
     def test_change_reaction_from_like_to_dislike_expect_200(self, client, auth_headers):
         """Updating an existing reaction from like to dislike should return 200"""
         pin_id = self._create_test_pin(client, auth_headers)
  
-        client.post(
-            f"/pins/{pin_id}/reactions",
+        client.patch(
+            f"/pins/{pin_id}/react",
             headers=auth_headers,
-            json={"reaction": "like"}
+            json={"value": 1}
         )
  
-        response = client.post(
-            f"/pins/{pin_id}/reactions",
+        response = client.patch(
+            f"/pins/{pin_id}/react",
             headers=auth_headers,
-            json={"reaction": "dislike"}
+            json={"value": -1}
         )
         assert response.status_code == 200
  
         # cleanup
-        client.delete(f"/pins/{pin_id}/reactions", headers=auth_headers)
+        client.delete(f"/pins/{pin_id}/react", headers=auth_headers)
         client.delete(f"/pins/{pin_id}", headers=auth_headers)
  
-    def test_remove_reaction_with_null_expect_204(self, client, auth_headers):
-        """Passing null as the reaction value should remove the existing reaction"""
+    def test_remove_reaction_with_delete_expect_200(self, client, auth_headers):
+        """Deleting a reaction should remove the existing reaction"""
         pin_id = self._create_test_pin(client, auth_headers)
  
-        client.post(
-            f"/pins/{pin_id}/reactions",
+        client.patch(
+            f"/pins/{pin_id}/react",
             headers=auth_headers,
-            json={"reaction": "like"}
+            json={"value": 1}
         )
  
-        response = client.post(
-            f"/pins/{pin_id}/reactions",
-            headers=auth_headers,
-            json={"reaction": None}
+        response = client.delete(
+            f"/pins/{pin_id}/react",
+            headers=auth_headers
         )
-        assert response.status_code == 204
+        assert response.status_code == 200
  
         # cleanup
         client.delete(f"/pins/{pin_id}", headers=auth_headers)
  
     def test_react_to_nonexistent_pin_expect_404(self, client, auth_headers):
         """Reacting to a pin that does not exist should return 404"""
-        response = client.post(
-            "/pins/999999/reactions",
+        response = client.patch(
+            "/pins/999999/react",
             headers=auth_headers,
-            json={"reaction": "like"}
+            json={"value": 1}
         )
         assert response.status_code == 404
  
-    def test_react_with_invalid_reaction_type_expect_422(self, client, auth_headers):
-        """An unrecognised reaction type should be rejected with 422"""
+    def test_react_with_invalid_value_type_expect_422(self, client, auth_headers):
+        """Passing a string instead of an integer should be rejected by FastAPI with 422"""
         pin_id = self._create_test_pin(client, auth_headers)
  
-        response = client.post(
-            f"/pins/{pin_id}/reactions",
+        response = client.patch(
+            f"/pins/{pin_id}/react",
             headers=auth_headers,
-            json={"reaction": "love"}
+            json={"value": "love"}
         )
         assert response.status_code == 422
  
@@ -102,8 +101,9 @@ class TestReactToPin:
  
     def test_react_without_auth_expect_401(self, client):
         """Reacting without authentication should return 401"""
-        response = client.post(
-            "/pins/1/reactions",
-            json={"reaction": "like"}
+        response = client.patch(
+            "/pins/1/react",
+            json={"value": 1}
         )
         assert response.status_code == 401
+ 
