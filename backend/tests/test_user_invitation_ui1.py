@@ -72,3 +72,16 @@ class TestUserInvitationUI1:
                 invalid += 1
 
         assert invalid == 0
+
+    def test_login_with_code_200(self, client, auth_headers):
+        """Create a code and attempt to login with it"""
+
+        rp = client.post("/invitation-codes", headers=auth_headers)
+        code = rp.json()["code"]
+
+        assert rp.status_code == 201
+        assert code is not None
+
+        rlog = client.post("/auth/login/code", json={"code": code})
+        assert rlog.status_code == 200
+        assert "token" in rlog.json()
