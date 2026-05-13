@@ -149,7 +149,8 @@ or incomplete. Added screenshots references for new sections where applicable.
 - added update profile tests UP1 plan + tests
 - added deactivate profile tests UP2 plan + tests
 - throughout the coursework, created several github issues for both frontend backend, kept track of feature that are implemented and to implement, and also gave implementation details for some issues, which others implemented
-- did foundation setup for backend and database
+- did foundation setup for backend and database, including creating ERD, database tables and models, schemas, and backend authentication logic
+- added some extra tests for image validation for test TP1
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
