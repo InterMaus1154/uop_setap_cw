@@ -172,14 +172,31 @@ class TestLocationPermissions:
         )
         assert response.status_code == 403
 
-    def test_get_friends_location_no_permissions_200(self, client, auth_headers):
-        """Get friends location, expect 200 and empty array if no permissions"""
+    def test_get_friends_location_no_permissions(self, client, auth_headers):
         response = client.get("/user-locations/friends", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data is not None
         assert isinstance(data, list)
         assert len(data) == 0
+    
+    def _create_user_no_location(self, db_session):
+        user = User(
+            user_fname="NoLocation",
+            user_lname="User",
+            user_email="nolocation@example.com",
+            user_token="nolocationtoken123"
+        )
+        db_session.add(user)
+        db_session.flush()
+        return user 
+
+    def test_get_location_permissions_no_user_location(self, db_session, client):
+        user = self._create_user_no_location(db_session)
+        headers = {"Authorization": f"Bearer {user.user_token}"}
+
+        response = client.get("/location-permissions/", headers=headers)
+        assert response.status_code == 404
     
     
     
