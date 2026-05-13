@@ -9,13 +9,18 @@ class TestAddFriend:
         response = client.post("/friends/", headers=auth_headers, json={"target_user_id": "test@com"})
         assert response.status_code == 422
 
-    def test_send_friend_request_to_existing_user(self, auth_headers, client):
+    def test_send_friend_request_to_existing_user(self, auth_headers, db_session, client):
         """Test sending a friend request to a valid existing user returns 201"""
-        me = client.get("/users/me", headers=auth_headers).json()
-        my_id = me["user_id"]
-        target_id = 5
-        response = client.post("/friends/", headers=auth_headers, json={"target_user_id": target_id})
+        from models.user import User
+        fresh_user = User(user_fname="Fresh", user_lname="User", user_email="fresh@test.com", user_token="freshtoken999")
+        db_session.add(fresh_user)
+        db_session.flush()
+
+        response = client.post("/friends/", headers=auth_headers, json={"target_user_id": fresh_user.user_id})
         assert response.status_code == 201
+
+        rel_id = response.json()["user_rel_id"]
+        client.delete(f"/friends/{rel_id}", headers=auth_headers)
 
 
     def test_send_friend_request_to_nonexistent_user(self, auth_headers, client):
