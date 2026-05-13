@@ -206,7 +206,15 @@ or incomplete. Added screenshots references for new sections where applicable.
 
 **Notes:** Covers main valid and invalid scenarios for reacting to a pin, including like, dislike, duplicate, change, invalid value, non-existent pin, and invalid user.
 
-
+## Luke up2264308 - 26/04/2026
+**Summary** Begin working on user manual finishing a few headings and adding some images 
+**Files Modified/Created**
+docs/categories_menu.png
+docs/pin_with_circle_around_it.png
+docs/place_pin.png
+docs/place_pin_menu.png
+docs/ui_explanation.png
+docs/users.md
 
 ### Theodore up2282406  - 20/04/2026
 **Summary:** Implemented auto stop/control flow for location sharing so updates only run while sharing is enabled, with safe start/stop lifecycle handling from the map screen.
@@ -226,6 +234,14 @@ or incomplete. Added screenshots references for new sections where applicable.
 - backend/routes/user_locations.py
 
 **Notes:** Implemented write-through caching on location create/update and cache-assisted reads for friend locations, with DB fallback when cache is missing. Added short TTL expiry to keep cached coordinates fresh while limiting stale data.
+
+### Luke up2264308 - 03/04/2026
+**Summary** Added functionality to make it so that when location sharing is enabled, the default location of a user's pin when they press add pin is the user's current location, changed the colour of the default pin before the details of the pin are confirmed to purple from red and make it so that when pins overlap, they collapse into a pin with a number above it that you can click to allow you to select a pin and then see the details of that pin 
+
+**Files Modified/Created:**
+- frontend/lib/screens/map_screen.dart
+
+
 
 
 ### Josh up2255832 - 18/03/2026
