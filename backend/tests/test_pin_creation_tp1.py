@@ -97,3 +97,12 @@ class TestCreatePins:
         response = client.post("/pins", headers=auth_headers, data=payload)
 
         assert response.status_code == 422
+
+    def test_create_pin_without_image_201(self, client, auth_headers):
+        """Create a pin without an image, image path should be null"""
+
+        rp = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data)
+        assert rp.status_code == 201
+        data = rp.json()
+        print(data)
+        assert data["pin_picture_url"] is None
