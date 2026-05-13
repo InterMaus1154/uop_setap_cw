@@ -21,6 +21,14 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Luke up2264308 - 13/05/2026
+**Description:**
+Fixed some small errors where my unit tests were returning the right results but for the wrong reasons
+
+**Files created/modified:**
+backend/tests/test_location_permissions.py
+
+
 ### Julian up2301253 - 12/05/2026
 **Description:**
 - Fixed guest account expiry showing 22h59m instead of 24h by replacing `datetime.utcnow()` with `datetime.now()`.
@@ -100,6 +108,13 @@ or incomplete. Added screenshots references for new sections where applicable.
 - backend\schemas.md
 
 ---
+
+### Luke up2264308 - 10/05/2026
+**Summary** add unit tests to location_permissions.py to test that the location permissions work correctly
+
+**Files created/modified:**
+backend/tests/test_location_permissions.py
+
 
 ### Julian up2301253 - 07/05/2026
 **Description:**
@@ -185,7 +200,39 @@ or incomplete. Added screenshots references for new sections where applicable.
 
 ---
 
-## Theodore up2282406 - 27/04/2026  
+### Luke up2264308 - 27/04/2026
+**Summary** continued working on user manual, adding more sections and images alongside changing the search icon in the friends list to say add friend for improved clarity in what it does
+
+**Files created/modified**
+docs/images/friend_request/add_friend.png
+docs/images/friend_request/add_friend_with_name.png
+docs/images/friend_request/friend_list.png
+docs/images/friend_request/friends_screen.png
+docs/images/friend_request/incoming_friend.png
+docs/images/friend_request/outgoing_friend.png
+docs/images/invitation_codes/ScreenShot 2026-04-27 220048.png
+docs/images/invitation_codes/ScreenShot 2026-04-27 220130.png
+docs/images/invitation_codes/ScreenShot 2026-04-27 220158.png
+docs/images/map_related/categories.png
+docs/images/map_related/categories_menu.png
+docs/images/map_related/category_level_and_expiry.png
+docs/images/map_related/create_pin_subcategory.png
+docs/images/map_related/example_click_pin.png
+docs/images/map_related/filter_pin_icon.png
+docs/images/map_related/multi_pin.png
+docs/images/map_related/pin_with_circle_around_it.png
+docs/images/map_related/place_pin.png
+docs/images/map_related/place_pin_menu.png
+docs/images/map_related/ui_explanation.png
+docs/images/profile/edit_profile.png
+docs/images/profile/profile.png
+docs/users.md
+frontend/lib/screens/friends_screen.dart
+
+
+
+
+### Theodore up2282406 - 27/04/2026  
 **Summary:** Wrote backend test plans and implemented these tests for deleting pin reactions (removing like/dislike). Added tests for all main scenarios: deleting an existing reaction, deleting a non-existent reaction, invalid pin/user cases, and unauthenticated access. Refactored fixtures for clarity and reliability.
 
 **Files Modified/Created:**
@@ -198,7 +245,7 @@ or incomplete. Added screenshots references for new sections where applicable.
 - Confirmed all delete pin reaction tests pass with correct endpoint usage and fixture setup.
 
 
-## Theodore up2282406 - 27/04/2026  
+### Theodore up2282406 - 27/04/2026  
 **Summary:** Wrote backend test plans and implemented these tests for reacting to a pin (like/dislike/change/invalid cases).
 
 **Files Modified/Created:**
@@ -206,7 +253,7 @@ or incomplete. Added screenshots references for new sections where applicable.
 
 **Notes:** Covers main valid and invalid scenarios for reacting to a pin, including like, dislike, duplicate, change, invalid value, non-existent pin, and invalid user.
 
-## Luke up2264308 - 26/04/2026
+### Luke up2264308 - 26/04/2026
 **Summary** Begin working on user manual finishing a few headings and adding some images 
 **Files Modified/Created**
 docs/categories_menu.png
