@@ -153,7 +153,7 @@ async def create_pin(
         image_path = f"{UPLOAD_DIR}/{filename}"
         db_path = f"uploads/pins/{filename}"  # in the db we only store relative path
         with open(image_path, "wb") as f:
-            f.write(await image.read())
+            f.write(contents)
 
     geo = _reverse_geocode(pin_latitude, pin_longitude)
 
