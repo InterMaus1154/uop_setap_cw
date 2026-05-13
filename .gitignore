@@ -6,6 +6,8 @@ README~
 # macOS specific
 .DS_Store
 
+.claude/
+
 # Python
 backend/venv/
 venv/
@@ -19,6 +21,9 @@ __pycache__/
 backend/.idea
 backend/.vsc
 backend/.env
+
+# Uploaded files (user-generated content)
+backend/uploads/
 
 # Flutter
 frontend/.dart_tool/

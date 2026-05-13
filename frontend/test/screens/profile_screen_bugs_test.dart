@@ -33,6 +33,9 @@ class FakeUserProvider extends ChangeNotifier implements UserProvider {
 
   @override
   Future<void> login(String email) async {}
+  // ihad to add after login with code method was added to the userprovider
+  @override
+  Future<void> loginWithCode(String code) async {}
 
   @override
   Future<void> logout() async {
@@ -56,6 +59,7 @@ User _testUser({bool useDisplayName = false}) => User(
   email: 'test@test.app',
   displayName: 'TestDisplay',
   useDisplayName: useDisplayName,
+  isActive: true,
 );
 
 Widget _buildTestWidget({

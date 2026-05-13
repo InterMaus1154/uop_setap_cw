@@ -3,6 +3,7 @@ from sqlalchemy import Column, BigInteger, SmallInteger, ForeignKey, String, DOU
 from sqlalchemy.orm import relationship
 
 from database.db import Base
+import os
 
 
 class Pin(Base):
@@ -20,6 +21,8 @@ class Pin(Base):
     pin_isactive = Column(Boolean, nullable=False, default=True, server_default="true")
     pin_expire_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False, default=func.now(), server_default=func.now())
+    pin_street = Column(String(200), nullable=True)
+    pin_city = Column(String(100), nullable=True)
 
     # cat_id, user_id, pin_title, pin_latitude, pin_longitude, pin_expire_at
     category = relationship("Category", back_populates="pins")
@@ -62,3 +65,10 @@ class Pin(Base):
     @user_reaction.setter
     def user_reaction(self, value):
         self._user_reaction = value
+
+    @property
+    def pin_picture_url(self) -> str | None:
+        if self.pin_picture_path:
+            base_url = os.getenv("BASE_URL", "http://localhost:8000")
+            return f"{base_url}/{self.pin_picture_path}"
+        return None

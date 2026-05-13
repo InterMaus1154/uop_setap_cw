@@ -7,7 +7,7 @@ class Pin {
   final int userId;
   final String pinTitle;
   final String? pinDescription;
-  final String? pinPicturePath;
+  final String? pinPictureUrl;
   final double pinLatitude;
   final double pinLongitude;
   final bool pinIsActive;
@@ -19,6 +19,8 @@ class Pin {
   final int pinLikes;
   final int pinDislikes;
   final int? userReaction; // 1=like, -1=dislike, null=none
+  final String? pinStreet;
+  final String? pinCity;
 
   Pin({
     required this.pinId,
@@ -27,7 +29,7 @@ class Pin {
     required this.userId,
     required this.pinTitle,
     this.pinDescription,
-    this.pinPicturePath,
+    this.pinPictureUrl,
     required this.pinLatitude,
     required this.pinLongitude,
     required this.pinIsActive,
@@ -38,6 +40,8 @@ class Pin {
     required this.pinLikes,
     required this.pinDislikes,
     this.userReaction,
+    this.pinStreet,
+    this.pinCity,
   });
 
   /// Parse hex string to a Flutter Color
@@ -59,7 +63,7 @@ class Pin {
       userId: json['user_id'] as int,
       pinTitle: json['pin_title'] as String,
       pinDescription: json['pin_description'] as String?,
-      pinPicturePath: json['pin_picture_path'] as String?,
+      pinPictureUrl: json['pin_picture_url'] as String?,
       pinLatitude: (json['pin_latitude'] as num).toDouble(),
       pinLongitude: (json['pin_longitude'] as num).toDouble(),
       pinIsActive: json['pin_isactive'] as bool,
@@ -70,6 +74,8 @@ class Pin {
       pinLikes: json['pin_likes'] as int? ?? 0,
       pinDislikes: json['pin_dislikes'] as int? ?? 0,
       userReaction: json['user_reaction'] as int?,
+      pinStreet: json['pin_street'] as String?,
+      pinCity: json['pin_city'] as String?,
     );
   }
 
@@ -81,7 +87,7 @@ class Pin {
       'user_id': userId,
       'pin_title': pinTitle,
       'pin_description': pinDescription,
-      'pin_picture_path': pinPicturePath,
+      'pin_picture_url': pinPictureUrl,
       'pin_latitude': pinLatitude,
       'pin_longitude': pinLongitude,
       'pin_isactive': pinIsActive,

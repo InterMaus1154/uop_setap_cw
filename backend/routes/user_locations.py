@@ -1,13 +1,31 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from geopy.geocoders import Nominatim
 
 from database.db import get_db
+from database.redis import redis_client
 from middleware.auth import require_auth
 from models.user import User
 from models.user_location import UserLocation
 from models.location_permission import LocationPermission
 from schemas.UserLocation import CreateUserLocation, UpdateUserLocation, UserLocationResponse
 from schemas.LocationPermission import CreateLocationPermission, LocationPermissionResponse
+
+_geolocator = Nominatim(user_agent="campus_connect")
+
+
+def _reverse_geocode(lat: float, lng: float) -> dict:
+    """Return city and street for a coordinate pair, or None if lookup fails."""
+    try:
+        result = _geolocator.reverse((lat, lng), timeout=5)
+        if result and result.raw.get("address"):
+            addr = result.raw["address"]
+            city = addr.get("city") or addr.get("town") or addr.get("village") or addr.get("county")
+            street = addr.get("road") or addr.get("pedestrian") or addr.get("footway")
+            return {"city": city, "street": street}
+    except Exception:
+        pass
+    return {"city": None, "street": None}
 
 router = APIRouter(prefix="/user-locations", tags=["user-locations"])
 location_permissions_router = APIRouter(prefix="/location-permissions", tags=["location-permissions"])
@@ -29,7 +47,17 @@ def create_or_update_user_location(
         existing.is_enabled = True
         db.commit()
         db.refresh(existing)
-        return existing
+        geo = _reverse_geocode(existing.latitude, existing.longitude)
+        # Write-through to Redis
+        redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+            "lat": existing.latitude,
+            "lng": existing.longitude,
+            "is_enabled": int(existing.is_enabled),
+            "city": geo["city"] or "",
+            "street": geo["street"] or ""
+        })
+        redis_client.expire(f"user_location:{current_user.user_id}", 30)
+        return UserLocationResponse(**existing.__dict__, city=geo["city"], street=geo["street"])
 
     # if no record exists - creates one
     location = UserLocation(
@@ -41,7 +69,17 @@ def create_or_update_user_location(
     db.add(location)
     db.commit()
     db.refresh(location)
-    return location
+    geo = _reverse_geocode(location.latitude, location.longitude)
+    # Write-through to Redis
+    redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+        "lat": location.latitude,
+        "lng": location.longitude,
+        "is_enabled": int(location.is_enabled),
+        "city": geo["city"] or "",
+        "street": geo["street"] or ""
+    })
+    redis_client.expire(f"user_location:{current_user.user_id}", 30)
+    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
 
 
 @router.patch("/", status_code=200, response_model=UserLocationResponse)
@@ -66,7 +104,17 @@ def update_user_location(
 
     db.commit()
     db.refresh(location)
-    return location
+    geo = _reverse_geocode(location.latitude, location.longitude)
+    # Write-through to Redis
+    redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+        "lat": location.latitude,
+        "lng": location.longitude,
+        "is_enabled": int(location.is_enabled),
+        "city": geo["city"] or "",
+        "street": geo["street"] or ""
+    })
+    redis_client.expire(f"user_location:{current_user.user_id}", 30)
+    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
 
 
 @router.delete("/", status_code=204)
@@ -97,7 +145,7 @@ def get_user_location(
     if not location:
         raise HTTPException(status_code=404, detail="User location not found")
 
-    return location
+    return UserLocationResponse(**location.__dict__, city=None, street=None)
 
 
 @router.get("/friends", status_code=200, response_model=list[UserLocationResponse])
@@ -106,17 +154,63 @@ def get_friends_locations(
     current_user: User = Depends(require_auth)
 ):
     """Return UserLocation records for friends who are sharing with the logged-in user."""
-    shared_locations = (
+    # Get all friends with permission
+    friends_query = (
         db.query(UserLocation)
         .join(LocationPermission, LocationPermission.user_loc_id == UserLocation.user_loc_id)
         .filter(
             LocationPermission.user_id == current_user.user_id,
             UserLocation.is_enabled == True
         )
-        .all()
     )
+    friends = friends_query.all()
 
-    return shared_locations
+    # Try to get each friend's location from Redis
+    results = []
+    for friend in friends:
+        cache = redis_client.hgetall(f"user_location:{friend.user_id}")
+        if cache and "lat" in cache and "lng" in cache and "is_enabled" in cache:
+            lat, lng = float(cache["lat"]), float(cache["lng"])
+            city = cache.get("city") or None
+            street = cache.get("street") or None
+            if city is None and street is None:
+                geo = _reverse_geocode(lat, lng)
+                city, street = geo["city"], geo["street"]
+            results.append(UserLocationResponse(
+                user_loc_id=friend.user_loc_id,
+                user_id=friend.user_id,
+                latitude=lat,
+                longitude=lng,
+                is_enabled=bool(int(cache["is_enabled"])),
+                created_at=friend.created_at,
+                updated_at=friend.updated_at,
+                city=city,
+                street=street
+            ))
+        else:
+            # Fallback to DB, and update Redis for next time
+            geo = _reverse_geocode(friend.latitude, friend.longitude)
+            results.append(UserLocationResponse(
+                user_loc_id=friend.user_loc_id,
+                user_id=friend.user_id,
+                latitude=friend.latitude,
+                longitude=friend.longitude,
+                is_enabled=friend.is_enabled,
+                created_at=friend.created_at,
+                updated_at=friend.updated_at,
+                city=geo["city"],
+                street=geo["street"]
+            ))
+            redis_client.hset(f"user_location:{friend.user_id}", mapping={
+                "lat": friend.latitude,
+                "lng": friend.longitude,
+                "is_enabled": int(friend.is_enabled),
+                "city": geo["city"] or "",
+                "street": geo["street"] or ""
+            })
+            redis_client.expire(f"user_location:{friend.user_id}", 30)
+
+    return results
 
 
 @location_permissions_router.post("/", status_code=201, response_model=LocationPermissionResponse)

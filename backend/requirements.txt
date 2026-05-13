@@ -2,6 +2,7 @@ alembic==1.18.1
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.12.1
+apscheduler==3.11.1
 click==8.3.1
 colorama==0.4.6
 dnspython==2.8.0
@@ -21,7 +22,10 @@ starlette==0.50.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.40.0
+geopy==2.4.1
+redis
 
 pytest~=9.0.2
 hypothesis~=6.151.9
 httpx~=0.28.1
+python-multipart

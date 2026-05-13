@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/friend_provider.dart';
@@ -5,6 +7,7 @@ import '../providers/location_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/api_service.dart';
 import 'friends_screen.dart';
+import 'invitation_codes_screen.dart';
 import 'user_selection_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -21,6 +24,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
   bool _isEditing = false;
   bool _isSaving = false;
+  Timer? _countdownTimer;
+  Duration? _timeLeft;
 
   late TextEditingController _fnameController;
   late TextEditingController _lnameController;
@@ -38,6 +43,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       text: user?.displayName ?? '',
     );
     _showDisplayName = user?.useDisplayName ?? false;
+    if (user?.expiresAt != null) {
+      _updateTimeLeft(user!.expiresAt!);
+      _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+        if (mounted) _updateTimeLeft(user.expiresAt!);
+      });
+    }
+  }
+
+  void _updateTimeLeft(DateTime expiresAt) {
+    setState(() => _timeLeft = expiresAt.difference(DateTime.now()));
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    _fnameController.dispose();
+    _lnameController.dispose();
+    _displayNameController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPinCount() async {
@@ -165,6 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(fontSize: 13, color: Colors.grey[500]),
               ),
               const SizedBox(height: 20),
+              _buildGuestBanner(),
               // Edit profile section
               _buildEditSection(),
               const SizedBox(height: 20),
@@ -192,6 +217,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
+              if (!(user?.isGuest ?? false)) ...[
+              const SizedBox(height: 16),
+              // Invitation Codes button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const InvitationCodesScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.card_giftcard),
+                  label: const Text('Invitation Codes'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[400],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              ], // end invitation codes guard
               const SizedBox(height: 16),
               // Logout
               SizedBox(
@@ -433,6 +482,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: isSelected ? Colors.white : Colors.grey[600],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGuestBanner() {
+    if (_timeLeft == null) return const SizedBox.shrink();
+    final expired = _timeLeft!.isNegative;
+    final hours = _timeLeft!.inHours;
+    final minutes = _timeLeft!.inMinutes.remainder(60);
+    final label = expired
+        ? 'Guest account expired'
+        : 'Guest account expires in: ${hours}h ${minutes}m';
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: expired ? Colors.red[50] : Colors.amber[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: expired ? Colors.red[300]! : Colors.amber[300]!,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.timer_outlined,
+            size: 20,
+            color: expired ? Colors.red[700] : Colors.amber[800],
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: expired ? Colors.red[700] : Colors.amber[800],
+            ),
+          ),
+        ],
       ),
     );
   }

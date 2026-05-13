@@ -1,14 +1,15 @@
-from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import Response, JSONResponse
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi.responses import JSONResponse
 from fastapi.params import Depends
 from sqlalchemy.orm import Session, Query as Q, joinedload
-from sqlalchemy import or_, func
+from sqlalchemy import or_
+import uuid
+import os
 
 from typing import Optional, Type
 
 from database.db import get_db
-from models import CategoryLevel, SubCategory
-from models.admin import Admin
+from models import SubCategory
 from models.pin import Pin
 from models.category import Category
 from models.pin_reaction import PinReaction
@@ -20,9 +21,19 @@ from models.pin_report import PinReportType
 from schemas.pin_reporting import PinReportRequest, PinReportResponse
 
 from datetime import datetime
+from routes.user_locations import _reverse_geocode
 
 router = APIRouter(prefix="/pins", tags=["pins"])
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads", "pins")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+@router.get("/report-types")
+def get_report_types():
+    """Return all valid pin report types"""
+    return [report_type.value for report_type in PinReportType]
 
 @router.get("/", response_model=list[PinResponse])
 def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Optional[list[int]] = Query(default=None),
@@ -49,7 +60,6 @@ def get_pins(cat_id: Optional[list[int]] = Query(default=None), cat_level_id: Op
         category_conditions.append(Category.cat_level_id.in_(cat_level_id))
 
     query = query.filter(or_(*category_conditions))
-
 
     if pin_expire_at:
         end_of_day = pin_expire_at.replace(hour=23, minute=59, second=50)
@@ -98,33 +108,68 @@ def get_pin(pin_id: int, db: Session = Depends(get_db), user: User | None = Depe
 
 
 @router.post("/", response_model=PinResponse, status_code=201)
-def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = Depends(require_auth)):
+async def create_pin(
+        pin_title: str = Form(..., max_length=100),
+        pin_latitude: float = Form(...),
+        pin_longitude: float = Form(...),
+        cat_id: int = Form(...),
+        sub_cat_id: Optional[int] = Form(None),
+        pin_expire_at: datetime = Form(...),
+        pin_description: Optional[str] = Form(None, max_length=300),
+        image: UploadFile = File(None),  # image is optional
+        db: Session = Depends(get_db), user: User = Depends(require_auth)):
     """Create a new pin"""
     # Ensures category exists
-    category = db.query(Category).filter(Category.cat_id == pin_data.cat_id).first()
+    category = db.query(Category).filter(Category.cat_id == cat_id).first()
     if not category:
         raise HTTPException(status_code=422, detail="Invalid category")
 
     # check if sub cat exists if provided
-    if pin_data.sub_cat_id:
+    if sub_cat_id:
         sub_category = (db.query(SubCategory)
-                        .filter(SubCategory.sub_cat_id == pin_data.sub_cat_id,
-                                SubCategory.cat_id == pin_data.cat_id)  # it will return null, if the provided sub_category doesnt belong to the provided category
+                        .filter(SubCategory.sub_cat_id == sub_cat_id,
+                                SubCategory.cat_id == cat_id)  # it will return null, if the provided sub_category doesnt belong to the provided category
                         .first())
 
         if not sub_category:
             raise HTTPException(status_code=422, detail="Invalid subcategory")
 
+    # save the image (optional — db_path stays None if no image provided)
+    image_path = None
+    db_path = None
+    if image:
+
+        # check if an image
+        if not image.content_type.startswith("image/"):
+            raise HTTPException(status_code=422, detail="File must be an image")
+
+        # file size is max 5mb
+        contents = await image.read()
+        if len(contents) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=422, detail="Image must be less than 5mb")
+
+        extension = image.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}.{extension}"
+        image_path = f"{UPLOAD_DIR}/{filename}"
+        db_path = f"uploads/pins/{filename}"  # in the db we only store relative path
+        with open(image_path, "wb") as f:
+            f.write(contents)
+
+    geo = _reverse_geocode(pin_latitude, pin_longitude)
+
     # Create new pin
     new_pin = Pin(
-        pin_title=pin_data.pin_title,
-        pin_latitude=pin_data.pin_latitude,
-        pin_longitude=pin_data.pin_longitude,
+        pin_title=pin_title,
+        pin_latitude=pin_latitude,
+        pin_longitude=pin_longitude,
         user_id=user.user_id,
-        cat_id=pin_data.cat_id,
-        sub_cat_id=pin_data.sub_cat_id,
-        pin_expire_at=pin_data.pin_expire_at,
-        pin_description=pin_data.pin_description
+        cat_id=cat_id,
+        sub_cat_id=sub_cat_id,
+        pin_expire_at=pin_expire_at,
+        pin_description=pin_description,
+        pin_picture_path=db_path,
+        pin_street=geo["street"],
+        pin_city=geo["city"],
     )
 
     db.add(new_pin)
@@ -136,7 +181,7 @@ def create_pin(pin_data: PinCreate, db: Session = Depends(get_db), user: User = 
 
 @router.put("/{pin_id}", response_model=PinResponse)
 def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
-               authenticated: User | Admin = Depends(require_auth)):
+               user: User = Depends(require_auth)):
     """Update pin details"""
     pin: Pin = (db.query(Pin)
                 .options(joinedload(Pin.category).joinedload(Category.category_level))
@@ -146,8 +191,7 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
 
     if not pin: raise HTTPException(status_code=404, detail="Pin not found")
 
-    # check if user is updating who created or it is an admin
-    if isinstance(authenticated, User) and pin.user_id != authenticated.user_id or not isinstance(authenticated, Admin):
+    if user.user_id != pin.user_id:
         raise HTTPException(status_code=403, detail="Forbidden")
 
     # update only provided fields
@@ -155,31 +199,38 @@ def update_pin(pin_id: int, pin_data: PinUpdate, db: Session = Depends(get_db),
         pin.pin_title = pin_data.pin_title
     if pin_data.pin_description is not None:
         pin.pin_description = pin_data.pin_description
-    if pin_data.pin_latitude is not None:
-        pin.pin_latitude = pin_data.pin_latitude
-    if pin_data.pin_longitude is not None:
-        pin.pin_longitude = pin_data.pin_longitude
     if pin_data.pin_expire_at is not None:
         pin.pin_expire_at = pin_data.pin_expire_at
 
     pin.user_reaction = None
 
-    if isinstance(authenticated, User):
-        user = authenticated
-        # if user is logged in
-        # set the status for the pins based on how the user already interacted with it
-        # 1 = like, -1 = dislike, None = no reaction yet
-        # value is set in user_reaction field
-        if user:
-            for reaction in pin.reactions:
-                if reaction.user_id == user.user_id:
-                    pin.user_reaction = reaction.reaction_value
-                    break
+    for reaction in pin.reactions:
+        if reaction.user_id == user.user_id:
+            pin.user_reaction = reaction.reaction_value
+            break
 
     db.commit()
     db.refresh(pin)
 
     return pin
+
+
+@router.delete("/{pin_id}", status_code=200)
+def delete_pin(pin_id: int, db: Session = Depends(get_db), user: User = Depends(require_auth)):
+    # check if pin exists
+    pin: Pin | None = db.query(Pin).filter(Pin.pin_id == pin_id, Pin.pin_isactive == True).first()
+
+    if pin is None:
+        raise HTTPException(status_code=404, detail="Pin not found")
+
+    # check if pin belongs to user
+    if pin.user_id != user.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    # deactivate pin instead of fully deleting, to preserve relationships (many tables depend on pin)
+    pin.pin_isactive = False
+    db.commit()
+    return {"message": "Pin deleted"}
 
 
 @router.patch("/{pin_id}/react")
@@ -243,7 +294,8 @@ def delete_pin_reaction(pin_id: int, user: User = Depends(require_auth), db: Ses
             raise HTTPException(status_code=500, detail=f"Error at deleting reaction. Error: {e}")
     else:
         raise HTTPException(status_code=404, detail="Reaction not found")
-    
+
+
 @router.post("/{pin_id}/report", status_code=201)
 def report_pin(
         request: PinReportRequest,
@@ -288,13 +340,10 @@ def report_pin(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    
-@router.get("/report-types")
-def get_report_types():
 
-    """Return all valid pin report types"""
-    
-    return [report_type.value for report_type in PinReportType]
+
+
+
 
 @router.get("/{pin_id}/reports", response_model=list[PinReportResponse])
 def get_pin_reports(

@@ -5,6 +5,9 @@ class User {
   final String email;
   final String? displayName;
   final bool useDisplayName;
+  final bool isActive;
+  final DateTime? expiresAt;
+
   User({
     required this.userId,
     required this.firstName,
@@ -12,6 +15,8 @@ class User {
     required this.email,
     this.displayName,
     required this.useDisplayName,
+    required this.isActive,
+    this.expiresAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -22,9 +27,14 @@ class User {
       email: json['user_email'] as String,
       displayName: json['user_displayname'] as String?,
       useDisplayName: json['user_use_displayname'] as bool,
+      isActive: json['user_isactive'] as bool? ?? true,
+      expiresAt: json['expires_at'] != null
+          ? DateTime.parse(json['expires_at'] as String)
+          : null,
     );
   }
 
-  String get fullName => '$firstName $lastName';
-  
+  bool get isGuest => expiresAt != null;
+
+  String get fullName => '$firstName $lastName'.trim();
 }

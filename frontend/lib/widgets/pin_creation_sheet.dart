@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/category.dart';
 import '../models/pin_form_data.dart';
@@ -10,7 +13,7 @@ class PinCreationSheet extends StatefulWidget {
   final List<Category> categories;
   final List<CategoryLevel> categoryLevels;
   final List<SubCategory> subCategories;
-  final Function(PinFormData) onSubmit;
+  final Function(PinFormData, XFile?) onSubmit;
 
   const PinCreationSheet({
     super.key,
@@ -29,9 +32,11 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final ImagePicker _imagePicker = ImagePicker();
 
   Category? _selectedCategory;
   SubCategory? _selectedSubCategory;
+  XFile? _selectedImage;
 
   List<SubCategory> get _filteredSubCategories {
     if (_selectedCategory == null) return [];
@@ -91,8 +96,136 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
         longitude: widget.location.longitude,
         ttlMinutes: ttl,
       );
-      widget.onSubmit(formData);
+      widget.onSubmit(formData, _selectedImage);
     }
+  }
+
+  /// Show a bottom sheet letting the user pick from gallery or camera
+  void _showImageSourcePicker() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            // Camera option — not available on web
+            if (!kIsWeb)
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take a photo'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picked = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        setState(() => _selectedImage = picked);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not pick image: $e')));
+      }
+    }
+  }
+
+  /// Build the image picker button and preview
+  Widget _buildImagePicker() {
+    if (_selectedImage != null) {
+      // Show preview with a remove button
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Attached Photo',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                // Read bytes from XFile — works on both web and mobile
+                child: FutureBuilder<Uint8List>(
+                  future: _selectedImage!.readAsBytes(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox(
+                        height: 160,
+                        child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    }
+                    return Image.memory(
+                      snapshot.data!,
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
+              ),
+              // Remove image button
+              Positioned(
+                top: 6,
+                right: 6,
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedImage = null),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // No image selected — show the add photo button
+    return OutlinedButton.icon(
+      onPressed: _showImageSourcePicker,
+      icon: const Icon(Icons.add_a_photo),
+      label: const Text('Add Photo (optional)'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.grey[700],
+        side: BorderSide(color: Colors.grey[300]!),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
   }
 
   @override
@@ -248,6 +381,10 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                   hintText: 'Add more details...',
                 ),
               ),
+              const SizedBox(height: 16),
+
+              // Image picker — browse gallery or take a photo
+              _buildImagePicker(),
               const SizedBox(height: 20),
 
               // Submit button
