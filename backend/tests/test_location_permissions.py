@@ -161,12 +161,13 @@ class TestLocationPermissions:
     def test_post_location_permissions_not_friend(self, db_session, client, auth_headers, main_user):
         # create a non-friend user
         non_friend = self._non_friend(db_session)
+        self._create_user_location(client, auth_headers)
         response = client.post(
             "/location-permissions/",
             json={"user_id": non_friend.user_id},
             headers=auth_headers,
         )
-        assert response.status_code == 404
+        assert response.status_code == 403
 
     def test_get_friends_location_no_permissions_200(self, client, auth_headers):
         """Get friends location, expect 200 and empty array if no permissions"""
