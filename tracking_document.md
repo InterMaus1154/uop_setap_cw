@@ -21,6 +21,20 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 14/05/2026
+**Summary:** Added unit tests for the 7 previously untested frontend models, taking model test coverage from 1 file (FriendRequest) to all 8. 62 new tests, all passing.
+
+**Files Created:**
+- frontend/test/models/pin_test.dart (17 tests — fromJson/toJson, int→double coordinate casting, likes/dislikes defaulting, pinColor hex parsing with fallbacks, isExpired, PinReaction)
+- frontend/test/models/user_test.dart (10 tests — field mapping, null displayName, isActive default, isGuest/fullName getters)
+- frontend/test/models/category_test.dart (7 tests — CategoryLevel/Category/SubCategory, includes regression test for cat_level_ttl_mins mapping)
+- frontend/test/models/pin_form_data_test.dart (5 tests — toJson keys, expiresAt from customExpiry vs computed from ttlMinutes)
+- frontend/test/models/user_location_test.dart (7 tests — field mapping, coordinate casting, null city/street, round-trip)
+- frontend/test/models/location_permission_test.dart (5 tests — field mapping, toJson, round-trip)
+- frontend/test/models/invitation_code_test.dart (11 tests — field mapping, isActive branches, expirationText branches)
+
+
+
 ### Julian up2301253 - 14/05/2026
 **Description:**
 - Wired custom expiry date/time to pin creation UI, using showDatePicker and showTimePicker (built-in flutter widgets), to backend.
