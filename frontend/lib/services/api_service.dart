@@ -393,6 +393,67 @@ class ApiService {
     }
   }
 
+  Future<Pin> updatePin(int pinId, {String? title, String? description, DateTime? expireAt}) async {
+    try {
+      final headers = await _authHeaders();
+      headers['Content-Type'] = 'application/json';
+      final body = <String, dynamic>{};
+      if (title != null) body['pin_title'] = title;
+      if (description != null) body['pin_description'] = description;
+      if (expireAt != null) body['pin_expire_at'] = expireAt.toIso8601String();
+      final response = await _httpClient
+          .put(Uri.parse('$baseUrl/pins/$pinId'),
+              headers: headers, body: jsonEncode(body))
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) {
+        throw ApiException(
+          'Failed to update pin: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+      return Pin.fromJson(jsonDecode(response.body));
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<void> deletePin(int pinId) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .delete(Uri.parse('$baseUrl/pins/$pinId'), headers: headers)
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) {
+        throw ApiException(
+          'Failed to delete pin: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
   // Friends
   Future<List<User>> getFriends() => _getList('/friends/', User.fromJson);
 

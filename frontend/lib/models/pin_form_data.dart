@@ -7,6 +7,7 @@ class PinFormData {
   final double latitude;
   final double longitude;
   final int ttlMinutes;
+  final DateTime? customExpiry;
 
   PinFormData({
     required this.catId,
@@ -16,9 +17,11 @@ class PinFormData {
     required this.latitude,
     required this.longitude,
     required this.ttlMinutes,
+    this.customExpiry,
   });
 
-  DateTime get expiresAt => DateTime.now().add(Duration(minutes: ttlMinutes));
+  DateTime get expiresAt =>
+      customExpiry ?? DateTime.now().add(Duration(minutes: ttlMinutes));
 
   /// Convert to JSON for API submission
   Map<String, dynamic> toJson() {
