@@ -32,6 +32,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _displayNameController;
   bool _showDisplayName = false;
 
+  bool _toggleDarkMode = false; 
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       text: user?.displayName ?? '',
     );
     _showDisplayName = user?.useDisplayName ?? false;
+    _toggleDarkMode = user?.darkMode ?? false;
     if (user?.expiresAt != null) {
       _updateTimeLeft(user!.expiresAt!);
       _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
@@ -88,6 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : _displayNameController.text,
         useDisplayName: _showDisplayName,
+        useDarkMode: _toggleDarkMode,
       );
       if (!mounted) return;
       final updatedUser = await _apiService.getUserById(
@@ -116,6 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _lnameController.text = user?.lastName ?? '';
       _displayNameController.text = user?.displayName ?? '';
       _showDisplayName = user?.useDisplayName ?? false;
+      _toggleDarkMode = user?.darkMode ?? false;
       _isEditing = false;
     });
   }
@@ -405,6 +410,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }),
                 ],
               ),
+              
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              child:Row(
+                children: [
+                  Icon(Icons.dark_mode_outlined, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Dark Mode',
+                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    ),
+                  ),
+                  _buildToggleButton('Off', !_toggleDarkMode, () {
+                    setState(() => _toggleDarkMode = false);
+                  }),
+                  const SizedBox(width: 6),
+                  _buildToggleButton('On', _toggleDarkMode, () {
+                    setState(() => _toggleDarkMode = true);
+                  }),
+                ],
+              )
             ),
             const SizedBox(height: 16),
             // Save / Cancel buttons
@@ -461,6 +489,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+
 
   Widget _buildToggleButton(String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
