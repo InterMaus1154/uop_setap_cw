@@ -220,8 +220,8 @@ class _MapScreenState extends State<MapScreen> {
           }
 
           return Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             // Constrain height so the sheet doesn't overflow on small screens
@@ -272,7 +272,7 @@ class _MapScreenState extends State<MapScreen> {
                               subCatName,
                               style: const TextStyle(fontSize: 12),
                             ),
-                            backgroundColor: Colors.grey[100],
+                            backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(30),
                             visualDensity: VisualDensity.compact,
                           ),
                       ],
@@ -454,7 +454,7 @@ class _MapScreenState extends State<MapScreen> {
                                         const SizedBox(height: 12),
                                         Row(
                                           children: [
-                                            Icon(Icons.timer_outlined, size: 18, color: Colors.grey[600]),
+                                            Icon(Icons.timer_outlined, size: 18, color: Theme.of(context).colorScheme.surfaceDim),
                                             const SizedBox(width: 6),
                                             Expanded(
                                               child: Text(
@@ -462,7 +462,7 @@ class _MapScreenState extends State<MapScreen> {
                                                     ? 'Expires: ${newExpiry!.day}/${newExpiry!.month}/${newExpiry!.year} '
                                                         '${newExpiry!.hour.toString().padLeft(2, '0')}:${newExpiry!.minute.toString().padLeft(2, '0')}'
                                                     : 'Expiry: ${_formatExpiry(pin.pinExpireAt)}',
-                                                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                                                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.surfaceDim),
                                               ),
                                             ),
                                             TextButton(
@@ -538,7 +538,7 @@ class _MapScreenState extends State<MapScreen> {
                                   actions: [
                                     TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                                     ElevatedButton(
-                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                                       onPressed: () => Navigator.pop(ctx, true),
                                       child: const Text('Delete'),
                                     ),
