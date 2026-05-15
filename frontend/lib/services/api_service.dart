@@ -37,6 +37,7 @@ class ApiService {
     required String lname,
     String? displayName,
     required bool useDisplayName,
+    required bool useDarkMode,
   }) async {
     final headers = await _authHeaders();
     final body = json.encode({
@@ -44,6 +45,7 @@ class ApiService {
       'user_lname': lname,
       'user_display_name': displayName,
       'user_use_displayname': useDisplayName,
+      'dark_mode': useDarkMode,
     });
     final response = await _httpClient
         .put(Uri.parse('$baseUrl/users/'), headers: headers, body: body)

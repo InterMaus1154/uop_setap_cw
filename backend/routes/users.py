@@ -37,6 +37,9 @@ def update_user(user_data: UserUpdate, user: User = Depends(require_auth), db: S
 
     if user_data.user_use_displayname is not None:
         user.user_use_displayname = user_data.user_use_displayname
+    
+    if user_data.dark_mode is not None:
+        user.dark_mode = user_data.dark_mode
 
     db.commit()
     db.refresh(user)

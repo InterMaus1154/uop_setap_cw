@@ -14,6 +14,7 @@ class UserBase(BaseModel):
     user_lname: str = Field(..., min_length=1, max_length=60)
     user_displayname: Optional[str] = Field(None, max_length=30)
     user_use_displayname: bool 
+    dark_mode: bool
 
 
 class UserCreate(UserBase):
@@ -25,6 +26,7 @@ class UserUpdate(BaseModel):
     user_fname: Optional[str] = Field(None, max_length=60)
     user_lname: Optional[str] = Field(None, max_length=60)
     user_use_displayname: Optional[bool] = None
+    dark_mode: Optional[bool] = None
 
 
 class UserResponse(UserBase):
@@ -55,5 +57,5 @@ class UserLoginResponse(BaseModel):
     last_login: Optional[datetime] = None
     created_at: datetime
     expires_at: Optional[datetime] = None
-
+    dark_mode: bool
     model_config = ConfigDict(from_attributes=True)

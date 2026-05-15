@@ -84,11 +84,10 @@ class _InvitationCodesScreenState extends State<InvitationCodesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).colorScheme.surfaceDim,
       appBar: AppBar(
         title: const Text('Invitation Codes'),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1A1A2E),
+        
         elevation: 0,
         actions: [
           if (MediaQuery.of(context).size.width > 600)
@@ -98,6 +97,10 @@ class _InvitationCodesScreenState extends State<InvitationCodesScreen> {
                 onPressed: _handleCreateCode,
                 icon: const Icon(Icons.add),
                 label: const Text('New Code'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue[400],
+                ),  
               ),
             ),
         ],

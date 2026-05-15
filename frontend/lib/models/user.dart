@@ -7,6 +7,7 @@ class User {
   final bool useDisplayName;
   final bool isActive;
   final DateTime? expiresAt;
+  final bool darkMode;
 
   User({
     required this.userId,
@@ -17,6 +18,7 @@ class User {
     required this.useDisplayName,
     required this.isActive,
     this.expiresAt,
+    required this.darkMode,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class User {
       expiresAt: json['expires_at'] != null
           ? DateTime.parse(json['expires_at'] as String)
           : null,
+      darkMode: json['dark_mode'] as bool? ?? false,
     );
   }
 

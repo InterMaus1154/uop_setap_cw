@@ -60,6 +60,7 @@ User _testUser({bool useDisplayName = false}) => User(
   displayName: 'TestDisplay',
   useDisplayName: useDisplayName,
   isActive: true,
+  darkMode: false,
 );
 
 Widget _buildTestWidget({

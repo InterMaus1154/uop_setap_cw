@@ -859,7 +859,7 @@ class _MapScreenState extends State<MapScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.onPrimary,
       builder: (context) => PinCreationSheet(
         location: _selectedLocation!,
         categories: _categories,
@@ -957,8 +957,8 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                       child: Text(
                         '${cluster.pins.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1016,8 +1016,8 @@ class _MapScreenState extends State<MapScreen> {
               backgroundColor: Colors.teal,
               child: Text(
                 initial,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -1162,7 +1162,7 @@ class _MapScreenState extends State<MapScreen> {
               left: 16,
               child: FloatingActionButton.small(
                 heroTag: 'cancelPin',
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surfaceBright,
                 onPressed: _exitPinPlacementMode,
                 child: const Icon(Icons.close, color: Colors.red),
               ),
@@ -1200,7 +1200,7 @@ class _MapScreenState extends State<MapScreen> {
                 heroTag: 'shareLocation',
                 backgroundColor: locationProvider.isSharingEnabled
                     ? Colors.teal
-                    : Colors.white,
+                    : Theme.of(context).colorScheme.surfaceDim,
                 onPressed: () async {
                   await locationProvider.toggleSharing();
                   if (context.mounted && locationProvider.error != null) {
@@ -1222,6 +1222,7 @@ class _MapScreenState extends State<MapScreen> {
                   color: locationProvider.isSharingEnabled
                       ? Colors.white
                       : Colors.grey,
+                  
                 ),
               ),
             ),
@@ -1231,7 +1232,7 @@ class _MapScreenState extends State<MapScreen> {
               right: 16,
               child: FloatingActionButton.small(
                 heroTag: 'filter',
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surfaceBright,
                 onPressed: () {
                   _showPinFilterDialog();
                 },
@@ -1245,7 +1246,7 @@ class _MapScreenState extends State<MapScreen> {
               right: 16,
               child: FloatingActionButton.small(
                 heroTag: 'recenter',
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surfaceBright,
                 onPressed: () async {
                   // Request the device's current GPS coordinates.
                   // This also handles location permission prompts internally.
@@ -1267,7 +1268,7 @@ class _MapScreenState extends State<MapScreen> {
                     );
                   }
                 },
-                child: const Icon(Icons.my_location, color: Colors.blue),
+                child: Icon(Icons.my_location, color: Colors.blue),
               ),
             ),
             // Add pin button
@@ -1327,7 +1328,7 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1372,7 +1373,7 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1427,7 +1428,7 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            
                           ),
                         ),
                         const SizedBox(height: 8),
