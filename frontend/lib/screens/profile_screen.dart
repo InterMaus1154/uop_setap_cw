@@ -537,10 +537,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: expired ? Colors.red[50] : Colors.amber[50],
+        color: expired ? Colors.red[200] : Colors.amber[200],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: expired ? Colors.red[300]! : Colors.amber[300]!,
+          color: expired ? Colors.red[200]! : Colors.amber[300]!,
         ),
       ),
       child: Row(
@@ -548,14 +548,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icon(
             Icons.timer_outlined,
             size: 20,
-            color: expired ? Colors.red[700] : Colors.amber[800],
+            color: expired ? Colors.red[700] : Colors.orange[400],
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
               fontSize: 13,
-              color: expired ? Colors.red[700] : Colors.amber[800],
+              fontWeight: FontWeight.w700,
+              color: expired ? Colors.red[700] : Colors.orange[400],
             ),
           ),
         ],
