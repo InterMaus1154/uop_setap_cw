@@ -112,7 +112,8 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         user_email=user_data.user_email,
         user_fname=user_data.user_fname,
         user_lname=user_data.user_lname,
-        user_displayname=user_data.user_displayname
+        user_displayname=user_data.user_displayname,
+        dark_mode=user_data.dark_mode,
     )
 
     db.add(new_user)

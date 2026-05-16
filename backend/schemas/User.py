@@ -14,7 +14,7 @@ class UserBase(BaseModel):
     user_lname: str = Field(..., min_length=1, max_length=60)
     user_displayname: Optional[str] = Field(None, max_length=30)
     user_use_displayname: bool 
-    dark_mode: bool
+    dark_mode: bool = False
 
 
 class UserCreate(UserBase):

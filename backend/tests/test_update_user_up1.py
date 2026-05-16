@@ -68,5 +68,118 @@ class TestUpdateUser:
         pd = rp.json()
         assert pd is not None
         assert pd["pin_author_name"] == data["user_displayname"]
+    
+    def test_dark_mode_preference(self, client, auth_headers):
+        """Update user's dark mode preference and see if it is updated in the response"""
 
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = True
+
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
+    
+    def test_dark_mode_preference_invalid_value(self, client, auth_headers):
+        """Try to update user's dark mode preference with invalid value"""
+
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = "not_a_boolean"
+
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 422
+    
+    def test_default_dark_mode_preference(self, client, auth_headers):
+        """Create a new user without specifying dark mode preference and see if it defaults to false"""
+
+        USER_DATA = {
+            "user_email": "test@example.com",
+            "user_fname": "Test",
+            "user_lname": "User",
+            "user_use_displayname": False
+        }
+
+        rp = client.post("/users", json=USER_DATA)
+        assert rp.status_code == 201
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == False
+    
+    def test_persist_dark_mode_preference(self, client, auth_headers):
+        """Update user's dark mode preference to true, then update it again without specifying dark mode and see if it persists"""
+
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = True
+
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
+
+        # Update again without specifying dark mode
+        payload.pop("dark_mode")
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
+    
+    def test_create_user_dark_mode_preference(self, client):
+        """Create a new user with dark mode preference set to true and see if it is set correctly"""
+
+        USER_DATA = {
+            "user_email": "test@example.com",
+            "user_fname": "Test",
+            "user_lname": "User",
+            "user_use_displayname": False,
+            "dark_mode": True
+        }
+
+        rp = client.post("/users", json=USER_DATA)
+        assert rp.status_code == 201
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
+    
+    def test_create_user_dark_mode_preference_invalid_value(self, client):
+        """Try to create a new user with dark mode preference set to invalid value"""
+
+        USER_DATA = {
+            "user_email": "test@example.com",
+            "user_fname": "Test",
+            "user_lname": "User",
+            "user_use_displayname": False,
+            "dark_mode": "not_a_boolean"
+        }
+
+        rp = client.post("/users", json=USER_DATA)
+        assert rp.status_code == 422
+    
+    def test_dark_mode_login_response(self, client, auth_headers):
+        """Update user's dark mode preference to true, then login again and see if dark mode is included in the login response"""
+
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["user_use_displayname"] = False
+        payload["dark_mode"] = True
+
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+
+        # Login again
+        LOGIN_DATA = {
+            "email": "test@test.app",
+        }
+        rp = client.post("/auth/login", json=LOGIN_DATA)
+        assert rp.status_code == 200
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
 
