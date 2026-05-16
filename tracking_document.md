@@ -200,6 +200,7 @@ backend/tests/test_location_permissions.py
 - did foundation setup for backend and database, including creating ERD, database tables and models, schemas, and backend authentication logic
 - added some extra tests for image validation for test TP1
 - added tests for invitation codes (UI1)
+- added two tests as part of TP1 for passing a valid and invalid expire time 
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
