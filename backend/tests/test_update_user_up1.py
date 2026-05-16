@@ -182,4 +182,48 @@ class TestUpdateUser:
         data = rp.json()
         assert data is not None
         assert data["dark_mode"] == True
+    
+    def test_dark_mode_idompotence(self, client, auth_headers):
+        """Update user's dark mode preference to true, then update it again to true and see if it remains true"""
+
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = True
+
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
+
+        # Update again to true
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] == True
+    
+    def test_dark_mode_concurrent_updates(self, client, auth_headers):
+        """Simulate concurrent updates to user's dark mode preference and see if the final value is consistent"""
+
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = True
+
+        # Simulate two concurrent updates
+        rp1 = client.put("/users", headers=auth_headers, json=payload)
+        rp2 = client.put("/users", headers=auth_headers, json=payload)
+
+        assert rp1.status_code == 200
+        assert rp2.status_code == 200
+
+        data1 = rp1.json()
+        data2 = rp2.json()
+
+        assert data1 is not None
+        assert data2 is not None
+        assert data1["dark_mode"] == True
+        assert data2["dark_mode"] == True
+    
+    
 
