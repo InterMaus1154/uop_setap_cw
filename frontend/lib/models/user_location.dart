@@ -32,13 +32,14 @@ class UserLocation {
       isEnabled: json['is_enabled'] as bool,
       createdAt: (() {
         final s = json['created_at'] as String;
-        final hasTz = s.endsWith('Z') || s.contains('+') || s.contains('-');
+        // Match only a trailing Z or a timezone offset like +HH:MM or -HH:MM
+        final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
         final toParse = hasTz ? s : '${s}Z';
         return DateTime.parse(toParse).toUtc();
       })(),
       updatedAt: (() {
         final s = json['updated_at'] as String;
-        final hasTz = s.endsWith('Z') || s.contains('+') || s.contains('-');
+        final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
         final toParse = hasTz ? s : '${s}Z';
         return DateTime.parse(toParse).toUtc();
       })(),
@@ -50,7 +51,7 @@ class UserLocation {
         try {
           // Some server responses may omit the timezone (naive datetime).
           // Treat naive ISO strings as UTC by appending 'Z' before parsing.
-          final hasTz = s.endsWith('Z') || s.contains('+') || s.contains('-');
+          final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
           final toParse = hasTz ? s : '${s}Z';
           return DateTime.parse(toParse).toUtc();
         } catch (_) {

@@ -357,4 +357,20 @@ class LocationProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // --- Test helpers ---
+  /// Set the provider's myLocation directly for tests and (re)start the expiry timer.
+  @visibleForTesting
+  void setMyLocationForTest(UserLocation loc) {
+    _myLocation = loc;
+    _cancelSharingExpiryTimer();
+    _scheduleSharingExpiryTimer();
+  }
+
+  /// Start or restart the expiry timer for tests.
+  @visibleForTesting
+  void startExpiryTimerForTest() {
+    _cancelSharingExpiryTimer();
+    _scheduleSharingExpiryTimer();
+  }
 }
