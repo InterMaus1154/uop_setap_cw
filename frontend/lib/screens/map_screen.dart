@@ -432,7 +432,97 @@ class _MapScreenState extends State<MapScreen> {
     // Watch location provider so the map rebuilds when friend positions update
     final locationProvider = context.watch<LocationProvider>();
     final friendProvider = context.read<FriendProvider>();
+    final currentUserId = context.read<UserProvider>().currentUser?.userId;
 
+<<<<<<< HEAD
+=======
+    final activePins = _pins
+        .where((p) => p.pinExpireAt.isAfter(DateTime.now()))
+        .toList();
+    final pinClusters = _buildScreenDistanceClusters(activePins);
+
+    final clusteredPinMarkers = <Marker>[
+      for (final cluster in pinClusters)
+        if (cluster.pins.length == 1)
+          Marker(
+            point: cluster.center,
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              onTap: () => _showPinDetails(cluster.pins.first),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: cluster.pins.first.pinColor,
+                    size: 36,
+                  ),
+                  if (currentUserId != null && cluster.pins.first.userId == currentUserId)
+                    Positioned(
+                      right: 2,
+                      top: 2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.person, color: Colors.white, size: 10),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          )
+        else
+          Marker(
+            point: cluster.center,
+            width: 52,
+            height: 52,
+            child: GestureDetector(
+              onTap: () => _showClusterPins(cluster.pins),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Center(
+                    child: Icon(
+                      Icons.location_on,
+                      color: Colors.indigo,
+                      size: 42,
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 2,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${cluster.pins.length}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    ];
+
+>>>>>>> 01eab28c291eb67fe118b46b7f542186640f7742
     // Build friend markers from the polled locations
     final friendMarkers = <Marker>[];
     for (final loc in locationProvider.friendLocations) {
