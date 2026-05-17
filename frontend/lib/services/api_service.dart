@@ -562,6 +562,7 @@ class ApiService {
     double? latitude,
     double? longitude,
     bool? isEnabled,
+    DateTime? sharingExpiresAt,
   }) async {
     try {
       final headers = await _authHeaders();
@@ -569,6 +570,7 @@ class ApiService {
       if (latitude != null) body['latitude'] = latitude;
       if (longitude != null) body['longitude'] = longitude;
       if (isEnabled != null) body['is_enabled'] = isEnabled;
+      if (sharingExpiresAt != null) body['sharing_expires_at'] = sharingExpiresAt.toIso8601String();
 
       final response = await _httpClient
           .patch(

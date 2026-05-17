@@ -8,6 +8,7 @@ class UserLocation {
   final DateTime updatedAt;
   final String? city;
   final String? street;
+  final DateTime? sharingExpiresAt;
 
   UserLocation({
     required this.userLocId,
@@ -19,6 +20,7 @@ class UserLocation {
     required this.updatedAt,
     this.city,
     this.street,
+    this.sharingExpiresAt,
   });
 
   factory UserLocation.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,9 @@ class UserLocation {
       updatedAt: DateTime.parse(json['updated_at'] as String),
       city: json['city'] as String?,
       street: json['street'] as String?,
+      sharingExpiresAt: json['sharing_expires_at'] != null
+          ? DateTime.parse(json['sharing_expires_at'] as String)
+          : null,
     );
   }
 
@@ -44,6 +49,8 @@ class UserLocation {
       'is_enabled': isEnabled,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      if (sharingExpiresAt != null)
+        'sharing_expires_at': sharingExpiresAt!.toIso8601String(),
     };
   }
 }

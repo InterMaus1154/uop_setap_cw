@@ -27,6 +27,9 @@ class LocationProvider extends ChangeNotifier {
   /// List of friends the current user is sharing their location with
   List<model.LocationPermission> _permissions = [];
 
+  /// Map of per-friend expiry times (UI-side). Key: friend userId
+  final Map<int, DateTime?> _permissionExpiryMap = {};
+
   bool _isLoading = false;
   String? _error;
   Timer? _pollTimer;
@@ -36,6 +39,7 @@ class LocationProvider extends ChangeNotifier {
   UserLocation? get myLocation => _myLocation;
   List<UserLocation> get friendLocations => _friendLocations;
   List<model.LocationPermission> get permissions => _permissions;
+  DateTime? permissionExpiryFor(int friendId) => _permissionExpiryMap[friendId];
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -180,7 +184,7 @@ class LocationProvider extends ChangeNotifier {
 
   /// Share your location with a specific friend.
   /// Creates a location record first if one doesn't exist yet.
-  Future<void> grantPermission(int friendId) async {
+  Future<void> grantPermission(int friendId, [DateTime? expiry]) async {
     try {
       // Make sure we have a location record before granting permission
       if (_myLocation == null) {
@@ -190,6 +194,10 @@ class LocationProvider extends ChangeNotifier {
 
       final perm = await _apiService.createLocationPermission(friendId);
       _permissions.add(perm);
+      // store per-friend expiry locally so UI can show it per friend
+      if (expiry != null) {
+        _permissionExpiryMap[friendId] = expiry;
+      }
       _error = null;
     } on ApiException catch (e) {
       _error = e.message;
@@ -203,6 +211,7 @@ class LocationProvider extends ChangeNotifier {
     try {
       await _apiService.deleteLocationPermission(friendId);
       _permissions.removeWhere((p) => p.userId == friendId);
+      _permissionExpiryMap.remove(friendId);
       _error = null;
     } on ApiException catch (e) {
       _error = e.message;
@@ -219,6 +228,26 @@ class LocationProvider extends ChangeNotifier {
       notifyListeners();
     } on ApiException {
       // Silently keep previous data — don't spam the user with errors
+    }
+  }
+
+  /// Set the current user's sharing expiry time on the backend.
+  Future<void> setSharingExpiry(DateTime? expiry) async {
+    try {
+      // Ensure a location record exists
+      if (_myLocation == null) {
+        await _createLocationFromGPS();
+        if (_myLocation == null) return;
+      }
+
+      _myLocation = await _apiService.updateUserLocation(
+        sharingExpiresAt: expiry,
+      );
+      _error = null;
+    } on ApiException catch (e) {
+      _error = e.message;
+    } finally {
+      notifyListeners();
     }
   }
 

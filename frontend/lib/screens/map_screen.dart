@@ -1373,9 +1373,7 @@ class _MapScreenState extends State<MapScreen> {
                 backgroundColor: locationProvider.isSharingEnabled
                     ? Colors.teal
                     : Theme.of(context).colorScheme.surfaceDim,
-                onPressed: () => locationProvider.isSharingEnabled
-                    ? toggleLocationOnOff(locationProvider)
-                    : _showLocationFilterDialog(locationProvider),
+                onPressed: () => toggleLocationOnOff(locationProvider),
                 tooltip: locationProvider.isSharingEnabled
                     ? 'Stop sharing location'
                     : 'Share my location',
@@ -1453,143 +1451,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  String? selectedOption;
-  final TextEditingController _customTimeController = TextEditingController();
-  DateTime? _customDateTime;
-  void _showLocationFilterDialog(LocationProvider locationProvider) {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 400,
-                  maxHeight: 600,
-                ),
-                child: AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  title: const Text(
-                    'Location filtering',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'How long do you want to share your location for',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        RadioGroup<String>(
-                          groupValue: selectedOption,
-                          onChanged: (String? newValue) {
-                            setDialogState(() => selectedOption = newValue);
-                          },
-                          child: Column(
-                            children: [
-                              RadioListTile(
-                                value: '1hour',
-                                title: const Text('1 hour'),
-                              ),
-                              RadioListTile(
-                                value: '2hour',
-                                title: const Text('2 hours'),
-                              ),
-                              RadioListTile(
-                                value: '3hour',
-                                title: const Text('3 hours'),
-                              ),
-                              ListTile(
-                                leading: Radio<String>(value: 'custom'),
-                                title: TextField(
-                                  controller: _customTimeController,
-                                  readOnly: true,
-                                  decoration: const InputDecoration(
-                                    hintText: 'Select date and time',
-                                  ),
-                                  onTap: () async {
-                                    final now = DateTime.now();
-                                    final initialDateTime =
-                                        _customDateTime ??
-                                        now.add(const Duration(hours: 1));
-
-                                    final pickedDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: initialDateTime,
-                                      firstDate: now,
-                                      lastDate: DateTime(now.year + 2),
-                                    );
-                                    if (pickedDate == null) return;
-
-                                    final pickedTime = await showTimePicker(
-                                      context: context,
-                                      initialTime: TimeOfDay.fromDateTime(
-                                        initialDateTime,
-                                      ),
-                                    );
-                                    if (pickedTime == null) return;
-
-                                    final selectedDateTime = DateTime(
-                                      pickedDate.year,
-                                      pickedDate.month,
-                                      pickedDate.day,
-                                      pickedTime.hour,
-                                      pickedTime.minute,
-                                    );
-
-                                    setDialogState(() {
-                                      _customDateTime = selectedDateTime;
-                                      _customTimeController.text =
-                                          '${selectedDateTime.year}-${selectedDateTime.month.toString().padLeft(2, '0')}-${selectedDateTime.day.toString().padLeft(2, '0')} '
-                                          '${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}';
-                                      selectedOption = selectedDateTime
-                                          .toIso8601String();
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-
-                        toggleLocationOnOff(locationProvider);
-                        Navigator.of(context).pop();
-
-                      },
-                      child: const Text('Confirm'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
+  
 
   void toggleLocationOnOff(LocationProvider locationProvider) async {
     await locationProvider.toggleSharing();
