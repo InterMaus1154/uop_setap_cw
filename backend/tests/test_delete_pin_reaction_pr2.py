@@ -1,6 +1,6 @@
 
 class TestDeletePinReaction:
-    """Test plan reference: DPR1"""
+    """Test plan reference: PR2"""
 
     TEST_PIN = {
         "cat_id": 1,

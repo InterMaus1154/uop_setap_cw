@@ -109,14 +109,16 @@ class TestCreatePins:
     def test_create_pin_with_valid_image_201(self, client, auth_headers):
         """Create a pin with valid image"""
         fake_image = io.BytesIO(b"fake image content")
-        rp = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data, files={"image": ("test.jpg", fake_image, "image/jpeg")})
+        rp = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data,
+                         files={"image": ("test.jpg", fake_image, "image/jpeg")})
         assert rp.status_code == 201
         assert rp.json()["pin_picture_url"] is not None
 
     def test_create_pin_with_invalid_image_422(self, client, auth_headers):
         """Create a pin with an invalid image (pdf instead of image)"""
         fake_file = io.BytesIO(b"Not an actual image")
-        rp = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data, files={"image": ("test.pdf", fake_file, "application/pdf")})
+        rp = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data,
+                         files={"image": ("test.pdf", fake_file, "application/pdf")})
         assert rp.status_code == 422
 
     def test_create_pin_with_invalid_image_size_422(self, client, auth_headers):
@@ -124,4 +126,23 @@ class TestCreatePins:
         large_image = io.BytesIO(b"x" * (5 * 1024 * 1024 + 1))
         rp = client.post("/pins", headers=auth_headers, data=self.pin_valid_test_data,
                          files={"image": ("test.jpg", large_image, "image/jpeg")})
+        assert rp.status_code == 422
+
+    def test_create_pin_with_custom_expiry_201(self, client, auth_headers):
+        """Add custom expiry field for a pin"""
+        payload = self.pin_valid_test_data.copy()
+        payload["pin_expire_at"] = "2026-05-17T17:30:00"
+        rp = client.post("/pins", data=payload, headers=auth_headers)
+        assert rp.status_code == 201
+
+        data = rp.json()
+        assert data is not None
+        assert "pin_expire_at" in data
+        assert data["pin_expire_at"] == payload["pin_expire_at"]
+
+    def test_create_pin_fails_with_invalid_expire_data_422(self, client, auth_headers):
+        """Invalid date fails creation, expects 422"""
+        payload = self.pin_valid_test_data.copy()
+        payload["pin_expire_at"] = "2026 06 12 17 00"
+        rp = client.post("/pins", data=payload, headers=auth_headers)
         assert rp.status_code == 422

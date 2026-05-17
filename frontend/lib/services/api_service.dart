@@ -37,6 +37,7 @@ class ApiService {
     required String lname,
     String? displayName,
     required bool useDisplayName,
+    required bool useDarkMode,
   }) async {
     final headers = await _authHeaders();
     final body = json.encode({
@@ -44,6 +45,7 @@ class ApiService {
       'user_lname': lname,
       'user_display_name': displayName,
       'user_use_displayname': useDisplayName,
+      'dark_mode': useDarkMode,
     });
     final response = await _httpClient
         .put(Uri.parse('$baseUrl/users/'), headers: headers, body: body)
@@ -379,49 +381,6 @@ class ApiService {
           statusCode: response.statusCode,
         );
       }
-    } on SocketException {
-      throw ApiException('No internet connection. Please check your network.');
-    } on TimeoutException {
-      throw ApiException('Request timed out. Please try again.');
-    } on http.ClientException {
-      throw ApiException(
-        'Could not connect to server. Is the backend running?',
-      );
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw ApiException('An unexpected error occurred: $e');
-    }
-  }
-
-  // Pin reporting
-  Future<void> reportPin(int pinId, String reportType) async {
-    try {
-      final headers = await _authHeaders();
-      final response = await _httpClient
-          .post(
-            Uri.parse('$baseUrl/pins/$pinId/report'),
-            headers: headers,
-            body: json.encode({'report_type': reportType}),
-          )
-          .timeout(_timeout);
-
-      if (response.statusCode == 201) return;
-
-      if (response.statusCode == 400) {
-        throw ApiException(
-          'You have already reported this pin.',
-          statusCode: 400,
-        );
-      }
-
-      if (response.statusCode == 404) {
-        throw ApiException('Pin not found.', statusCode: 404);
-      }
-
-      throw ApiException(
-        'Failed to report pin: ${response.statusCode}',
-        statusCode: response.statusCode,
-      );
     } on SocketException {
       throw ApiException('No internet connection. Please check your network.');
     } on TimeoutException {

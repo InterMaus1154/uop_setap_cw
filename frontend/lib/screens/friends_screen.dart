@@ -40,11 +40,11 @@ class _FriendsScreenState extends State<FriendsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      
       appBar: AppBar(
         title: const Text('Friends'),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1A1A2E),
+        
+        
         elevation: 0,
         bottom: TabBar(
           controller: _tabController,
@@ -163,10 +163,10 @@ class _IncomingRequestsTab extends StatelessWidget {
       );
     }
     if (provider.incomingRequests.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No pending requests',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       );
     }
@@ -246,10 +246,10 @@ class _OutgoingRequestsTab extends StatelessWidget {
       );
     }
     if (provider.outgoingRequests.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No outgoing requests',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       );
     }
@@ -298,11 +298,10 @@ class _UserTile extends StatelessWidget {
         backgroundColor: Colors.blue[400],
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: const TextStyle(color: Colors.white),
         ),
       ),
       title: Text(name),
-      subtitle: Text(user.email, style: TextStyle(color: Colors.grey[600])),
+      subtitle: Text(user.email, style: TextStyle(color:Theme.of(context).colorScheme.onSurface)),
       // Location sharing toggle — lets you choose who can see your location
       trailing: onToggleSharing != null
           ? Tooltip(
@@ -332,7 +331,7 @@ class _RequestTile extends StatelessWidget {
         backgroundColor: Colors.blue[400],
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : '?',
-          style: const TextStyle(color: Colors.white),
+          
         ),
       ),
       title: Text(name),

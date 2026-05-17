@@ -20,9 +20,7 @@ class PinFormData {
     this.customExpiry,
   });
 
-  // If a custom expiry was set use it, otherwise calculate from ttlMinutes
-  DateTime get expiresAt =>
-      customExpiry ?? DateTime.now().add(Duration(minutes: ttlMinutes));
+  DateTime get expiresAt => DateTime.now().add(Duration(minutes: ttlMinutes));
 
   /// Convert to JSON for API submission
   Map<String, dynamic> toJson() {

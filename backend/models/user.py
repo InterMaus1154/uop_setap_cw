@@ -20,6 +20,7 @@ class User(Base):
     user_token = Column(String(500), nullable=True)
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=False, server_default=func.now(), default=func.now())
+    dark_mode = Column(Boolean, nullable=False, server_default=text("false"), default=False)
 
     pins = relationship("Pin", back_populates="user")
     reactions = relationship("PinReaction", back_populates="user")

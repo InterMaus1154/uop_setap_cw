@@ -32,6 +32,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _displayNameController;
   bool _showDisplayName = false;
 
+  bool _toggleDarkMode = false; 
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       text: user?.displayName ?? '',
     );
     _showDisplayName = user?.useDisplayName ?? false;
+    _toggleDarkMode = user?.darkMode ?? false;
     if (user?.expiresAt != null) {
       _updateTimeLeft(user!.expiresAt!);
       _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
@@ -88,6 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? null
             : _displayNameController.text,
         useDisplayName: _showDisplayName,
+        useDarkMode: _toggleDarkMode,
       );
       if (!mounted) return;
       final updatedUser = await _apiService.getUserById(
@@ -116,6 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _lnameController.text = user?.lastName ?? '';
       _displayNameController.text = user?.displayName ?? '';
       _showDisplayName = user?.useDisplayName ?? false;
+      _toggleDarkMode = user?.darkMode ?? false;
       _isEditing = false;
     });
   }
@@ -146,7 +151,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final fullName = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -173,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1A2E),
+                  
                 ),
               ),
               if (displayName != null && displayName.isNotEmpty) ...[
@@ -289,19 +294,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceBright,
+        
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
+            color: Theme.of(context).colorScheme.surfaceDim,
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
         ],
       ),
       child: Form(
+        
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,7 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E),
+                    
                   ),
                 ),
                 IconButton(
@@ -326,9 +333,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 12),
             TextFormField(
+              
               controller: _fnameController,
               decoration: InputDecoration(
                 labelText: 'First Name',
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surfaceBright,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -349,6 +359,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               controller: _lnameController,
               decoration: InputDecoration(
                 labelText: 'Last Name',
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surfaceBright,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -369,6 +381,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               controller: _displayNameController,
               decoration: InputDecoration(
                 labelText: 'Display Name (optional)',
+                filled: true,
+                fillColor: Theme.of(context).colorScheme.surfaceBright,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -383,17 +397,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.visibility, size: 18, color: Colors.grey[600]),
+                  Icon(Icons.visibility, size: 18, ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Show under pins',
-                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                      style: TextStyle(fontSize: 13, ),
                     ),
                   ),
                   _buildToggleButton('Full Name', !_showDisplayName, () {
@@ -405,6 +418,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }),
                 ],
               ),
+              
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              child:Row(
+                children: [
+                  Icon(Icons.dark_mode_outlined, size: 18,),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Dark Mode',
+                      style: TextStyle(fontSize: 13,),
+                    ),
+                  ),
+                  _buildToggleButton('Off', !_toggleDarkMode, () {
+                    setState(() => _toggleDarkMode = false);
+                  }),
+                  const SizedBox(width: 6),
+                  _buildToggleButton('On', _toggleDarkMode, () {
+                    setState(() => _toggleDarkMode = true);
+                  }),
+                ],
+              )
             ),
             const SizedBox(height: 16),
             // Save / Cancel buttons
@@ -462,16 +498,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+
+
   Widget _buildToggleButton(String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue[400] : Colors.white,
+          color: isSelected ? Colors.blue[400] : Theme.of(context).colorScheme.surfaceBright,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? Colors.blue[400]! : Colors.grey[300]!,
+            color: isSelected ? Colors.blue[400]! : Theme.of(context).colorScheme.outline,
           ),
         ),
         child: Text(
@@ -479,7 +517,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.grey[600],
+            color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
@@ -499,10 +537,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: expired ? Colors.red[50] : Colors.amber[50],
+        color: expired ? Colors.red[200] : Colors.amber[200],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: expired ? Colors.red[300]! : Colors.amber[300]!,
+          color: expired ? Colors.red[200]! : Colors.amber[300]!,
         ),
       ),
       child: Row(
@@ -510,14 +548,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icon(
             Icons.timer_outlined,
             size: 20,
-            color: expired ? Colors.red[700] : Colors.amber[800],
+            color: expired ? Colors.red[700] : Colors.orange[400],
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
               fontSize: 13,
-              color: expired ? Colors.red[700] : Colors.amber[800],
+              fontWeight: FontWeight.w700,
+              color: expired ? Colors.red[700] : Colors.orange[400],
             ),
           ),
         ],
@@ -530,11 +569,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceBright,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x14000000),
+            color: Theme.of(context).colorScheme.surfaceDim,
             blurRadius: 8,
             offset: Offset(0, 2),
           ),
@@ -555,13 +594,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A1A2E),
+                    
                   ),
                 ),
           const SizedBox(height: 4),
           Text(
             'Pins Created',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14),
           ),
         ],
       ),

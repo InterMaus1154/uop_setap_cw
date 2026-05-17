@@ -21,6 +21,47 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Josh up2255832 - 14/05/2026
+**Summary:** Added unit tests for the 7 previously untested frontend models, taking model test coverage from 1 file (FriendRequest) to all 8. 62 new tests, all passing.
+
+**Files Created:**
+- frontend/test/models/pin_test.dart (17 tests — fromJson/toJson, int→double coordinate casting, likes/dislikes defaulting, pinColor hex parsing with fallbacks, isExpired, PinReaction)
+- frontend/test/models/user_test.dart (10 tests — field mapping, null displayName, isActive default, isGuest/fullName getters)
+- frontend/test/models/category_test.dart (7 tests — CategoryLevel/Category/SubCategory, includes regression test for cat_level_ttl_mins mapping)
+- frontend/test/models/pin_form_data_test.dart (5 tests — toJson keys, expiresAt from customExpiry vs computed from ttlMinutes)
+- frontend/test/models/user_location_test.dart (7 tests — field mapping, coordinate casting, null city/street, round-trip)
+- frontend/test/models/location_permission_test.dart (5 tests — field mapping, toJson, round-trip)
+- frontend/test/models/invitation_code_test.dart (11 tests — field mapping, isActive branches, expirationText branches)
+
+
+
+### Julian up2301253 - 14/05/2026
+**Description:**
+- Wired custom expiry date/time to pin creation UI, using showDatePicker and showTimePicker (built-in flutter widgets), to backend.
+- Added edit and delete buttons to pin details page on map. Allows editing of deatils (expiry, description, title) and deletion of previously created pins with (extra deletion confirmation page) by owner. Wired them to backend endpoints.
+- Added `deletePin` and `updatePin` methods to API service.
+- Added backend tests for report pin (RP2) and get pin reports (RP3).
+- Added backend tests for update pin (TP2).
+
+**Files created/modified:**
+- frontend/lib/models/pin_form_data.dart
+- frontend/lib/widgets/pin_creation_sheet.dart
+- frontend/lib/screens/map_screen.dart
+- frontend/lib/services/api_service.dart
+- backend/tests/test_report_pin_rp2.py
+- backend/tests/test_get_pin_reports_rp3.py
+- backend/tests/test_update_pin_tp2.py
+
+---
+
+### Luke up2264308 - 13/05/2026
+**Description:**
+Fixed some small errors where my unit tests were returning the right results but for the wrong reasons
+
+**Files created/modified:**
+backend/tests/test_location_permissions.py
+
+
 ### Julian up2301253 - 12/05/2026
 **Description:**
 - Fixed guest account expiry showing 22h59m instead of 24h by replacing `datetime.utcnow()` with `datetime.now()`.
@@ -101,6 +142,13 @@ or incomplete. Added screenshots references for new sections where applicable.
 
 ---
 
+### Luke up2264308 - 10/05/2026
+**Summary** add unit tests to location_permissions.py to test that the location permissions work correctly
+
+**Files created/modified:**
+backend/tests/test_location_permissions.py
+
+
 ### Julian up2301253 - 07/05/2026
 **Description:**
 - Added the models.md file to backend documentation.
@@ -151,6 +199,8 @@ or incomplete. Added screenshots references for new sections where applicable.
 - throughout the coursework, created several github issues for both frontend backend, kept track of feature that are implemented and to implement, and also gave implementation details for some issues, which others implemented
 - did foundation setup for backend and database, including creating ERD, database tables and models, schemas, and backend authentication logic
 - added some extra tests for image validation for test TP1
+- added tests for invitation codes (UI1)
+- added two tests as part of TP1 for passing a valid and invalid expire time 
 
 ### Julian up2301253 - 29/04/2026
 **Description:**
@@ -184,7 +234,39 @@ or incomplete. Added screenshots references for new sections where applicable.
 
 ---
 
-## Theodore up2282406 - 27/04/2026  
+### Luke up2264308 - 27/04/2026
+**Summary** continued working on user manual, adding more sections and images alongside changing the search icon in the friends list to say add friend for improved clarity in what it does
+
+**Files created/modified**
+docs/images/friend_request/add_friend.png
+docs/images/friend_request/add_friend_with_name.png
+docs/images/friend_request/friend_list.png
+docs/images/friend_request/friends_screen.png
+docs/images/friend_request/incoming_friend.png
+docs/images/friend_request/outgoing_friend.png
+docs/images/invitation_codes/ScreenShot 2026-04-27 220048.png
+docs/images/invitation_codes/ScreenShot 2026-04-27 220130.png
+docs/images/invitation_codes/ScreenShot 2026-04-27 220158.png
+docs/images/map_related/categories.png
+docs/images/map_related/categories_menu.png
+docs/images/map_related/category_level_and_expiry.png
+docs/images/map_related/create_pin_subcategory.png
+docs/images/map_related/example_click_pin.png
+docs/images/map_related/filter_pin_icon.png
+docs/images/map_related/multi_pin.png
+docs/images/map_related/pin_with_circle_around_it.png
+docs/images/map_related/place_pin.png
+docs/images/map_related/place_pin_menu.png
+docs/images/map_related/ui_explanation.png
+docs/images/profile/edit_profile.png
+docs/images/profile/profile.png
+docs/users.md
+frontend/lib/screens/friends_screen.dart
+
+
+
+
+### Theodore up2282406 - 27/04/2026  
 **Summary:** Wrote backend test plans and implemented these tests for deleting pin reactions (removing like/dislike). Added tests for all main scenarios: deleting an existing reaction, deleting a non-existent reaction, invalid pin/user cases, and unauthenticated access. Refactored fixtures for clarity and reliability.
 
 **Files Modified/Created:**
@@ -197,7 +279,7 @@ or incomplete. Added screenshots references for new sections where applicable.
 - Confirmed all delete pin reaction tests pass with correct endpoint usage and fixture setup.
 
 
-## Theodore up2282406 - 27/04/2026  
+### Theodore up2282406 - 27/04/2026  
 **Summary:** Wrote backend test plans and implemented these tests for reacting to a pin (like/dislike/change/invalid cases).
 
 **Files Modified/Created:**
@@ -205,7 +287,15 @@ or incomplete. Added screenshots references for new sections where applicable.
 
 **Notes:** Covers main valid and invalid scenarios for reacting to a pin, including like, dislike, duplicate, change, invalid value, non-existent pin, and invalid user.
 
-
+### Luke up2264308 - 26/04/2026
+**Summary** Begin working on user manual finishing a few headings and adding some images 
+**Files Modified/Created**
+docs/categories_menu.png
+docs/pin_with_circle_around_it.png
+docs/place_pin.png
+docs/place_pin_menu.png
+docs/ui_explanation.png
+docs/users.md
 
 ### Theodore up2282406  - 20/04/2026
 **Summary:** Implemented auto stop/control flow for location sharing so updates only run while sharing is enabled, with safe start/stop lifecycle handling from the map screen.
@@ -225,6 +315,14 @@ or incomplete. Added screenshots references for new sections where applicable.
 - backend/routes/user_locations.py
 
 **Notes:** Implemented write-through caching on location create/update and cache-assisted reads for friend locations, with DB fallback when cache is missing. Added short TTL expiry to keep cached coordinates fresh while limiting stale data.
+
+### Luke up2264308 - 03/04/2026
+**Summary** Added functionality to make it so that when location sharing is enabled, the default location of a user's pin when they press add pin is the user's current location, changed the colour of the default pin before the details of the pin are confirmed to purple from red and make it so that when pins overlap, they collapse into a pin with a number above it that you can click to allow you to select a pin and then see the details of that pin 
+
+**Files Modified/Created:**
+- frontend/lib/screens/map_screen.dart
+
+
 
 
 ### Josh up2255832 - 18/03/2026
@@ -338,6 +436,35 @@ or incomplete. Added screenshots references for new sections where applicable.
 - backend/schemas/UserLocation.py
 - backend/schemas/LocationPermission.py
 - backend/routes/user_locations.py
+
+---
+
+### Toby up2282406 - 02/03/2026
+
+**Summary:** Added endpoint for returning valid pin report types.
+
+**Files Modified:**
+- backend/routes/pins.py
+
+**Details:**
+- Added 'GET /pins/report-types' endpoint.
+- Returned valid 'PinReportType' enum values for frontend integration.
+- Allowed frontend to dynamically retrieve valid reporting options.
+
+---
+
+### Toby up2282406 - 02/03/2026
+
+**Summary:** Added endpoint for retrieving reports linked to a specific pin.
+
+**Files Modified:**
+- backend/routes/pins.py
+- backend/schemas/pin_reporting.py
+
+**Details:**
+- Added 'GET /pins/{pin_id}/reports' endpoint.
+- Added validation checks to ensure the pin exists before returning reports.
+- Returned all reports associated with a specific pin.
 
 ---
 
@@ -488,6 +615,23 @@ Added pin filtering based on expiry date so that you can put a date in and then 
 **Files modified:**
 - backend/routes/pins.py
 
+### Toby up2282406 - 23/02/2026
+
+**Summary:** Implemented backend pin reporting functionality.
+
+**Files Modified/Created:**
+- backend/routes/pins.py
+- backend/schemas/pin_reporting.py
+
+**Details:**
+- Created 'PinReportRequest' schema for validating pin report requests.
+- Created 'PinReportResponse' schema for returning report data.
+- Added 'POST /pins/{pin_id}/report' endpoint for authenticated users to report pins.
+- Added validation checks to ensure pins exist before reports are created.
+- Prevented duplicate reports from the same user on the same pin.
+- Added error handling and rollback handling for failed database operations.
+
+---
 
 ### Theodore up2282406 - 23/02/2026
 **Summary:** Added like and dislike buttons to the frontend pin display. Implemented interactive UI for users to react to pins, with status saved and reflected in the backend.
