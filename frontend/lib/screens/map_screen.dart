@@ -1049,6 +1049,7 @@ class _MapScreenState extends State<MapScreen> {
     // Watch location provider so the map rebuilds when friend positions update
     final locationProvider = context.watch<LocationProvider>();
     final friendProvider = context.read<FriendProvider>();
+    final currentUserId = context.read<UserProvider>().currentUser?.userId;
 
     final activePins = _pins
         .where((p) => p.pinExpireAt.isAfter(DateTime.now()))
@@ -1064,10 +1065,30 @@ class _MapScreenState extends State<MapScreen> {
             height: 40,
             child: GestureDetector(
               onTap: () => _showPinDetails(cluster.pins.first),
-              child: Icon(
-                Icons.location_on,
-                color: cluster.pins.first.pinColor,
-                size: 36,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: cluster.pins.first.pinColor,
+                    size: 36,
+                  ),
+                  if (currentUserId != null && cluster.pins.first.userId == currentUserId)
+                    Positioned(
+                      right: 2,
+                      top: 2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.person, color: Colors.white, size: 10),
+                      ),
+                    ),
+                ],
               ),
             ),
           )
