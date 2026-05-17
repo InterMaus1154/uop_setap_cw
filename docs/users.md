@@ -98,6 +98,26 @@ If there are multiple pins close enough to be touching on the map, then the prog
 If you click on any of the items listed in this menu, then it will behave akin to clicking on a single pin of another type
 
 
+### Pin Reporting
+If you are logged in, you will also see a button with three dots in the top 
+right corner of the pin detail panel. Tapping this will give you the option 
+to report the pin. Tapping report will show three options:
+
+- **Inaccurate** - the information on the pin is no longer correct
+- **Resolved** - the incident has been resolved
+- **Duplicate** - the pin already exists elsewhere on the map
+
+Select the option that best describes the issue and the report will be sent. 
+You can only report a pin once. If you are not logged in, the three dot menu 
+will not appear.
+
+![Report Pin](images/map_related/pin_reporting.png)
+
+
+
+
+
+
 
 ## Friends, sending friend requests and Location sharing
 If you navigate to the profile section of the app, you will notice that there is a button that says Friends. In this section, you can see your friends list, see your incoming and outgoing friend requests and add new friends. In this app, adding friends allows you to share your location with them if you so choose
