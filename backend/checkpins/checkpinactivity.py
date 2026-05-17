@@ -99,12 +99,56 @@ def deactivate_expired_guests():
         db.close()
 
 
+def deactivate_expired_sharing():
+    print("deactivate_expired_sharing: starting")
+    db = SessionLocal()
+    try:
+        now = datetime.utcnow()
+        from models.user_location import UserLocation
+        from database.redis import redis_client
+
+        expired = db.query(UserLocation).filter(
+            UserLocation.sharing_expires_at.isnot(None),
+            UserLocation.sharing_expires_at < now,
+            UserLocation.is_enabled == True,
+        ).all()
+
+        changed = False
+        for loc in expired:
+            print(f"Expiring sharing for user {loc.user_id}")
+            loc.is_enabled = False
+            loc.sharing_expires_at = None
+            # Update Redis cache so friends see the change immediately
+            try:
+                redis_client.hset(f"user_location:{loc.user_id}", mapping={
+                    "lat": loc.latitude,
+                    "lng": loc.longitude,
+                    "is_enabled": 0,
+                    "city": "",
+                    "street": "",
+                })
+                redis_client.expire(f"user_location:{loc.user_id}", 30)
+            except Exception as e:
+                print(f"Error updating redis for user {loc.user_id}: {e}")
+            changed = True
+
+        if changed:
+            db.commit()
+            print(f"deactivate_expired_sharing: committed {len(expired)} expiries")
+    except Exception as e:
+        print(f"Error deactivating expired sharing: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.add_job(cleanup, "cron", hour=2, minute=0, id="daily_cleanup")
     scheduler.add_job(check_pin_activity, "interval", seconds=60, id="pin_activity_check")
     scheduler.add_job(deactivate_disliked_pins, "interval", seconds=60, id="dislike_pin_deactivation")
     scheduler.add_job(deactivate_expired_guests, "interval", hours=1, id="guest_deactivation")
+    scheduler.add_job(deactivate_expired_sharing, "interval", seconds=30, id="expire_sharing_check")
     scheduler.start()
     yield
     scheduler.shutdown()

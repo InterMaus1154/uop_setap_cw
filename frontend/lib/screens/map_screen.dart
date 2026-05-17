@@ -1504,12 +1504,12 @@ class _MapScreenState extends State<MapScreen> {
                                 title: const Text('1 hour'),
                               ),
                               RadioListTile(
-                                value: '2hour',
-                                title: const Text('2 hours'),
+                                value: '6hour',
+                                title: const Text('6 hours'),
                               ),
                               RadioListTile(
-                                value: '3hour',
-                                title: const Text('3 hours'),
+                                value: '24hour',
+                                title: const Text('24 hours'),
                               ),
                               ListTile(
                                 leading: Radio<String>(value: 'custom'),
@@ -1573,10 +1573,30 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
+                        DateTime? expiry;
+                        if (selectedOption == '1hour') {
+                          expiry = DateTime.now().add(const Duration(hours: 1));
+                        } else if (selectedOption == '6hour') {
+                          expiry = DateTime.now().add(const Duration(hours: 6));
+                        } else if (selectedOption == '24hour') {
+                          expiry = DateTime.now().add(const Duration(hours: 24));
+                        } else if (_customDateTime != null) {
+                          expiry = _customDateTime;
+                        } else if (selectedOption != null) {
+                          // Try to parse ISO string if set
+                          try {
+                            expiry = DateTime.parse(selectedOption!);
+                          } catch (_) {
+                            expiry = DateTime.now().add(
+                              const Duration(hours: 1),
+                            );
+                          }
+                        } else {
+                          expiry = DateTime.now().add(const Duration(hours: 1));
+                        }
 
-                        toggleLocationOnOff(locationProvider);
+                        toggleLocationOnOff(locationProvider, expiry);
                         Navigator.of(context).pop();
-
                       },
                       child: const Text('Confirm'),
                     ),
@@ -1590,10 +1610,12 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  void toggleLocationOnOff(
+    LocationProvider locationProvider, [
+    DateTime? expiry,
+  ]) async {
+    await locationProvider.toggleSharing(expiry: expiry);
 
-  void toggleLocationOnOff(LocationProvider locationProvider) async {
-    await locationProvider.toggleSharing();
-    
     if (locationProvider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1602,10 +1624,7 @@ class _MapScreenState extends State<MapScreen> {
         ),
       );
     }
-    
   }
-
-  
 
   void _showPinFilterDialog() {
     // Initialize with current active filters

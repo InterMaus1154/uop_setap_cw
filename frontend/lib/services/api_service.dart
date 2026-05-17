@@ -562,6 +562,8 @@ class ApiService {
     double? latitude,
     double? longitude,
     bool? isEnabled,
+    DateTime? sharingExpiresAt,
+    bool includeSharingExpiresField = false,
   }) async {
     try {
       final headers = await _authHeaders();
@@ -569,6 +571,14 @@ class ApiService {
       if (latitude != null) body['latitude'] = latitude;
       if (longitude != null) body['longitude'] = longitude;
       if (isEnabled != null) body['is_enabled'] = isEnabled;
+      // Include the sharing_expires_at field explicitly when caller requests it.
+      // If includeSharingExpiresField is true and sharingExpiresAt is null,
+      // we send null to explicitly clear the expiry on the server.
+      if (includeSharingExpiresField) {
+        body['sharing_expires_at'] = sharingExpiresAt
+            ?.toUtc()
+            .toIso8601String();
+      }
 
       final response = await _httpClient
           .patch(

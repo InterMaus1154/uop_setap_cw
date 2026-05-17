@@ -30,6 +30,7 @@ class LocationProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   Timer? _pollTimer;
+  Timer? _sharingExpiryTimer;
 
   // --- Getters ---
 
@@ -112,14 +113,33 @@ class LocationProvider extends ChangeNotifier {
   /// Toggle the user's location sharing on or off.
   /// If no location record exists yet, creates one using the device's GPS.
   /// When re-enabling, refreshes GPS coordinates so the position is current.
-  Future<void> toggleSharing() async {
+  Future<void> toggleSharing({DateTime? expiry}) async {
     try {
       if (_myLocation == null) {
         // First time enabling — get device GPS and create a record
         await _createLocationFromGPS();
+        if (_myLocation == null) return;
+
+        // If caller provided an expiry, send it explicitly.
+        if (expiry != null) {
+          _myLocation = await _apiService.updateUserLocation(
+            isEnabled: true,
+            sharingExpiresAt: expiry,
+            includeSharingExpiresField: true,
+          );
+        } else {
+          // Ensure sharing is enabled server-side and explicitly clear any previous expiry
+          _myLocation = await _apiService.updateUserLocation(
+            isEnabled: true,
+            sharingExpiresAt: null,
+            includeSharingExpiresField: true,
+          );
+        }
+        _scheduleSharingExpiryTimer();
       } else if (_myLocation!.isEnabled) {
         // Currently on → turn off (no GPS needed)
         _myLocation = await _apiService.updateUserLocation(isEnabled: false);
+        _cancelSharingExpiryTimer();
       } else {
         // Currently off → turn on with fresh GPS coordinates
         final position = await getCurrentPosition();
@@ -129,7 +149,10 @@ class LocationProvider extends ChangeNotifier {
           latitude: position.latitude,
           longitude: position.longitude,
           isEnabled: true,
+          sharingExpiresAt: expiry,
+          includeSharingExpiresField: expiry != null,
         );
+        _scheduleSharingExpiryTimer();
       }
       _error = null;
     } on ApiException catch (e) {
@@ -233,6 +256,8 @@ class LocationProvider extends ChangeNotifier {
         latitude: position.latitude,
         longitude: position.longitude,
       );
+      // If the server returned an expiry, ensure the client timer is scheduled
+      _scheduleSharingExpiryTimer();
     } on ApiException {
       // Silently ignore — next tick will retry
     } catch (_) {
@@ -264,6 +289,7 @@ class LocationProvider extends ChangeNotifier {
   void clear() {
     _pollTimer?.cancel();
     _pollTimer = null;
+    _cancelSharingExpiryTimer();
     _myLocation = null;
     _friendLocations = [];
     _permissions = [];
@@ -275,6 +301,57 @@ class LocationProvider extends ChangeNotifier {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _cancelSharingExpiryTimer();
     super.dispose();
+  }
+
+  void _cancelSharingExpiryTimer() {
+    _sharingExpiryTimer?.cancel();
+    _sharingExpiryTimer = null;
+  }
+
+  void _scheduleSharingExpiryTimer() {
+    _cancelSharingExpiryTimer();
+    final expiry = _myLocation?.sharingExpiresAt;
+    if (expiry == null) return;
+
+    final nowUtc = DateTime.now().toUtc();
+    final expUtc = expiry.toUtc();
+    final diff = expUtc.difference(nowUtc);
+    if (diff.inMilliseconds <= 0) {
+      // Already expired — handle immediately
+      _handleSharingExpired();
+      return;
+    }
+
+    _sharingExpiryTimer = Timer(diff, () {
+      _handleSharingExpired();
+    });
+  }
+
+  Future<void> _handleSharingExpired() async {
+    try {
+      // Attempt to turn off sharing on the server so friends stop seeing this user
+      _myLocation = await _apiService.updateUserLocation(isEnabled: false);
+    } on ApiException {
+      // On failure, still update local state conservatively
+      if (_myLocation != null) {
+        _myLocation = UserLocation(
+          userLocId: _myLocation!.userLocId,
+          userId: _myLocation!.userId,
+          latitude: _myLocation!.latitude,
+          longitude: _myLocation!.longitude,
+          isEnabled: false,
+          createdAt: _myLocation!.createdAt,
+          updatedAt: DateTime.now(),
+          city: _myLocation!.city,
+          street: _myLocation!.street,
+          sharingExpiresAt: null,
+        );
+      }
+    } finally {
+      _cancelSharingExpiryTimer();
+      notifyListeners();
+    }
   }
 }
