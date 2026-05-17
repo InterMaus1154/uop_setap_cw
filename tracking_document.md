@@ -21,6 +21,18 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Julian up2301253 - 17/05/2026
+**Description:**
+- Added icon badge overlay to map pins created by the logged-in user, using a Stack and Positioned widget to display a small blue circle with a person icon in the corner of the pin marker.
+- Added Nominatim reverse geocoding to pin creation sheet so street/city name displays instead of raw coordinates while creating a pin, matching behaviour of existing pins on the map.
+- Fixed `expiresAt` getter in `PinFormData` not returning `customExpiry` when set, causing custom expiry dates to be silently discarded on pin submission.
+
+**Files created/modified:**
+- frontend/lib/screens/map_screen.dart
+- frontend/lib/widgets/pin_creation_sheet.dart
+- frontend/lib/models/pin_form_data.dart
+
+--
 
 ### Theodore up2282406 - 17/05/2026
 **Summary:** Added sharing_expires_at column to user_locations to support 
