@@ -9,7 +9,6 @@ import '../models/category.dart';
 import '../models/pin_form_data.dart';
 import '../models/pin.dart';
 import '../providers/friend_provider.dart';
-import '../providers/user_provider.dart';
 import '../providers/location_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
@@ -156,8 +155,10 @@ class _MapScreenState extends State<MapScreen> {
     int? reaction = pin.userReaction;
     int likes = pin.pinLikes;
     int dislikes = pin.pinDislikes;
-    final currentUserId =
-        Provider.of<UserProvider>(context, listen: false).currentUser?.userId;
+    final currentUserId = Provider.of<UserProvider>(
+      context,
+      listen: false,
+    ).currentUser?.userId;
     final isOwner = currentUserId != null && currentUserId == pin.userId;
     showModalBottomSheet(
       context: context,
@@ -293,7 +294,9 @@ class _MapScreenState extends State<MapScreen> {
                               subCatName,
                               style: const TextStyle(fontSize: 12),
                             ),
-                            backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary.withAlpha(30),
                             visualDensity: VisualDensity.compact,
                           ),
                       ],
@@ -449,8 +452,12 @@ class _MapScreenState extends State<MapScreen> {
                             icon: const Icon(Icons.edit_outlined),
                             label: const Text('Edit'),
                             onPressed: () async {
-                              final titleCtrl = TextEditingController(text: pin.pinTitle);
-                              final descCtrl = TextEditingController(text: pin.pinDescription ?? '');
+                              final titleCtrl = TextEditingController(
+                                text: pin.pinTitle,
+                              );
+                              final descCtrl = TextEditingController(
+                                text: pin.pinDescription ?? '',
+                              );
                               DateTime? newExpiry;
                               final saved = await showDialog<bool>(
                                 context: context,
@@ -463,48 +470,89 @@ class _MapScreenState extends State<MapScreen> {
                                         TextField(
                                           controller: titleCtrl,
                                           maxLength: 100,
-                                          decoration: const InputDecoration(labelText: 'Title', border: OutlineInputBorder()),
+                                          decoration: const InputDecoration(
+                                            labelText: 'Title',
+                                            border: OutlineInputBorder(),
+                                          ),
                                         ),
                                         const SizedBox(height: 12),
                                         TextField(
                                           controller: descCtrl,
                                           maxLength: 300,
                                           maxLines: 3,
-                                          decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+                                          decoration: const InputDecoration(
+                                            labelText: 'Description',
+                                            border: OutlineInputBorder(),
+                                          ),
                                         ),
                                         const SizedBox(height: 12),
                                         Row(
                                           children: [
-                                            Icon(Icons.timer_outlined, size: 18, color: Theme.of(context).colorScheme.surfaceDim),
+                                            Icon(
+                                              Icons.timer_outlined,
+                                              size: 18,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.surfaceDim,
+                                            ),
                                             const SizedBox(width: 6),
                                             Expanded(
                                               child: Text(
                                                 newExpiry != null
                                                     ? 'Expires: ${newExpiry!.day}/${newExpiry!.month}/${newExpiry!.year} '
-                                                        '${newExpiry!.hour.toString().padLeft(2, '0')}:${newExpiry!.minute.toString().padLeft(2, '0')}'
+                                                          '${newExpiry!.hour.toString().padLeft(2, '0')}:${newExpiry!.minute.toString().padLeft(2, '0')}'
                                                     : 'Expiry: ${_formatExpiry(pin.pinExpireAt)}',
-                                                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.surfaceDim),
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.surfaceDim,
+                                                ),
                                               ),
                                             ),
                                             TextButton(
-                                              child: Text(newExpiry != null ? 'Change' : 'Set'),
+                                              child: Text(
+                                                newExpiry != null
+                                                    ? 'Change'
+                                                    : 'Set',
+                                              ),
                                               onPressed: () async {
                                                 final now = DateTime.now();
-                                                final date = await showDatePicker(
-                                                  context: ctx,
-                                                  initialDate: newExpiry ?? pin.pinExpireAt,
-                                                  firstDate: now,
-                                                  lastDate: now.add(const Duration(days: 7)),
-                                                );
-                                                if (date == null || !ctx.mounted) return;
-                                                final time = await showTimePicker(
-                                                  context: ctx,
-                                                  initialEntryMode: TimePickerEntryMode.input,
-                                                  initialTime: TimeOfDay.fromDateTime(newExpiry ?? pin.pinExpireAt),
-                                                );
+                                                final date =
+                                                    await showDatePicker(
+                                                      context: ctx,
+                                                      initialDate:
+                                                          newExpiry ??
+                                                          pin.pinExpireAt,
+                                                      firstDate: now,
+                                                      lastDate: now.add(
+                                                        const Duration(days: 7),
+                                                      ),
+                                                    );
+                                                if (date == null ||
+                                                    !ctx.mounted)
+                                                  return;
+                                                final time =
+                                                    await showTimePicker(
+                                                      context: ctx,
+                                                      initialEntryMode:
+                                                          TimePickerEntryMode
+                                                              .input,
+                                                      initialTime:
+                                                          TimeOfDay.fromDateTime(
+                                                            newExpiry ??
+                                                                pin.pinExpireAt,
+                                                          ),
+                                                    );
                                                 if (time == null) return;
                                                 setDlgState(() {
-                                                  newExpiry = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                                                  newExpiry = DateTime(
+                                                    date.year,
+                                                    date.month,
+                                                    date.day,
+                                                    time.hour,
+                                                    time.minute,
+                                                  );
                                                 });
                                               },
                                             ),
@@ -513,8 +561,16 @@ class _MapScreenState extends State<MapScreen> {
                                       ],
                                     ),
                                     actions: [
-                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                      ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, true),
+                                        child: const Text('Save'),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -525,17 +581,24 @@ class _MapScreenState extends State<MapScreen> {
                                 final updated = await _apiService.updatePin(
                                   pin.pinId,
                                   title: titleCtrl.text.trim(),
-                                  description: descCtrl.text.trim().isEmpty ? null : descCtrl.text.trim(),
+                                  description: descCtrl.text.trim().isEmpty
+                                      ? null
+                                      : descCtrl.text.trim(),
                                   expireAt: newExpiry,
                                 );
                                 setState(() {
-                                  final i = _pins.indexWhere((p) => p.pinId == pin.pinId);
+                                  final i = _pins.indexWhere(
+                                    (p) => p.pinId == pin.pinId,
+                                  );
                                   if (i != -1) _pins[i] = updated;
                                 });
                               } on ApiException catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to update pin: $e'), backgroundColor: Colors.red),
+                                    SnackBar(
+                                      content: Text('Failed to update pin: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
                                   );
                                 }
                               }
@@ -545,8 +608,14 @@ class _MapScreenState extends State<MapScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: OutlinedButton.icon(
-                            icon: const Icon(Icons.delete_outline, color: Colors.red),
-                            label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                            ),
+                            label: const Text(
+                              'Delete',
+                              style: TextStyle(color: Colors.red),
+                            ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Colors.red),
                             ),
@@ -555,11 +624,22 @@ class _MapScreenState extends State<MapScreen> {
                                 context: context,
                                 builder: (ctx) => AlertDialog(
                                   title: const Text('Delete Pin'),
-                                  content: const Text('Are you sure you want to delete this pin?'),
+                                  content: const Text(
+                                    'Are you sure you want to delete this pin?',
+                                  ),
                                   actions: [
-                                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(ctx, false),
+                                      child: const Text('Cancel'),
+                                    ),
                                     ElevatedButton(
-                                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Theme.of(context).colorScheme.onPrimary),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
+                                      ),
                                       onPressed: () => Navigator.pop(ctx, true),
                                       child: const Text('Delete'),
                                     ),
@@ -570,11 +650,18 @@ class _MapScreenState extends State<MapScreen> {
                               Navigator.pop(context);
                               try {
                                 await _apiService.deletePin(pin.pinId);
-                                setState(() => _pins.removeWhere((p) => p.pinId == pin.pinId));
+                                setState(
+                                  () => _pins.removeWhere(
+                                    (p) => p.pinId == pin.pinId,
+                                  ),
+                                );
                               } on ApiException catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Failed to delete pin: $e'), backgroundColor: Colors.red),
+                                    SnackBar(
+                                      content: Text('Failed to delete pin: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
                                   );
                                 }
                               }
@@ -1281,7 +1368,6 @@ class _MapScreenState extends State<MapScreen> {
                   color: locationProvider.isSharingEnabled
                       ? Colors.white
                       : Colors.grey,
-                  
                 ),
               ),
             ),
@@ -1387,7 +1473,6 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1432,7 +1517,6 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1487,7 +1571,6 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            
                           ),
                         ),
                         const SizedBox(height: 8),

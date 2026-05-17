@@ -43,6 +43,14 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
   Category? _selectedCategory;
   SubCategory? _selectedSubCategory;
   XFile? _selectedImage;
+  DateTime? _customExpiry;
+
+  // Report type labels shown in the menu mapped to backend values
+  static const Map<String, String> _reportTypes = {
+    'Inaccurate': 'inaccurate',
+    'Resolved': 'resolved',
+    'Duplicate': 'duplicate',
+  };
 
   List<SubCategory> get _filteredSubCategories {
     if (_selectedCategory == null) return [];
@@ -89,38 +97,10 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
         latitude: widget.location.latitude,
         longitude: widget.location.longitude,
         ttlMinutes: ttl,
+        customExpiry: _customExpiry,
       );
       widget.onSubmit(formData, _selectedImage);
     }
-  }
-
-  Future<void> _pickCustomExpiry() async {
-    final now = DateTime.now();
-    final date = await showDatePicker(
-      context: context,
-      initialDate:
-          _customExpiry ?? now.add(Duration(minutes: _ttlMinutes ?? 60)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 7)),
-    );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialEntryMode: TimePickerEntryMode.input,
-      initialTime: TimeOfDay.fromDateTime(
-        _customExpiry ?? now.add(Duration(minutes: _ttlMinutes ?? 60)),
-      ),
-    );
-    if (time == null || !mounted) return;
-    setState(() {
-      _customExpiry = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute,
-      );
-    });
   }
 
   /// Show a dialog letting the user pick a report type then send to backend
@@ -425,12 +405,30 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.timer_outlined, color: Colors.blue[700]),
-                      const SizedBox(width: 8),
-                      Text(
-                        _expiryText,
-                        style: TextStyle(color: Colors.blue[700]),
+                      Row(
+                        children: [
+                          Icon(Icons.timer_outlined, color: Colors.blue[700]),
+                          const SizedBox(width: 8),
+                          Text(
+                            _customExpiry != null
+                                ? 'Expires: ${_customExpiry!.day}/${_customExpiry!.month}/${_customExpiry!.year} '
+                                      '${_customExpiry!.hour.toString().padLeft(2, '0')}:${_customExpiry!.minute.toString().padLeft(2, '0')}'
+                                : 'Default: ${(_ttlMinutes! / 60).round()} hrs',
+                            style: TextStyle(color: Colors.blue[700]),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _pickCustomExpiry,
+                        child: Text(
+                          _customExpiry != null ? 'Change' : 'Set date & time',
+                          style: TextStyle(
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
