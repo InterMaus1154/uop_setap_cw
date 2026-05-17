@@ -1373,7 +1373,9 @@ class _MapScreenState extends State<MapScreen> {
                 backgroundColor: locationProvider.isSharingEnabled
                     ? Colors.teal
                     : Theme.of(context).colorScheme.surfaceDim,
-                onPressed: () => _showLocationFilterDialog(locationProvider),
+                onPressed: () => locationProvider.isSharingEnabled
+                    ? toggleLocationOnOff(locationProvider)
+                    : _showLocationFilterDialog(locationProvider),
                 tooltip: locationProvider.isSharingEnabled
                     ? 'Stop sharing location'
                     : 'Share my location',
@@ -1487,7 +1489,6 @@ class _MapScreenState extends State<MapScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -1572,7 +1573,10 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        confirmButtonPlaceholderFunction(locationProvider);
+
+                        toggleLocationOnOff(locationProvider);
+                        Navigator.of(context).pop();
+
                       },
                       child: const Text('Confirm'),
                     ),
@@ -1586,16 +1590,10 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  void placeholderFunction() {}
 
-  void confirmButtonPlaceholderFunction(
-    LocationProvider locationProvider,
-  ) async {
+  void toggleLocationOnOff(LocationProvider locationProvider) async {
     await locationProvider.toggleSharing();
-    if (!mounted) return;
-    // Close the dialog after toggling sharing
-    Navigator.of(context).pop();
-
+    
     if (locationProvider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1604,7 +1602,10 @@ class _MapScreenState extends State<MapScreen> {
         ),
       );
     }
+    
   }
+
+  
 
   void _showPinFilterDialog() {
     // Initialize with current active filters
