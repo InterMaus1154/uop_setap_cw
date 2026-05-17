@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
@@ -44,6 +46,36 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
   SubCategory? _selectedSubCategory;
   XFile? _selectedImage;
   DateTime? _customExpiry;
+  String? _locationName;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocationName();
+  }
+
+  Future<void> _fetchLocationName() async {
+    try {
+      final uri = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse'
+        '?lat=${widget.location.latitude}&lon=${widget.location.longitude}&format=json',
+      );
+      final response = await http.get(uri, headers: {'User-Agent': 'campus_connect'});
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final addr = data['address'] as Map<String, dynamic>?;
+        if (addr != null && mounted) {
+          final street = addr['road'] as String?;
+          final city = (addr['city'] ?? addr['town'] ?? addr['village'] ?? addr['county']) as String?;
+          setState(() {
+            _locationName = [street, city]
+              .where((s) => s != null && s!.isNotEmpty)
+              .join(', ');
+          });
+        }
+      }
+    } catch (_) {}
+  }
 
   // Report type labels shown in the menu mapped to backend values
   static const Map<String, String> _reportTypes = {
@@ -350,7 +382,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Location: ${widget.location.latitude.toStringAsFixed(5)}, ${widget.location.longitude.toStringAsFixed(5)}',
+                'Location: ${_locationName ?? '${widget.location.latitude.toStringAsFixed(5)}, ${widget.location.longitude.toStringAsFixed(5)}'}',
                 style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
               const SizedBox(height: 20),
