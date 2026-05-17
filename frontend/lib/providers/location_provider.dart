@@ -113,7 +113,10 @@ class LocationProvider extends ChangeNotifier {
   /// Toggle the user's location sharing on or off.
   /// If no location record exists yet, creates one using the device's GPS.
   /// When re-enabling, refreshes GPS coordinates so the position is current.
-  Future<void> toggleSharing({DateTime? expiry}) async {
+  Future<void> toggleSharing({
+    DateTime? expiry,
+    bool clearExpiry = false,
+  }) async {
     try {
       if (_myLocation == null) {
         // First time enabling — get device GPS and create a record
@@ -150,7 +153,7 @@ class LocationProvider extends ChangeNotifier {
           longitude: position.longitude,
           isEnabled: true,
           sharingExpiresAt: expiry,
-          includeSharingExpiresField: expiry != null,
+          includeSharingExpiresField: (expiry != null) || clearExpiry,
         );
         _scheduleSharingExpiryTimer();
       }

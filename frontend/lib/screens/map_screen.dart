@@ -1511,6 +1511,10 @@ class _MapScreenState extends State<MapScreen> {
                                 value: '24hour',
                                 title: const Text('24 hours'),
                               ),
+                              RadioListTile(
+                                value: 'indefinite',
+                                title: const Text('Indefinite'),
+                              ),
                               ListTile(
                                 leading: Radio<String>(value: 'custom'),
                                 title: TextField(
@@ -1574,12 +1578,18 @@ class _MapScreenState extends State<MapScreen> {
                     ElevatedButton(
                       onPressed: () {
                         DateTime? expiry;
+                        bool clearExpiry = false;
                         if (selectedOption == '1hour') {
                           expiry = DateTime.now().add(const Duration(hours: 1));
                         } else if (selectedOption == '6hour') {
                           expiry = DateTime.now().add(const Duration(hours: 6));
                         } else if (selectedOption == '24hour') {
-                          expiry = DateTime.now().add(const Duration(hours: 24));
+                          expiry = DateTime.now().add(
+                            const Duration(hours: 24),
+                          );
+                        } else if (selectedOption == 'indefinite') {
+                          expiry = null;
+                          clearExpiry = true;
                         } else if (_customDateTime != null) {
                           expiry = _customDateTime;
                         } else if (selectedOption != null) {
@@ -1588,14 +1598,18 @@ class _MapScreenState extends State<MapScreen> {
                             expiry = DateTime.parse(selectedOption!);
                           } catch (_) {
                             expiry = DateTime.now().add(
-                              const Duration(hours: 1),
+                              const Duration(seconds:1),
                             );
                           }
                         } else {
-                          expiry = DateTime.now().add(const Duration(hours: 1));
+                          expiry = DateTime.now().add(const Duration(seconds:30));
                         }
 
-                        toggleLocationOnOff(locationProvider, expiry);
+                        toggleLocationOnOff(
+                          locationProvider,
+                          expiry,
+                          clearExpiry,
+                        );
                         Navigator.of(context).pop();
                       },
                       child: const Text('Confirm'),
@@ -1613,8 +1627,12 @@ class _MapScreenState extends State<MapScreen> {
   void toggleLocationOnOff(
     LocationProvider locationProvider, [
     DateTime? expiry,
+    bool clearExpiry = false,
   ]) async {
-    await locationProvider.toggleSharing(expiry: expiry);
+    await locationProvider.toggleSharing(
+      expiry: expiry,
+      clearExpiry: clearExpiry,
+    );
 
     if (locationProvider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
