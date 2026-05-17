@@ -393,6 +393,49 @@ class ApiService {
     }
   }
 
+  // Pin reporting
+  Future<void> reportPin(int pinId, String reportType) async {
+    try {
+      final headers = await _authHeaders();
+      final response = await _httpClient
+          .post(
+            Uri.parse('$baseUrl/pins/$pinId/report'),
+            headers: headers,
+            body: json.encode({'report_type': reportType}),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode == 201) return;
+
+      if (response.statusCode == 400) {
+        throw ApiException(
+          'You have already reported this pin.',
+          statusCode: 400,
+        );
+      }
+
+      if (response.statusCode == 404) {
+        throw ApiException('Pin not found.', statusCode: 404);
+      }
+
+      throw ApiException(
+        'Failed to report pin: ${response.statusCode}',
+        statusCode: response.statusCode,
+      );
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on http.ClientException {
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('An unexpected error occurred: $e');
+    }
+  }
+
   // Friends
   Future<List<User>> getFriends() => _getList('/friends/', User.fromJson);
 
@@ -809,7 +852,9 @@ class ApiService {
         await _storage.saveToken(token);
         return LoginResponse(user: User.fromJson(data), token: token);
       } else if (response.statusCode == 401) {
-        final detail = json.decode(response.body)['detail'] ?? 'Invalid or expired invitation code.';
+        final detail =
+            json.decode(response.body)['detail'] ??
+            'Invalid or expired invitation code.';
         throw ApiException(detail, statusCode: 401);
       } else {
         throw ApiException(
@@ -822,7 +867,9 @@ class ApiService {
     } on TimeoutException {
       throw ApiException('Request timed out. Please try again.');
     } on http.ClientException {
-      throw ApiException('Could not connect to server. Is the backend running?');
+      throw ApiException(
+        'Could not connect to server. Is the backend running?',
+      );
     } catch (e) {
       if (e is ApiException) rethrow;
       throw ApiException('An unexpected error occurred: $e');

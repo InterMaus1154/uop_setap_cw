@@ -12,6 +12,7 @@ import '../providers/friend_provider.dart';
 import '../providers/location_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
+import '../providers/user_provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -230,16 +231,36 @@ class _MapScreenState extends State<MapScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
-                    ),
+                      if (context.read<UserProvider>().isLoggedIn)
+                        PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert),
+                          onSelected: (value) {
+                            if (value == 'report') {
+                              _showReportOptions(context, pin.pinId);
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            const PopupMenuItem<String>(
+                              value: 'report',
+                              child: Text('Report'),
+                            ),
+                          ],
+                        ),
+                    ],
                   ),
                   Text(
                     pin.pinTitle,
@@ -381,7 +402,7 @@ class _MapScreenState extends State<MapScreen> {
                             return parts.isNotEmpty
                                 ? parts
                                 : 'Lat: ${pin.pinLatitude.toStringAsFixed(5)}, '
-                                    'Lng: ${pin.pinLongitude.toStringAsFixed(5)}';
+                                      'Lng: ${pin.pinLongitude.toStringAsFixed(5)}';
                           }(),
                           style: TextStyle(
                             fontSize: 13,
@@ -701,6 +722,43 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Future<void> _showReportOptions(BuildContext context, int pinId) async {
+    final reportTypes = {
+      'Inaccurate': 'inaccurate',
+      'Resolved': 'resolved',
+      'Duplicate': 'duplicate',
+    };
+
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Report Pin'),
+        children: reportTypes.entries.map((entry) {
+          return SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, entry.value),
+            child: Text(entry.key),
+          );
+        }).toList(),
+      ),
+    );
+
+    if (selected == null || !mounted) return;
+
+    try {
+      await _apiService.reportPin(pinId, selected);
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pin reported successfully')),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
   Future<void> _confirmLocationAndShowForm() async {
     if (_selectedLocation == null) return;
 
@@ -856,11 +914,12 @@ class _MapScreenState extends State<MapScreen> {
                 latLng: LatLng(loc.latitude, loc.longitude),
                 updatedAt: loc.updatedAt,
                 locationName: () {
-                    final s = [loc.street, loc.city]
-                        .where((s) => s != null && s.isNotEmpty)
-                        .join(', ');
-                    return s.isEmpty ? null : s;
-                  }(),
+                  final s = [
+                    loc.street,
+                    loc.city,
+                  ].where((s) => s != null && s.isNotEmpty).join(', ');
+                  return s.isEmpty ? null : s;
+                }(),
               );
             },
             child: CircleAvatar(

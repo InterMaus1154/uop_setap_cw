@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../models/category.dart';
 import '../models/pin_form_data.dart';
 import '../providers/user_provider.dart';
+import '../services/api_service.dart';
 import 'package:provider/provider.dart';
 
 class PinCreationSheet extends StatefulWidget {
@@ -15,6 +16,9 @@ class PinCreationSheet extends StatefulWidget {
   final List<SubCategory> subCategories;
   final Function(PinFormData, XFile?) onSubmit;
 
+  // Optional: if a pinId is passed, the sheet is in "view" mode and can report
+  final int? pinId;
+
   const PinCreationSheet({
     super.key,
     required this.location,
@@ -22,6 +26,7 @@ class PinCreationSheet extends StatefulWidget {
     required this.categoryLevels,
     required this.subCategories,
     required this.onSubmit,
+    this.pinId,
   });
 
   @override
@@ -33,10 +38,19 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  final ApiService _apiService = ApiService();
 
   Category? _selectedCategory;
   SubCategory? _selectedSubCategory;
   XFile? _selectedImage;
+  DateTime? _customExpiry;
+
+  // Report type labels shown in the menu mapped to backend values
+  static const Map<String, String> _reportTypes = {
+    'Inaccurate': 'inaccurate',
+    'Resolved': 'resolved',
+    'Duplicate': 'duplicate',
+  };
 
   List<SubCategory> get _filteredSubCategories {
     if (_selectedCategory == null) return [];
@@ -55,18 +69,6 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
     } catch (e) {
       return null;
     }
-  }
-
-  String get _expiryText {
-    final ttl = _ttlMinutes;
-    if (ttl == null) return '';
-    if (ttl >= 60) {
-      final hours = ttl ~/ 60;
-      final mins = ttl % 60;
-      if (mins == 0) return 'Expires in $hours hour${hours > 1 ? 's' : ''}';
-      return 'Expires in $hours hr $mins min';
-    }
-    return 'Expires in $ttl minutes';
   }
 
   @override
@@ -95,12 +97,76 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
         latitude: widget.location.latitude,
         longitude: widget.location.longitude,
         ttlMinutes: ttl,
+        customExpiry: _customExpiry, // add this line
       );
       widget.onSubmit(formData, _selectedImage);
     }
   }
 
-  /// Show a bottom sheet letting the user pick from gallery or camera
+  /// Show a dialog letting the user pick a report type then send to backend
+  Future<void> _showReportDialog() async {
+    final pinId = widget.pinId;
+    if (pinId == null) return;
+
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: const Text('Report Pin'),
+        children: _reportTypes.entries.map((entry) {
+          return SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, entry.value),
+            child: Text(entry.key),
+          );
+        }).toList(),
+      ),
+    );
+
+    if (selected == null || !mounted) return;
+
+    try {
+      await _apiService.reportPin(pinId, selected);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pin reported successfully')),
+      );
+      Navigator.pop(context);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  Future<void> _pickCustomExpiry() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate:
+          _customExpiry ?? now.add(Duration(minutes: _ttlMinutes ?? 60)),
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 7)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialEntryMode: TimePickerEntryMode.input,
+      initialTime: TimeOfDay.fromDateTime(
+        _customExpiry ?? now.add(Duration(minutes: _ttlMinutes ?? 60)),
+      ),
+    );
+    if (time == null || !mounted) return;
+    setState(() {
+      _customExpiry = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+    });
+  }
+
   void _showImageSourcePicker() {
     showModalBottomSheet(
       context: context,
@@ -115,7 +181,6 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                 _pickImage(ImageSource.gallery);
               },
             ),
-            // Camera option — not available on web
             if (!kIsWeb)
               ListTile(
                 leading: const Icon(Icons.camera_alt),
@@ -151,10 +216,8 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
     }
   }
 
-  /// Build the image picker button and preview
   Widget _buildImagePicker() {
     if (_selectedImage != null) {
-      // Show preview with a remove button
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -167,7 +230,6 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                // Read bytes from XFile — works on both web and mobile
                 child: FutureBuilder<Uint8List>(
                   future: _selectedImage!.readAsBytes(),
                   builder: (context, snapshot) {
@@ -188,7 +250,6 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                   },
                 ),
               ),
-              // Remove image button
               Positioned(
                 top: 6,
                 right: 6,
@@ -214,7 +275,6 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
       );
     }
 
-    // No image selected — show the add photo button
     return OutlinedButton.icon(
       onPressed: _showImageSourcePicker,
       icon: const Icon(Icons.add_a_photo),
@@ -234,12 +294,13 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
       context,
       listen: false,
     ).isLoggedIn;
+
     return Container(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Theme.of(context).canvasColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
@@ -250,7 +311,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Top bar with drag handle and menu
+              // Top bar with drag handle and ... menu
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -265,11 +326,14 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                       ),
                     ),
                   ),
-                  if (isLoggedIn)
+                  // Only show the ... menu for logged-in users viewing an existing pin
+                  if (isLoggedIn && widget.pinId != null)
                     PopupMenuButton<String>(
                       icon: const Icon(Icons.more_vert),
                       onSelected: (value) {
-                        // TODO: Handle menu actions (report, etc.)
+                        if (value == 'report') {
+                          _showReportDialog();
+                        }
                       },
                       itemBuilder: (context) => [
                         const PopupMenuItem<String>(
@@ -304,6 +368,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                   setState(() {
                     _selectedCategory = cat;
                     _selectedSubCategory = null;
+                    _customExpiry = null;
                   });
                 },
                 validator: (value) =>
@@ -331,8 +396,8 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                 const SizedBox(height: 16),
               ],
 
-              // Expiry info
-              if (_selectedCategory != null)
+              // Expiry row
+              if (_selectedCategory != null && _ttlMinutes != null)
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -340,12 +405,30 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.timer_outlined, color: Colors.blue[700]),
-                      const SizedBox(width: 8),
-                      Text(
-                        _expiryText,
-                        style: TextStyle(color: Colors.blue[700]),
+                      Row(
+                        children: [
+                          Icon(Icons.timer_outlined, color: Colors.blue[700]),
+                          const SizedBox(width: 8),
+                          Text(
+                            _customExpiry != null
+                                ? 'Expires: ${_customExpiry!.day}/${_customExpiry!.month}/${_customExpiry!.year} '
+                                      '${_customExpiry!.hour.toString().padLeft(2, '0')}:${_customExpiry!.minute.toString().padLeft(2, '0')}'
+                                : 'Default: ${(_ttlMinutes! / 60).round()} hrs',
+                            style: TextStyle(color: Colors.blue[700]),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _pickCustomExpiry,
+                        child: Text(
+                          _customExpiry != null ? 'Change' : 'Set date & time',
+                          style: TextStyle(
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -383,7 +466,7 @@ class _PinCreationSheetState extends State<PinCreationSheet> {
               ),
               const SizedBox(height: 16),
 
-              // Image picker — browse gallery or take a photo
+              // Image picker
               _buildImagePicker(),
               const SizedBox(height: 20),
 
