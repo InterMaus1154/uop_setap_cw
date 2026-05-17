@@ -111,6 +111,8 @@ Select the option that best describes the issue and the report will be sent.
 You can only report a pin once. If you are not logged in, the three dot menu 
 will not appear.
 
+![Report Pin](images/map_related/pin_reporting.png)
+
 
 
 

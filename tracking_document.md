@@ -23,6 +23,20 @@ Use this document to log your contributions. Add new entries at the top.
 
 
 ### Theodore up2282406 - 17/05/2026
+**Summary:** Added sharing_expires_at column to user_locations to support 
+time-limited location sharing. Updated the model, schema and routes to accept 
+and save the expiry time, auto-disabling sharing when it expires on both the 
+user and friends endpoints. Generated and applied the Alembic migration, 
+stamping head first as the migration history was out of sync.
+
+**Files Modified/Created:**
+- backend/models/user_location.py
+- backend/schemas/UserLocation.py
+- backend/routes/user_locations.py
+- backend/alembic/versions/b7ca2966177e_add_sharing_expires_at_to_user_locations.py
+
+---
+### Theodore up2282406 - 17/05/2026
 **Summary:** Implemented pin reporting feature on the frontend. Added reportPin 
 method to ApiService following the same pattern as existing API methods, handling 
 201, 400, 404 and error states. Added _showReportOptions method to map_screen.dart 
@@ -146,7 +160,7 @@ backend/tests/test_location_permissions.py
 ### Theodore up2282406 - 10/05/2026
 **Summary:** Contributed to writing the user manual documentation. Added and expanded multiple 
 sections including getting started, map screen button explanations, understanding pin 
-categories, pin expiry, map navigation, location sharing, profile editing, common 
+categories, pin expiry,pin reporting ,  map navigation, location sharing, profile editing, common 
 error messages, a FAQ section, and fixed structural inconsistencies such as the 
 Profile Screen heading level.
 
