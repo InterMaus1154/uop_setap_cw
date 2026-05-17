@@ -12,14 +12,21 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UserProvider? userProvider;
+  final ApiService? apiService;
+  final Widget? home;
+
+  const MyApp({super.key, this.userProvider, this.apiService, this.home});
 
   @override
   Widget build(BuildContext context) {
-    final apiService = ApiService();
+    final apiService = this.apiService ?? ApiService();
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        if (userProvider != null)
+          ChangeNotifierProvider<UserProvider>.value(value: userProvider!)
+        else
+          ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => FriendProvider()),
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(
@@ -44,7 +51,7 @@ class MyApp extends StatelessWidget {
               ),
               useMaterial3: true,
             ),
-            home: const UserSelectionScreen(),
+            home: home ?? const UserSelectionScreen(),
           );
         },
       ),

@@ -169,4 +169,81 @@ void main() {
       },
     );
   });
+
+  group('Dark Mode related tests', () {
+    testWidgets('Dark Mode toggle toggles On/Off in edit form', (
+      WidgetTester tester,
+    ) async {
+      final userProvider = FakeUserProvider(_testUser());
+      await tester.pumpWidget(_buildTestWidget(userProvider: userProvider));
+      await tester.pump();
+
+      // Open edit form
+      await tester.tap(find.text('Edit Profile'));
+      await tester.pump();
+
+      // Find the Row that contains the Dark Mode label
+      final darkModeRow = find.ancestor(
+        of: find.text('Dark Mode'),
+        matching: find.byType(Row),
+      );
+      expect(darkModeRow, findsOneWidget);
+
+      // Find the 'On' and 'Off' text widgets inside that Row
+      final onText = find.descendant(
+        of: darkModeRow,
+        matching: find.text('On'),
+      );
+      final offText = find.descendant(
+        of: darkModeRow,
+        matching: find.text('Off'),
+      );
+      expect(onText, findsOneWidget);
+      expect(offText, findsOneWidget);
+
+      // Tap On -> should show blue background for the On toggle
+      await tester.tap(onText);
+      await tester.pump();
+
+      bool foundBlue = false;
+      final containers = find
+          .ancestor(of: onText, matching: find.byType(Container))
+          .evaluate()
+          .toList();
+      for (final el in containers) {
+        final w = el.widget;
+        if (w is Container && w.decoration is BoxDecoration) {
+          final dec = w.decoration as BoxDecoration;
+          if (dec.color == Colors.blue[400]) {
+            foundBlue = true;
+            break;
+          }
+        }
+      }
+      expect(foundBlue, isTrue);
+
+      // Tap Off -> should deselect On (Off becomes blue)
+      await tester.tap(offText);
+      await tester.pump();
+
+      bool offBlue = false;
+      final offContainers = find
+          .ancestor(of: offText, matching: find.byType(Container))
+          .evaluate()
+          .toList();
+      for (final el in offContainers) {
+        final w = el.widget;
+        if (w is Container && w.decoration is BoxDecoration) {
+          final dec = w.decoration as BoxDecoration;
+          if (dec.color == Colors.blue[400]) {
+            offBlue = true;
+            break;
+          }
+        }
+      }
+      expect(offBlue, isTrue);
+    });
+  });
+
+
 }

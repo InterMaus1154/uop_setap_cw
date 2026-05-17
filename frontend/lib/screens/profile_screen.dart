@@ -2,23 +2,24 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/friend_provider.dart';
-import '../providers/location_provider.dart';
-import '../providers/user_provider.dart';
-import '../services/api_service.dart';
-import 'friends_screen.dart';
-import 'invitation_codes_screen.dart';
-import 'user_selection_screen.dart';
+import 'package:frontend/providers/friend_provider.dart';
+import 'package:frontend/providers/location_provider.dart';
+import 'package:frontend/providers/user_provider.dart';
+import 'package:frontend/services/api_service.dart';
+import 'package:frontend/screens/friends_screen.dart';
+import 'package:frontend/screens/invitation_codes_screen.dart';
+import 'package:frontend/screens/user_selection_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final ApiService? apiService;
+  const ProfileScreen({super.key, this.apiService});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final ApiService _apiService = ApiService();
+  late final ApiService _apiService;
   final _formKey = GlobalKey<FormState>();
   int? _pinCount;
   bool _isLoading = true;
@@ -32,11 +33,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _displayNameController;
   bool _showDisplayName = false;
 
-  bool _toggleDarkMode = false; 
+  bool _toggleDarkMode = false;
 
   @override
   void initState() {
     super.initState();
+    _apiService = widget.apiService ?? ApiService();
     _loadPinCount();
     final user = context.read<UserProvider>().currentUser;
     _fnameController = TextEditingController(text: user?.firstName ?? '');
@@ -151,7 +153,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final fullName = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
 
     return Scaffold(
-      
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -178,7 +179,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  
                 ),
               ),
               if (displayName != null && displayName.isNotEmpty) ...[
@@ -223,28 +223,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               if (!(user?.isGuest ?? false)) ...[
-              const SizedBox(height: 16),
-              // Invitation Codes button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const InvitationCodesScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.card_giftcard),
-                  label: const Text('Invitation Codes'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[400],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 16),
+                // Invitation Codes button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const InvitationCodesScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.card_giftcard),
+                    label: const Text('Invitation Codes'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[400],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
-              ),
               ], // end invitation codes guard
               const SizedBox(height: 16),
               // Logout
@@ -297,7 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceBright,
-        
+
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -308,7 +310,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: Form(
-        
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,11 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const Text(
                   'Edit Profile',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 IconButton(
                   onPressed: _cancelEdit,
@@ -333,7 +330,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 12),
             TextFormField(
-              
               controller: _fnameController,
               decoration: InputDecoration(
                 labelText: 'First Name',
@@ -401,12 +397,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.visibility, size: 18, ),
+                  Icon(Icons.visibility, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Show under pins',
-                      style: TextStyle(fontSize: 13, ),
+                      style: TextStyle(fontSize: 13),
                     ),
                   ),
                   _buildToggleButton('Full Name', !_showDisplayName, () {
@@ -418,19 +414,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }),
                 ],
               ),
-              
             ),
             Container(
               margin: const EdgeInsets.only(top: 12),
-              child:Row(
+              child: Row(
                 children: [
-                  Icon(Icons.dark_mode_outlined, size: 18,),
+                  Icon(Icons.dark_mode_outlined, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      'Dark Mode',
-                      style: TextStyle(fontSize: 13,),
-                    ),
+                    child: Text('Dark Mode', style: TextStyle(fontSize: 13)),
                   ),
                   _buildToggleButton('Off', !_toggleDarkMode, () {
                     setState(() => _toggleDarkMode = false);
@@ -440,7 +432,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     setState(() => _toggleDarkMode = true);
                   }),
                 ],
-              )
+              ),
             ),
             const SizedBox(height: 16),
             // Save / Cancel buttons
@@ -498,18 +490,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
-
   Widget _buildToggleButton(String label, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue[400] : Theme.of(context).colorScheme.surfaceBright,
+          color: isSelected
+              ? Colors.blue[400]
+              : Theme.of(context).colorScheme.surfaceBright,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? Colors.blue[400]! : Theme.of(context).colorScheme.outline,
+            color: isSelected
+                ? Colors.blue[400]!
+                : Theme.of(context).colorScheme.outline,
           ),
         ),
         child: Text(
@@ -517,7 +511,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+            color: isSelected
+                ? Colors.white
+                : Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),
@@ -594,14 +590,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    
                   ),
                 ),
           const SizedBox(height: 4),
-          Text(
-            'Pins Created',
-            style: TextStyle(fontSize: 14),
-          ),
+          Text('Pins Created', style: TextStyle(fontSize: 14)),
         ],
       ),
     );
