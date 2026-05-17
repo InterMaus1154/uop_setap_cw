@@ -21,6 +21,35 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+
+### Theodore up2282406 - 17/05/2026
+**Summary:** Implemented pin reporting feature on the frontend. Added reportPin 
+method to ApiService following the same pattern as existing API methods, handling 
+201, 400, 404 and error states. Added _showReportOptions method to map_screen.dart 
+which shows a SimpleDialog with the three report types (Inaccurate, Resolved, 
+Duplicate) and calls the API on selection. Added the ... PopupMenuButton to the 
+pin detail modal in _showPinDetails, gated to logged-in users only using 
+UserProvider. Also added deletePin and updatePin methods to ApiService which were 
+missing from the local file despite being used in map_screen.dart.
+
+**Files Modified/Created:**
+- frontend/lib/services/api_service.dart
+- frontend/lib/screens/map_screen.dart
+
+---
+
+### Theodore up2282406 - 17/05/2026
+**Summary:** Wrote backend tests for pin reporting (RP1) covering all test plan 
+entries: valid reports for each of the three report types (inaccurate, resolved, 
+duplicate), duplicate report from same user returning 400, non-existent pin 
+returning 404, invalid report type returning 422, unauthenticated request returning 
+401, and missing report_type field returning 422. Added _cleanup_pin helper to 
+handle foreign key constraints when deleting test pins that have reports attached.
+
+**Files Modified/Created:**
+- Test_Plan.xlsx
+
+---
 ### Josh up2255832 - 14/05/2026
 **Summary:** Added unit tests for the 7 previously untested frontend models, taking model test coverage from 1 file (FriendRequest) to all 8. 62 new tests, all passing.
 

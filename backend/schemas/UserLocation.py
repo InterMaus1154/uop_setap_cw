@@ -18,6 +18,7 @@ class UpdateUserLocation(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     is_enabled: Optional[bool] = None
+    sharing_expires_at: Optional[datetime] = None
 
 
 class UserLocationResponse(BaseModel):
@@ -27,6 +28,7 @@ class UserLocationResponse(BaseModel):
     latitude: float
     longitude: float
     is_enabled: bool
+    sharing_expires_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     city: Optional[str] = None

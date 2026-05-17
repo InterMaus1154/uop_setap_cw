@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from geopy.geocoders import Nominatim
@@ -41,14 +42,12 @@ def create_or_update_user_location(
     existing = db.query(UserLocation).filter(UserLocation.user_id == current_user.user_id).first()
 
     if existing:
-        # update existing record instead of creating new one
         existing.latitude = payload.latitude
         existing.longitude = payload.longitude
         existing.is_enabled = True
         db.commit()
         db.refresh(existing)
         geo = _reverse_geocode(existing.latitude, existing.longitude)
-        # Write-through to Redis
         redis_client.hset(f"user_location:{current_user.user_id}", mapping={
             "lat": existing.latitude,
             "lng": existing.longitude,
@@ -59,7 +58,6 @@ def create_or_update_user_location(
         redis_client.expire(f"user_location:{current_user.user_id}", 30)
         return UserLocationResponse(**existing.__dict__, city=geo["city"], street=geo["street"])
 
-    # if no record exists - creates one
     location = UserLocation(
         user_id=current_user.user_id,
         latitude=payload.latitude,
@@ -70,7 +68,6 @@ def create_or_update_user_location(
     db.commit()
     db.refresh(location)
     geo = _reverse_geocode(location.latitude, location.longitude)
-    # Write-through to Redis
     redis_client.hset(f"user_location:{current_user.user_id}", mapping={
         "lat": location.latitude,
         "lng": location.longitude,
@@ -101,11 +98,16 @@ def update_user_location(
         location.longitude = payload.longitude
     if payload.is_enabled is not None:
         location.is_enabled = payload.is_enabled
+    if payload.sharing_expires_at is not None:
+        location.sharing_expires_at = payload.sharing_expires_at
+
+    # If disabling sharing, clear the expiry
+    if payload.is_enabled is False:
+        location.sharing_expires_at = None
 
     db.commit()
     db.refresh(location)
     geo = _reverse_geocode(location.latitude, location.longitude)
-    # Write-through to Redis
     redis_client.hset(f"user_location:{current_user.user_id}", mapping={
         "lat": location.latitude,
         "lng": location.longitude,
@@ -128,7 +130,6 @@ def delete_user_location(
     if not location:
         raise HTTPException(status_code=404, detail="User location not found")
 
-    # Delete all location permissions for this location first
     db.query(LocationPermission).filter(LocationPermission.user_loc_id == location.user_loc_id).delete()
     db.delete(location)
     db.commit()
@@ -145,6 +146,13 @@ def get_user_location(
     if not location:
         raise HTTPException(status_code=404, detail="User location not found")
 
+    # Auto-disable if sharing has expired
+    if location.sharing_expires_at and datetime.utcnow() > location.sharing_expires_at:
+        location.is_enabled = False
+        location.sharing_expires_at = None
+        db.commit()
+        db.refresh(location)
+
     return UserLocationResponse(**location.__dict__, city=None, street=None)
 
 
@@ -154,7 +162,6 @@ def get_friends_locations(
     current_user: User = Depends(require_auth)
 ):
     """Return UserLocation records for friends who are sharing with the logged-in user."""
-    # Get all friends with permission
     friends_query = (
         db.query(UserLocation)
         .join(LocationPermission, LocationPermission.user_loc_id == UserLocation.user_loc_id)
@@ -165,9 +172,16 @@ def get_friends_locations(
     )
     friends = friends_query.all()
 
-    # Try to get each friend's location from Redis
+    now = datetime.utcnow()
     results = []
     for friend in friends:
+        # Skip friends whose sharing has expired and disable them
+        if friend.sharing_expires_at and now > friend.sharing_expires_at:
+            friend.is_enabled = False
+            friend.sharing_expires_at = None
+            db.commit()
+            continue
+
         cache = redis_client.hgetall(f"user_location:{friend.user_id}")
         if cache and "lat" in cache and "lng" in cache and "is_enabled" in cache:
             lat, lng = float(cache["lat"]), float(cache["lng"])
@@ -188,7 +202,6 @@ def get_friends_locations(
                 street=street
             ))
         else:
-            # Fallback to DB, and update Redis for next time
             geo = _reverse_geocode(friend.latitude, friend.longitude)
             results.append(UserLocationResponse(
                 user_loc_id=friend.user_loc_id,
@@ -220,12 +233,10 @@ def create_location_permission(
     current_user: User = Depends(require_auth)
 ):
     """Create a location permission (share location with a friend)."""
-    # Validate user location exists
     user_location = db.query(UserLocation).filter(UserLocation.user_id == current_user.user_id).first()
     if not user_location:
         raise HTTPException(status_code=404, detail="User location not found. Please create one first.")
 
-    # Validate friend exists in current user's friends list
     friend = db.query(User).filter(User.user_id == payload.user_id).first()
     if not friend:
         raise HTTPException(status_code=404, detail="Friend not found")
@@ -233,7 +244,6 @@ def create_location_permission(
     if friend not in current_user.friends:
         raise HTTPException(status_code=403, detail="User is not your friend")
 
-    # Create permission
     permission = LocationPermission(
         user_loc_id=user_location.user_loc_id,
         user_id=payload.user_id
@@ -251,12 +261,10 @@ def delete_location_permission(
     current_user: User = Depends(require_auth)
 ):
     """Delete a location permission (stop sharing with a friend)."""
-    # Get current user's location
     user_location = db.query(UserLocation).filter(UserLocation.user_id == current_user.user_id).first()
     if not user_location:
         raise HTTPException(status_code=404, detail="User location not found")
 
-    # Find and delete the permission
     permission = db.query(LocationPermission).filter(
         LocationPermission.user_loc_id == user_location.user_loc_id,
         LocationPermission.user_id == user_id
