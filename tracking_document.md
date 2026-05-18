@@ -21,6 +21,22 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Luke up2264308 - 17/05/2026
+**Description**
+Added the frontend support for being able to set location sharing to only last a fixed amount of time and then turn off location sharing once the set time has elapsed 
+**Files created/modified**
+backend/alembic/versions/50da653d7345_add_sharing_expires_at_to_user_locations.py
+frontend/lib/screens/map_screen.dart
+backend/checkpins/checkpinactivity.dart
+backend/routes/user_locations.py
+frontend/lib/models/user_location.dart
+frontend/lib/providers/location_provider.dart
+frontend/lib/screens/map_screen.dart
+frontend/lib/services/api_service.dart
+
+
+
+
 ### Julian up2301253 - 17/05/2026
 **Description:**
 - Added icon badge overlay to map pins created by the logged-in user, using a Stack and Positioned widget to display a small blue circle with a person icon in the corner of the pin marker.
@@ -74,6 +90,18 @@ handle foreign key constraints when deleting test pins that have reports attache
 
 **Files Modified/Created:**
 - Test_Plan.xlsx
+
+
+### Luke up2264308 - 15/05/2026
+**Summary** Added the ability for a user to set their app to dark mode, which will change the colour of the theming of the app to a darker one
+
+**Files Modified/Created**
+frontend/lib/screens/map_screen.dart
+frontend/lib/widgets/pin_creation_sheet.dart
+frontend/lib/screens/profile_screen.dart
+frontend/lib/screens/friends_screen.dart
+frontend/lib/screens/invitation_codes_screen.dart
+frontend/lib/screens/profile_screen.dart
 
 ---
 ### Josh up2255832 - 14/05/2026
