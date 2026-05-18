@@ -179,7 +179,7 @@ On the profile screen, you can view your invitation code. You can share this cod
 
 ## Editing your profile
 
-To edit your name or display name, navigate to the profile screen and click on "Edit Profile" . You will see your current name and display name displayed on the screen. Tap on the edit button next to the field you want to change, type in your new name and then press save to confirm the change. You can also edit the name you want displayed , as well as if you want your Full Name or Display Name to be shown under the pin.
+To edit your name or display name, navigate to the profile screen and click on "Edit Profile" . You will see your current name and display name displayed on the screen. Tap on the edit button next to the field you want to change, type in your new name and then press save to confirm the change. You can also edit the name you want displayed, whether you want your Full Name or Display Name to be shown under the pin or whether you want to view the application in dark mode or not.
 
 ![Editing Your Profile](images/profile/Edit_Profile.png)
 
