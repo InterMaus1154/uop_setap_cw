@@ -132,34 +132,6 @@ def deactivate_expired_guests():
         db.close()
 
 
-def deactivate_expired_location_sharing():
-    """Disable location sharing for users whose sharing_expires_at has passed."""
-    from models.user_location import UserLocation
-    db = SessionLocal()
-    try:
-        now = datetime.now()
-        expired = (
-            db.query(UserLocation)
-            .filter(
-                UserLocation.is_enabled == True,
-                UserLocation.sharing_expires_at.isnot(None),
-                UserLocation.sharing_expires_at <= now,
-            )
-            .all()
-        )
-        for location in expired:
-            location.is_enabled = False
-            location.sharing_expires_at = None
-        if expired:
-            db.commit()
-            print(f"Disabled location sharing for {len(expired)} users due to expiry")
-    except Exception as e:
-        print(f"Error deactivating expired location sharing: {e}")
-        db.rollback()
-    finally:
-        db.close()
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     scheduler.add_job(cleanup, "cron", hour=2, minute=0, id="daily_cleanup")
@@ -167,7 +139,6 @@ async def lifespan(app: FastAPI):
     scheduler.add_job(deactivate_disliked_pins, "interval", seconds=60, id="dislike_pin_deactivation")
     scheduler.add_job(deactivate_resolved_pins, "interval", seconds=60, id="resolved_pin_deactivation")
     scheduler.add_job(deactivate_expired_guests, "interval", hours=1, id="guest_deactivation")
-    scheduler.add_job(deactivate_expired_location_sharing, "interval", seconds=30, id="location_sharing_expiry")
     scheduler.start()
     yield
     scheduler.shutdown()

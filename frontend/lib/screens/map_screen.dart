@@ -1062,6 +1062,7 @@ class _MapScreenState extends State<MapScreen> {
     // Watch location provider so the map rebuilds when friend positions update
     final locationProvider = context.watch<LocationProvider>();
     final friendProvider = context.read<FriendProvider>();
+    final currentUserId = context.read<UserProvider>().currentUser?.userId;
 
     final activePins = _pins
         .where((p) => p.pinExpireAt.isAfter(DateTime.now()))
@@ -1077,10 +1078,35 @@ class _MapScreenState extends State<MapScreen> {
             height: 40,
             child: GestureDetector(
               onTap: () => _showPinDetails(cluster.pins.first),
-              child: Icon(
-                Icons.location_on,
-                color: cluster.pins.first.pinColor,
-                size: 36,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    color: cluster.pins.first.pinColor,
+                    size: 36,
+                  ),
+                  if (currentUserId != null &&
+                      cluster.pins.first.userId == currentUserId)
+                    Positioned(
+                      right: 2,
+                      top: 2,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           )
@@ -1110,13 +1136,13 @@ class _MapScreenState extends State<MapScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onPrimary,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         '${cluster.pins.length}',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1360,17 +1386,9 @@ class _MapScreenState extends State<MapScreen> {
                 backgroundColor: locationProvider.isSharingEnabled
                     ? Colors.teal
                     : Theme.of(context).colorScheme.surfaceDim,
-                onPressed: () async {
-                  await locationProvider.toggleSharing();
-                  if (context.mounted && locationProvider.error != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(locationProvider.error!),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
+                onPressed: () => locationProvider.isSharingEnabled
+                    ? toggleLocationOnOff(locationProvider)
+                    : _showLocationFilterDialog(locationProvider),
                 tooltip: locationProvider.isSharingEnabled
                     ? 'Stop sharing location'
                     : 'Share my location',
@@ -1446,6 +1464,197 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
     );
+  }
+
+  String? selectedOption;
+  final TextEditingController _customTimeController = TextEditingController();
+  DateTime? _customDateTime;
+  void _showLocationFilterDialog(LocationProvider locationProvider) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 400,
+                  maxHeight: 600,
+                ),
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: const Text(
+                    'Location filtering',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'How long do you want to share your location for',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        RadioGroup<String>(
+                          groupValue: selectedOption,
+                          onChanged: (String? newValue) {
+                            setDialogState(() => selectedOption = newValue);
+                          },
+                          child: Column(
+                            children: [
+                              RadioListTile(
+                                value: '1hour',
+                                title: const Text('1 hour'),
+                              ),
+                              RadioListTile(
+                                value: '6hour',
+                                title: const Text('6 hours'),
+                              ),
+                              RadioListTile(
+                                value: '24hour',
+                                title: const Text('24 hours'),
+                              ),
+                              RadioListTile(
+                                value: 'indefinite',
+                                title: const Text('Indefinite'),
+                              ),
+                              ListTile(
+                                leading: Radio<String>(value: 'custom'),
+                                title: TextField(
+                                  controller: _customTimeController,
+                                  readOnly: true,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Select date and time',
+                                  ),
+                                  onTap: () async {
+                                    final now = DateTime.now();
+                                    final initialDateTime =
+                                        _customDateTime ??
+                                        now.add(const Duration(hours: 1));
+
+                                    final pickedDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: initialDateTime,
+                                      firstDate: now,
+                                      lastDate: DateTime(now.year + 2),
+                                    );
+                                    if (pickedDate == null) return;
+
+                                    final pickedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.fromDateTime(
+                                        initialDateTime,
+                                      ),
+                                    );
+                                    if (pickedTime == null) return;
+
+                                    final selectedDateTime = DateTime(
+                                      pickedDate.year,
+                                      pickedDate.month,
+                                      pickedDate.day,
+                                      pickedTime.hour,
+                                      pickedTime.minute,
+                                    );
+
+                                    setDialogState(() {
+                                      _customDateTime = selectedDateTime;
+                                      _customTimeController.text =
+                                          '${selectedDateTime.year}-${selectedDateTime.month.toString().padLeft(2, '0')}-${selectedDateTime.day.toString().padLeft(2, '0')} '
+                                          '${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}';
+                                      selectedOption = selectedDateTime
+                                          .toIso8601String();
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        DateTime? expiry;
+                        bool clearExpiry = false;
+                        if (selectedOption == '1hour') {
+                          expiry = DateTime.now().add(const Duration(hours: 1));
+                        } else if (selectedOption == '6hour') {
+                          expiry = DateTime.now().add(const Duration(hours: 6));
+                        } else if (selectedOption == '24hour') {
+                          expiry = DateTime.now().add(
+                            const Duration(hours: 24),
+                          );
+                        } else if (selectedOption == 'indefinite') {
+                          expiry = null;
+                          clearExpiry = true;
+                        } else if (_customDateTime != null) {
+                          expiry = _customDateTime;
+                        } else if (selectedOption != null) {
+                          // Try to parse ISO string if set
+                          try {
+                            expiry = DateTime.parse(selectedOption!);
+                          } catch (_) {
+                            expiry = DateTime.now().add(
+                              const Duration(seconds:1),
+                            );
+                          }
+                        } else {
+                          expiry = DateTime.now().add(const Duration(seconds:30));
+                        }
+
+                        toggleLocationOnOff(
+                          locationProvider,
+                          expiry,
+                          clearExpiry,
+                        );
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Confirm'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void toggleLocationOnOff(
+    LocationProvider locationProvider, [
+    DateTime? expiry,
+    bool clearExpiry = false,
+  ]) async {
+    await locationProvider.toggleSharing(
+      expiry: expiry,
+      clearExpiry: clearExpiry,
+    );
+
+    if (locationProvider.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(locationProvider.error!),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showPinFilterDialog() {

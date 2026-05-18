@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from geopy.geocoders import Nominatim
@@ -11,6 +11,7 @@ from models.user_location import UserLocation
 from models.location_permission import LocationPermission
 from schemas.UserLocation import CreateUserLocation, UpdateUserLocation, UserLocationResponse
 from schemas.LocationPermission import CreateLocationPermission, LocationPermissionResponse
+from checkpins.checkpinactivity import deactivate_expired_sharing
 
 _geolocator = Nominatim(user_agent="campus_connect")
 
@@ -27,6 +28,20 @@ def _reverse_geocode(lat: float, lng: float) -> dict:
     except Exception:
         pass
     return {"city": None, "street": None}
+
+
+def _ensure_utc_aware(dt: datetime | None):
+    """Return a timezone-aware UTC datetime or None.
+
+    SQLAlchemy stores naive datetimes in UTC. When returning values via
+    FastAPI/Pydantic, make sure datetimes are marked as UTC so the JSON
+    serializer emits timezone-aware ISO strings (with trailing 'Z').
+    """
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 router = APIRouter(prefix="/user-locations", tags=["user-locations"])
 location_permissions_router = APIRouter(prefix="/location-permissions", tags=["location-permissions"])
@@ -45,6 +60,8 @@ def create_or_update_user_location(
         existing.latitude = payload.latitude
         existing.longitude = payload.longitude
         existing.is_enabled = True
+        existing.sharing_expires_at = payload.sharing_expires_at.replace(
+            tzinfo=None) if payload.sharing_expires_at else None
         db.commit()
         db.refresh(existing)
         geo = _reverse_geocode(existing.latitude, existing.longitude)
@@ -56,13 +73,20 @@ def create_or_update_user_location(
             "street": geo["street"] or ""
         })
         redis_client.expire(f"user_location:{current_user.user_id}", 30)
-        return UserLocationResponse(**existing.__dict__, city=geo["city"], street=geo["street"])
+        resp = existing.__dict__.copy()
+        resp['created_at'] = _ensure_utc_aware(existing.created_at)
+        resp['updated_at'] = _ensure_utc_aware(existing.updated_at)
+        resp['sharing_expires_at'] = _ensure_utc_aware(existing.sharing_expires_at)
+        resp['city'] = geo["city"]
+        resp['street'] = geo["street"]
+        return UserLocationResponse(**resp)
 
     location = UserLocation(
         user_id=current_user.user_id,
         latitude=payload.latitude,
         longitude=payload.longitude,
-        is_enabled=True
+        is_enabled=True,
+        sharing_expires_at=payload.sharing_expires_at.replace(tzinfo=None) if payload.sharing_expires_at else None
     )
     db.add(location)
     db.commit()
@@ -76,7 +100,13 @@ def create_or_update_user_location(
         "street": geo["street"] or ""
     })
     redis_client.expire(f"user_location:{current_user.user_id}", 30)
-    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
+    resp = location.__dict__.copy()
+    resp['created_at'] = _ensure_utc_aware(location.created_at)
+    resp['updated_at'] = _ensure_utc_aware(location.updated_at)
+    resp['sharing_expires_at'] = _ensure_utc_aware(location.sharing_expires_at)
+    resp['city'] = geo["city"]
+    resp['street'] = geo["street"]
+    return UserLocationResponse(**resp)
 
 
 @router.patch("/", status_code=200, response_model=UserLocationResponse)
@@ -98,8 +128,20 @@ def update_user_location(
         location.longitude = payload.longitude
     if payload.is_enabled is not None:
         location.is_enabled = payload.is_enabled
-    if payload.sharing_expires_at is not None:
-        location.sharing_expires_at = payload.sharing_expires_at
+    # Normalize incoming sharing_expires_at to UTC (naive) to avoid
+    # naive/aware datetime comparison errors later in cleanup jobs.
+    def _to_utc_naive(dt: datetime | None):
+        if dt is None:
+            return None
+        if dt.tzinfo is None:
+            # Treat naive datetimes as UTC
+            return dt
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+
+    # If the request explicitly included the sharing_expires_at field (even null),
+    # apply it. Use __fields_set__ to distinguish omission vs explicit null.
+    if 'sharing_expires_at' in getattr(payload, '__fields_set__', set()):
+        location.sharing_expires_at = _to_utc_naive(payload.sharing_expires_at)
 
     # If disabling sharing, clear the expiry
     if payload.is_enabled is False:
@@ -116,7 +158,13 @@ def update_user_location(
         "street": geo["street"] or ""
     })
     redis_client.expire(f"user_location:{current_user.user_id}", 30)
-    return UserLocationResponse(**location.__dict__, city=geo["city"], street=geo["street"])
+    resp = location.__dict__.copy()
+    resp['created_at'] = _ensure_utc_aware(location.created_at)
+    resp['updated_at'] = _ensure_utc_aware(location.updated_at)
+    resp['sharing_expires_at'] = _ensure_utc_aware(location.sharing_expires_at)
+    resp['city'] = geo["city"]
+    resp['street'] = geo["street"]
+    return UserLocationResponse(**resp)
 
 
 @router.delete("/", status_code=204)
@@ -152,8 +200,26 @@ def get_user_location(
         location.sharing_expires_at = None
         db.commit()
         db.refresh(location)
+        # Update Redis so other clients see the disabled state immediately
+        try:
+            redis_client.hset(f"user_location:{current_user.user_id}", mapping={
+                "lat": location.latitude,
+                "lng": location.longitude,
+                "is_enabled": int(location.is_enabled),
+                "city": "",
+                "street": "",
+            })
+            redis_client.expire(f"user_location:{current_user.user_id}", 30)
+        except Exception:
+            pass
 
-    return UserLocationResponse(**location.__dict__, city=None, street=None)
+    resp = location.__dict__.copy()
+    resp['created_at'] = _ensure_utc_aware(location.created_at)
+    resp['updated_at'] = _ensure_utc_aware(location.updated_at)
+    resp['sharing_expires_at'] = _ensure_utc_aware(location.sharing_expires_at)
+    resp['city'] = None
+    resp['street'] = None
+    return UserLocationResponse(**resp)
 
 
 @router.get("/friends", status_code=200, response_model=list[UserLocationResponse])
@@ -180,6 +246,18 @@ def get_friends_locations(
             friend.is_enabled = False
             friend.sharing_expires_at = None
             db.commit()
+            # Ensure cache reflects disabled state so requesting client doesn't get stale data
+            try:
+                redis_client.hset(f"user_location:{friend.user_id}", mapping={
+                    "lat": friend.latitude,
+                    "lng": friend.longitude,
+                    "is_enabled": int(friend.is_enabled),
+                    "city": "",
+                    "street": "",
+                })
+                redis_client.expire(f"user_location:{friend.user_id}", 30)
+            except Exception:
+                pass
             continue
 
         cache = redis_client.hgetall(f"user_location:{friend.user_id}")
@@ -196,8 +274,9 @@ def get_friends_locations(
                 latitude=lat,
                 longitude=lng,
                 is_enabled=bool(int(cache["is_enabled"])),
-                created_at=friend.created_at,
-                updated_at=friend.updated_at,
+                created_at=_ensure_utc_aware(friend.created_at),
+                updated_at=_ensure_utc_aware(friend.updated_at),
+                sharing_expires_at=_ensure_utc_aware(friend.sharing_expires_at),
                 city=city,
                 street=street
             ))
@@ -209,8 +288,9 @@ def get_friends_locations(
                 latitude=friend.latitude,
                 longitude=friend.longitude,
                 is_enabled=friend.is_enabled,
-                created_at=friend.created_at,
-                updated_at=friend.updated_at,
+                created_at=_ensure_utc_aware(friend.created_at),
+                updated_at=_ensure_utc_aware(friend.updated_at),
+                sharing_expires_at=_ensure_utc_aware(friend.sharing_expires_at),
                 city=geo["city"],
                 street=geo["street"]
             ))
@@ -292,3 +372,16 @@ def get_location_permissions(
     ).all()
 
     return permissions
+
+
+@router.post('/expire-now')
+def expire_now(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_auth)
+):
+    """Trigger server-side expiry processing immediately (diagnostic endpoint)."""
+    try:
+        deactivate_expired_sharing()
+        return {"detail": "expiry processed"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

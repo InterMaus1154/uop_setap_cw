@@ -1,6 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend/models/location_permission.dart';
 
+import 'dart:convert';
+
+import 'package:http/testing.dart';
+import 'package:http/http.dart' as http;
+import 'package:frontend/services/api_service.dart';
+import 'package:frontend/services/secure_storage_service.dart';
+
+class FakeStorage extends SecureStorageService {
+  @override
+  Future<String?> getToken() async => null;
+}
+
 void main() {
   group('LocationPermission', () {
     final validJson = {
@@ -58,5 +70,83 @@ void main() {
         throwsA(isA<FormatException>()),
       );
     });
+  });
+  test(
+    'sends explicit null when includeSharingExpiresField=true and sharingExpiresAt is null',
+    () async {
+      late http.Request captured;
+
+      final mockClient = MockClient((http.Request req) async {
+        captured = req;
+        final body = json.encode({
+          'user_loc_id': 1,
+          'user_id': 2,
+          'latitude': 0.0,
+          'longitude': 0.0,
+          'is_enabled': true,
+          'created_at': '2026-05-17T12:00:00Z',
+          'updated_at': '2026-05-17T12:00:00Z',
+          'sharing_expires_at': null,
+        });
+        return http.Response(
+          body,
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final api = ApiService(storage: FakeStorage(), httpClient: mockClient);
+
+      await api.updateUserLocation(
+        includeSharingExpiresField: true,
+        sharingExpiresAt: null,
+      );
+
+      expect(captured.method, equals('PATCH'));
+      final Map<String, dynamic> sent =
+          json.decode(captured.body) as Map<String, dynamic>;
+      expect(sent.containsKey('sharing_expires_at'), isTrue);
+      expect(sent['sharing_expires_at'], isNull);
+    },
+  );
+
+  test('sends UTC ISO string when sharingExpiresAt is provided', () async {
+    late http.Request captured;
+
+    final mockClient = MockClient((http.Request req) async {
+      captured = req;
+      final body = json.encode({
+        'user_loc_id': 1,
+        'user_id': 2,
+        'latitude': 0.0,
+        'longitude': 0.0,
+        'is_enabled': true,
+        'created_at': '2026-05-17T12:00:00Z',
+        'updated_at': '2026-05-17T12:00:00Z',
+        'sharing_expires_at': '2026-05-17T12:00:00Z',
+      });
+      return http.Response(
+        body,
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+    });
+
+    final api = ApiService(storage: FakeStorage(), httpClient: mockClient);
+
+    final expiry = DateTime.utc(2026, 5, 17, 12, 0, 0);
+    await api.updateUserLocation(
+      includeSharingExpiresField: true,
+      sharingExpiresAt: expiry,
+    );
+
+    expect(captured.method, equals('PATCH'));
+    final Map<String, dynamic> sent =
+        json.decode(captured.body) as Map<String, dynamic>;
+    expect(sent.containsKey('sharing_expires_at'), isTrue);
+    expect(
+      sent['sharing_expires_at'],
+      equals(expiry.toUtc().toIso8601String()),
+    );
   });
 }

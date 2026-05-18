@@ -8,6 +8,7 @@ class UserLocation {
   final DateTime updatedAt;
   final String? city;
   final String? street;
+  final DateTime? sharingExpiresAt;
 
   UserLocation({
     required this.userLocId,
@@ -19,6 +20,7 @@ class UserLocation {
     required this.updatedAt,
     this.city,
     this.street,
+    this.sharingExpiresAt,
   });
 
   factory UserLocation.fromJson(Map<String, dynamic> json) {
@@ -28,10 +30,34 @@ class UserLocation {
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       isEnabled: json['is_enabled'] as bool,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: (() {
+        final s = json['created_at'] as String;
+        // Match only a trailing Z or a timezone offset like +HH:MM or -HH:MM
+        final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
+        final toParse = hasTz ? s : '${s}Z';
+        return DateTime.parse(toParse).toUtc();
+      })(),
+      updatedAt: (() {
+        final s = json['updated_at'] as String;
+        final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
+        final toParse = hasTz ? s : '${s}Z';
+        return DateTime.parse(toParse).toUtc();
+      })(),
       city: json['city'] as String?,
       street: json['street'] as String?,
+      sharingExpiresAt: (() {
+        final s = json['sharing_expires_at'] as String?;
+        if (s == null) return null;
+        try {
+          // Some server responses may omit the timezone (naive datetime).
+          // Treat naive ISO strings as UTC by appending 'Z' before parsing.
+          final hasTz = RegExp(r'(Z|[+\-]\d{2}:\d{2})$').hasMatch(s);
+          final toParse = hasTz ? s : '${s}Z';
+          return DateTime.parse(toParse).toUtc();
+        } catch (_) {
+          return null;
+        }
+      })(),
     );
   }
 
@@ -44,6 +70,7 @@ class UserLocation {
       'is_enabled': isEnabled,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'sharing_expires_at': sharingExpiresAt?.toIso8601String(),
     };
   }
 }

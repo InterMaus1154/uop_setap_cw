@@ -46,7 +46,8 @@ class TestCreateUserLocation:
 
     def test_create_location_with_valid_token_expect_401(self, client):
         """Token passed, but invalid"""
-        response = client.post("/user-locations", json=self.TEST_COORDINATES, headers={"Authorization": "Bearer invalid"})
+        response = client.post("/user-locations", json=self.TEST_COORDINATES,
+                               headers={"Authorization": "Bearer invalid"})
         assert response.status_code == 401
 
     def test_post_updates_existing_location_with_new(self, client, auth_headers):
@@ -87,5 +88,14 @@ class TestCreateUserLocation:
         response = client.patch("/user-locations", json={"latitude": 52.0}, headers=auth_headers)
         assert response.status_code == 404
 
-
+    def test_create_location_with_expires_at(self, client, auth_headers):
+        """Create location with expires ta"""
+        payload = self.TEST_COORDINATES.copy()
+        payload["sharing_expires_at"] = "2026-05-18T08:25:00Z"
+        rp = client.post("/user-locations", json=payload, headers=auth_headers)
+        assert rp.status_code in (200, 201)
+        data = rp.json()
+        assert data is not None
+        assert "sharing_expires_at" in data
+        assert data["sharing_expires_at"] == payload["sharing_expires_at"]
 

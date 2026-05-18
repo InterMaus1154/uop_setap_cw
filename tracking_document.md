@@ -21,6 +21,34 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Luke up2264308 - 17/05/2026
+**Description**
+Added the frontend support for being able to set location sharing to only last a fixed amount of time and then turn off location sharing once the set time has elapsed 
+**Files created/modified**
+backend/alembic/versions/50da653d7345_add_sharing_expires_at_to_user_locations.py
+frontend/lib/screens/map_screen.dart
+backend/checkpins/checkpinactivity.dart
+backend/routes/user_locations.py
+frontend/lib/models/user_location.dart
+frontend/lib/providers/location_provider.dart
+frontend/lib/screens/map_screen.dart
+frontend/lib/services/api_service.dart
+
+
+
+
+### Julian up2301253 - 17/05/2026
+**Description:**
+- Added icon badge overlay to map pins created by the logged-in user, using a Stack and Positioned widget to display a small blue circle with a person icon in the corner of the pin marker.
+- Added Nominatim reverse geocoding to pin creation sheet so street/city name displays instead of raw coordinates while creating a pin, matching behaviour of existing pins on the map.
+- Fixed `expiresAt` getter in `PinFormData` not returning `customExpiry` when set, causing custom expiry dates to be silently discarded on pin submission.
+
+**Files created/modified:**
+- frontend/lib/screens/map_screen.dart
+- frontend/lib/widgets/pin_creation_sheet.dart
+- frontend/lib/models/pin_form_data.dart
+
+--
 
 ### Theodore up2282406 - 17/05/2026
 **Summary:** Added sharing_expires_at column to user_locations to support 
@@ -63,6 +91,18 @@ handle foreign key constraints when deleting test pins that have reports attache
 **Files Modified/Created:**
 - Test_Plan.xlsx
 
+
+### Luke up2264308 - 15/05/2026
+**Summary** Added the ability for a user to set their app to dark mode, which will change the colour of the theming of the app to a darker one
+
+**Files Modified/Created**
+frontend/lib/screens/map_screen.dart
+frontend/lib/widgets/pin_creation_sheet.dart
+frontend/lib/screens/profile_screen.dart
+frontend/lib/screens/friends_screen.dart
+frontend/lib/screens/invitation_codes_screen.dart
+frontend/lib/screens/profile_screen.dart
+
 ---
 ### Josh up2255832 - 14/05/2026
 **Summary:** Added unit tests for the 7 previously untested frontend models, taking model test coverage from 1 file (FriendRequest) to all 8. 62 new tests, all passing.
@@ -83,17 +123,18 @@ handle foreign key constraints when deleting test pins that have reports attache
 - Wired custom expiry date/time to pin creation UI, using showDatePicker and showTimePicker (built-in flutter widgets), to backend.
 - Added edit and delete buttons to pin details page on map. Allows editing of deatils (expiry, description, title) and deletion of previously created pins with (extra deletion confirmation page) by owner. Wired them to backend endpoints.
 - Added `deletePin` and `updatePin` methods to API service.
-- Added backend tests for report pin (RP2) and get pin reports (RP3).
-- Added backend tests for update pin (TP2).
+- Added backend tests for report pin (RP2) — 6 tests: valid report returns 201, duplicate report returns 400, nonexistent pin returns 404, invalid reason returns 422, missing reason returns 422, no auth returns 401.
+- Added backend tests for get pin reports (RP3) — 5 tests: multiple user reports returns 200, no reports returns 200, nonexistent pin returns 404, no auth returns 401, non-integer pin ID returns 422.
+- Added backend tests for update pin (TP2) — 4 tests: update with null title returns 200, title exceeds max length returns 422, update by different user returns 403, pin not found returns 404.
 
 **Files created/modified:**
 - frontend/lib/models/pin_form_data.dart
 - frontend/lib/widgets/pin_creation_sheet.dart
 - frontend/lib/screens/map_screen.dart
 - frontend/lib/services/api_service.dart
-- backend/tests/test_report_pin_rp2.py
-- backend/tests/test_get_pin_reports_rp3.py
-- backend/tests/test_update_pin_tp2.py
+- backend/tests/test_report_pin_rp2.py (6 tests)
+- backend/tests/test_get_pin_reports_rp3.py (5 tests)
+- backend/tests/test_update_pin_tp2.py (4 tests)
 
 ---
 
