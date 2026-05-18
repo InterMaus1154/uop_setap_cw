@@ -1123,13 +1123,13 @@ class _MapScreenState extends State<MapScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black87,
+                        color: Theme.of(context).colorScheme.onPrimary,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
                         '${cluster.pins.length}',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
