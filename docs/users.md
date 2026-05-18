@@ -57,15 +57,15 @@ Once on the map screen you can interact with the map in the following ways:
 
 In order to create a pin, you need to press the button circled in the picture above. Once you do that, you will be prompted to click on where you want the pin to be placed. If you have location enabled, it will default to placing the pin at your current location however you may still move it if the incident occurred in a different location to where you are. A picture of how this looks is below 
 
-![image](images/map_related/place_pin.png)
+![Placing a pin on the map](images/map_related/place_pin.png)
 
 Once you confirm the location you want the pin to be placed in, you will be shown the menu seen in the picture below
 
-![image](images/map_related/place_pin_menu.png)
+![Menu for placing pin](images/map_related/place_pin_menu.png)
 
 By clicking on the categories, you will get the drop down shown in the picture below
 
-![image](images/map_related/categories_menu.png)
+![pin categories menu](images/map_related/categories_menu.png)
 
 Once you click on one of these, the menu will look as it does below
 
