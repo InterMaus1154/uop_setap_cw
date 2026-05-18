@@ -13,6 +13,7 @@ import '../providers/location_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/pin_creation_sheet.dart';
 import '../providers/user_provider.dart';
+import 'dart:async';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -93,11 +94,22 @@ class _MapScreenState extends State<MapScreen> {
   List<Pin> _pins = [];
   bool _isLoadingPins = true;
 
+  Timer? _pinRefreshTimer; // just the declaration here at class level
+
   @override
   void initState() {
     super.initState();
     _loadPins();
     _loadCategories();
+    _pinRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      _loadPins(
+        catIds: _activeCategoryIds.isEmpty ? null : _activeCategoryIds,
+        catLevelIds: _activeCategoryLevelIds.isEmpty
+            ? null
+            : _activeCategoryLevelIds,
+        pinExpireAt: _activeExpiryDate,
+      );
+    });
 
     // Initialise location provider and start polling for friend positions
     // Use addPostFrameCallback to avoid notifyListeners() during build
@@ -766,6 +778,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void dispose() {
     // Stop polling when leaving the map screen
+    _pinRefreshTimer?.cancel();
     _locationProvider.stopPolling();
     _mapController.dispose();
     super.dispose();
