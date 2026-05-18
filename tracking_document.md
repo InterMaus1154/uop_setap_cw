@@ -21,6 +21,17 @@ Use this document to log your contributions. Add new entries at the top.
 
 ## Entries
 
+### Theodore up2282406 - 18/05/2026
+**Summary:** Added deactivate_resolved_pins to the scheduler to auto-deactivate 
+pins with 5+ resolved reports in 30 minutes, and deactivate_expired_location_sharing 
+to disable location sharing when the expiry passes. Added a 60 second pin refresh 
+timer to the frontend map screen so scheduler changes are reflected automatically.
+
+**Files Modified/Created:**
+- backend/checkpins/checkpinactivity.py
+- frontend/lib/screens/map_screen.dart
+
+---
 ### Luke up2264308 - 17/05/2026
 **Description**
 Added the frontend support for being able to set location sharing to only last a fixed amount of time and then turn off location sharing once the set time has elapsed 
