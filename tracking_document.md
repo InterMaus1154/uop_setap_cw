@@ -123,17 +123,18 @@ frontend/lib/screens/profile_screen.dart
 - Wired custom expiry date/time to pin creation UI, using showDatePicker and showTimePicker (built-in flutter widgets), to backend.
 - Added edit and delete buttons to pin details page on map. Allows editing of deatils (expiry, description, title) and deletion of previously created pins with (extra deletion confirmation page) by owner. Wired them to backend endpoints.
 - Added `deletePin` and `updatePin` methods to API service.
-- Added backend tests for report pin (RP2) and get pin reports (RP3).
-- Added backend tests for update pin (TP2).
+- Added backend tests for report pin (RP2) — 6 tests: valid report returns 201, duplicate report returns 400, nonexistent pin returns 404, invalid reason returns 422, missing reason returns 422, no auth returns 401.
+- Added backend tests for get pin reports (RP3) — 5 tests: multiple user reports returns 200, no reports returns 200, nonexistent pin returns 404, no auth returns 401, non-integer pin ID returns 422.
+- Added backend tests for update pin (TP2) — 4 tests: update with null title returns 200, title exceeds max length returns 422, update by different user returns 403, pin not found returns 404.
 
 **Files created/modified:**
 - frontend/lib/models/pin_form_data.dart
 - frontend/lib/widgets/pin_creation_sheet.dart
 - frontend/lib/screens/map_screen.dart
 - frontend/lib/services/api_service.dart
-- backend/tests/test_report_pin_rp2.py
-- backend/tests/test_get_pin_reports_rp3.py
-- backend/tests/test_update_pin_tp2.py
+- backend/tests/test_report_pin_rp2.py (6 tests)
+- backend/tests/test_get_pin_reports_rp3.py (5 tests)
+- backend/tests/test_update_pin_tp2.py (4 tests)
 
 ---
 
