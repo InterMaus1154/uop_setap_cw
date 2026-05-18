@@ -98,3 +98,4 @@ class TestCreateUserLocation:
         assert data is not None
         assert "sharing_expires_at" in data
         assert data["sharing_expires_at"] == payload["sharing_expires_at"]
+
