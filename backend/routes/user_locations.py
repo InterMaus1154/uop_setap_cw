@@ -60,6 +60,8 @@ def create_or_update_user_location(
         existing.latitude = payload.latitude
         existing.longitude = payload.longitude
         existing.is_enabled = True
+        existing.sharing_expires_at = payload.sharing_expires_at.replace(
+            tzinfo=None) if payload.sharing_expires_at else None
         db.commit()
         db.refresh(existing)
         geo = _reverse_geocode(existing.latitude, existing.longitude)
@@ -83,7 +85,8 @@ def create_or_update_user_location(
         user_id=current_user.user_id,
         latitude=payload.latitude,
         longitude=payload.longitude,
-        is_enabled=True
+        is_enabled=True,
+        sharing_expires_at=payload.sharing_expires_at.replace(tzinfo=None) if payload.sharing_expires_at else None
     )
     db.add(location)
     db.commit()

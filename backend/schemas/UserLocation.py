@@ -11,6 +11,7 @@ class CreateUserLocation(BaseModel):
     """Schema for creating a user location"""
     latitude: float
     longitude: float
+    sharing_expires_at: Optional[datetime] = None
 
 
 class UpdateUserLocation(BaseModel):
