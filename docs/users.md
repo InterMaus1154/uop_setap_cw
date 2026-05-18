@@ -129,16 +129,19 @@ time. To enable location sharing with a friend, navigate to the friends list
 on the profile screen. Next to each friend in your list there is a toggle 
 switch, switching this on means that friend will be able to see your location 
 on the map. To stop sharing your location with a friend, simply toggle the 
-switch back off and your pin will no longer be visible to them.
+switch back off and your pin will no longer be visible to them. The picture below shows the friends screen where you can do this
+
+![Friend Location Sharing](images/friend_location_sharing.png)
+
 
 You can also toggle all location sharing on and off directly from the map 
-screen using the location sharing button shown in the map screen section of 
-this guide. Turning this off will stop sharing your location with all friends 
-at once regardless of the individual toggles set in your friends list.
+screen and set how long you want your location to be shared for using the location sharing button shown in the map screen section of this guide. Turning this off will stop sharing your location with all friends at once regardless of the individual toggles set in your friends list. 
 
 ![Map Location Sharing](images/location_sharing_on_map.png)  
 
-![Friend Location Sharing](images/friend_location_sharing.png)
+![Location Sharing Time Limit](images/map_related/location_sharing.png)
+
+
 
 
 ### Incoming friend requests
@@ -181,7 +184,7 @@ On the profile screen, you can view your invitation code. You can share this cod
 
 To edit your name or display name, navigate to the profile screen and click on "Edit Profile" . You will see your current name and display name displayed on the screen. Tap on the edit button next to the field you want to change, type in your new name and then press save to confirm the change. You can also edit the name you want displayed, whether you want your Full Name or Display Name to be shown under the pin or whether you want to view the application in dark mode or not.
 
-![Editing Your Profile](images/profile/Edit_Profile.png)
+![Editing Your Profile](images/profile/edit_profile_image.png)
 
 
 
