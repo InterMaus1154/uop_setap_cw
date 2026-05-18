@@ -69,4 +69,24 @@ class TestUpdateUser:
         assert pd is not None
         assert pd["pin_author_name"] == data["user_displayname"]
 
+    def test_update_user_turn_on_dark_mode_200(self, client, auth_headers):
+        """Turn on dark mode"""
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = True
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] is True
+
+    def test_update_user_turn_off_dark_mode_200(self, client, auth_headers):
+        """Turn off dark mode"""
+        payload = self.TEST_UPDATE_DATA.copy()
+        payload["dark_mode"] = False
+        rp = client.put("/users", headers=auth_headers, json=payload)
+        assert rp.status_code == 200
+        data = rp.json()
+        assert data is not None
+        assert data["dark_mode"] is False
+
 
